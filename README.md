@@ -4,11 +4,29 @@ An open-source [MCP](https://modelcontextprotocol.io) server for creating vivid,
 
 Connect it to any MCP-capable chat (Claude Code, Claude Desktop, Cursor and others) and ask for a character. You get a **character package**:
 
-- **Character card**: goals, audience identification, psychological profile, description, fears, archetype and quirks, backstory and world, traits, and the character arc. It is saved as `card.json`, `card.md` and a printable `card.html`.
+- **Character card**: goals, audience identification, psychological profile, description, fears, archetype and quirks, backstory and world, traits, and the character arc. It is saved as `card.json` and a readable `card.md`.
 - **Look derived from the story**: shape language, silhouette, how perfect or flawed they are, a signature item (their attribute), marks with origins, movement, outfit and palette with meanings. An independent designer derives it from the finished story and cuts anything that doesn't show a part of it.
-- **A-pose concept sheet**: a front/back model sheet in a production A-pose, ready to hand to a 3D or animation artist. It is saved as `concept.png`, and the card is re-rendered to include it.
+- **A-pose concept sheet**: a front/back model sheet in a production A-pose, ready to hand to a 3D or animation artist. It is saved as `assets/concept.png`, and the card is re-rendered to include it.
 
 **Random does not mean a pile of random traits.** Every character grows from one *core*: a **wound** teaches them a **lie**. The lie breeds a **fear**, which they protect with a **defense** (their worst trait). The same wound forged a **gift** (their best trait). Their arc is learning the **truth**. Each roll picks one curated, coherent core, then adds surprising *sparks* (occupation, world, archetype, visible mark) that the model has to make serve the core. You can't predict who you will get, but every part of the card hangs together.
+
+### How a character is made
+
+```mermaid
+flowchart TD
+    REQ["Request<br/>random, or a brief: 'a very tall, thin character'"] --> V["3 variants of one concept<br/>same role and world, different cores"]
+    V --> R["Independent review<br/>coherence check + critic per variant"]
+    R --> F["Author fixes or defends, once"]
+    F --> J["Judge picks one winner<br/>the others stay in the library with a verdict"]
+    J --> D["Designer: the look, derived from the story"]
+    D --> E["Editor: plain, clear text<br/>in a voice that fits the character"]
+    E --> C["Concept: A-pose model sheet"]
+    C --> S["Location: the character in their own place"]
+    S --> VID["Looping idle video"] & VO["Voice"] & M["Theme music"]
+    VID & VO & M --> P["Character package<br/>card · concept · scene · video · voice · theme"]
+```
+
+The winner gets its concept as part of the tournament. Everything after it is generated **only on request**, one step at a time, and every step is built from the card: the location from the character's key places and idle pose, the voice from their history and speech, the theme from their wound and dramatic question. Video, voice and music don't depend on each other and can be made in any order.
 
 ### The variant tournament
 
@@ -21,6 +39,7 @@ By default every request produces **3 variants of the same concept**. If you ask
 5. **Judge** compares the revised variants and picks one winner.
 
 6. **Designer** (an independent agent) derives the winner's look from its story.
+7. **Editor** (an independent agent) rewrites the winner's text so a stranger understands every field on the first read.
 
 Only the winner gets an A-pose concept. The losers stay in the library with their verdict.
 
@@ -33,8 +52,9 @@ Ask for a prompt and you get exactly that one, written from the card:
 - **voice**: a voice-design description and an audition script for TTS voice-design tools
 - **video**: a 5–10 s Seedance-style clip that shows the character in action
 - **song**: a Suno style line and lyrics that tell the character's arc
+- **theme**: an instrumental leitmotif (about 30 s, loops) built from the wound, the paradox and the dramatic question, as an ElevenLabs Music composition plan
 
-Prompts are saved to `<character>/media/<kind>.md`. character-forge does not call these generators itself.
+Prompts are saved to `<character>/prompts/<kind>.md`. Writing a prompt never calls a generator; the concept, scene, video, voice and theme tools do, each only when asked.
 
 There are two modes:
 
@@ -125,10 +145,10 @@ Clients that support MCP prompts also list `random_character` and `character_fro
 | `character_roll` | Rolls a coherent core plus sparks; with `variants: 3` and `anchor`, rolls competing variants of one concept |
 | `character_check` | Coherence check: red flags (generic filler, repeats, want = need) plus questions built from the card's own content |
 | `character_role` | Instructions and rubric for a role: `coherence`, `critic`, `judge`, `author`, `designer` |
-| `character_save` | Validates the full card and saves JSON + Markdown + HTML; returns the `id` |
+| `character_save` | Validates the full card and saves JSON + Markdown; returns the `id` |
 | `character_concept` | Builds the A-pose prompt and generates `concept.png` (`views`, `strength`, `figure`, `mode`, `pose_image`, `seed`, `dry_run`) |
-| `character_prompt` | On request: the rules and card material for one generation prompt (`concept`, `illustration`, `voice`, `video`, `song`) |
-| `character_prompt_save` | Saves a written prompt as `media/<kind>.md` |
+| `character_prompt` | On request: the rules and card material for one generation prompt (`concept`, `illustration`, `voice`, `video`, `song`, `theme`) |
+| `character_prompt_save` | Saves a written prompt as `prompts/<kind>.md` |
 | `character_list` | Lists saved characters, with variant group and verdict (`group` filter) |
 | `character_get` | Returns a card as markdown or JSON (edit it, then save again with `overwrite`) |
 
@@ -189,9 +209,9 @@ The project layout:
 - `src/random.ts`: seeded rolls and variant sets
 - `src/check.ts`: coherence red flags and questions
 - `src/tournament.ts`: rubric and role instructions (coherence, critic, judge, author, designer)
-- `src/media.ts`: rules and card material for generation prompts (illustration, voice, video, song)
+- `src/media.ts`: rules and card material for generation prompts (illustration, voice, video, song, theme)
 - `src/schema.ts`: the card schema (zod)
-- `src/render.ts`: Markdown and HTML card rendering
+- `src/render.ts`: Markdown card rendering
 - `src/concept.ts`: the A-pose prompt and the concept pipeline
 - `src/store.ts`: the character library on disk
 - `src/tools/`: one file per MCP tool
