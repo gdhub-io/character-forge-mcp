@@ -1,0 +1,45 @@
+{
+  "name": "character-forge-mcp",
+  "version": "0.3.0",
+  "description": "MCP server for building vivid, story-ready characters: a full character card (goals, psychology, fears, backstory, traits, arc) plus a T-pose concept sheet. For film, games, ads and books.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "character",
+    "character-design",
+    "screenwriting",
+    "gamedev",
+    "worldbuilding",
+    "concept-art"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  },
+  "bin": {
+    "character-forge": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}
