@@ -69,28 +69,51 @@ export async function falControlGenerate(input: FalControlInput): Promise<FalRes
         enable_safety_checker: true,
       }
     : { ...common, ...specific };
+  const out = await falQueue(model, body);
+  return { bytes: out.bytes, mimeType: out.mimeType, seed: out.seed ?? input.seed ?? 0, model };
+}
+
+/**
+ * Submits to fal's queue, waits, downloads the first output file. `kind` picks the output field:
+ * "images" (images[0]) or "video" (video). Always polls the URLs fal returns (hand-built ones answer 405).
+ */
+export async function falQueue(model: string, body: Record<string, unknown>, kind: "images" | "video" | "audio" = "images", timeoutMs = TIMEOUT_MS): Promise<{ bytes: Buffer; mimeType: string; seed?: number }> {
+  type FileOut = { url: string; content_type?: string };
+  const out = await falQueueJson<{ images?: FileOut[]; video?: FileOut; audio?: FileOut; seed?: number; has_nsfw_concepts?: boolean[] }>(model, body, timeoutMs);
+  const file = kind === "images" ? out.images?.[0] : out[kind];
+  if (!file) throw new Error(`fal result has no ${kind}: ${JSON.stringify(out).slice(0, 500)}`);
+  if (out.has_nsfw_concepts?.[0]) throw new Error("fal safety checker blocked the output; adjust the prompt");
+  return { bytes: await falDownload(file.url), mimeType: file.content_type ?? { images: "image/png", video: "video/mp4", audio: "audio/mpeg" }[kind], seed: out.seed };
+}
+
+/** Submits to fal's queue, waits, returns the raw result JSON. Always polls the URLs fal returns (hand-built ones answer 405). */
+export async function falQueueJson<T>(model: string, body: Record<string, unknown>, timeoutMs = TIMEOUT_MS): Promise<T> {
+  const key = process.env.FAL_KEY;
+  if (!key) throw new Error("FAL_KEY is not set");
+  const headers = { Authorization: `Key ${key}`, "Content-Type": "application/json" };
   const submit = await fetch(`https://queue.fal.run/${model}`, { method: "POST", headers, body: JSON.stringify(body) });
   const queued = (await submit.json()) as { status_url?: string; response_url?: string; detail?: unknown };
   if (!submit.ok || !queued.status_url || !queued.response_url) throw new Error(`fal submit ${submit.status}: ${JSON.stringify(queued.detail ?? queued)}`);
-
-  // Always use the URLs fal returns: hand-built ones that include the model path answer 405.
-  const deadline = Date.now() + TIMEOUT_MS;
+  const deadline = Date.now() + timeoutMs;
   for (;;) {
     const st = (await (await fetch(queued.status_url, { headers })).json()) as { status: string; error?: string };
     if (st.status === "COMPLETED") {
       if (st.error) throw new Error(`fal failed: ${st.error}`);
       break;
     }
-    if (Date.now() > deadline) throw new Error("fal timed out after 3 minutes");
+    if (Date.now() > deadline) throw new Error(`fal timed out after ${Math.round(timeoutMs / 60000)} minutes`);
     await new Promise((r) => setTimeout(r, POLL_MS));
   }
-
   const res = await fetch(queued.response_url, { headers });
-  const out = (await res.json()) as { images?: { url: string; content_type?: string }[]; seed: number; has_nsfw_concepts?: boolean[]; detail?: unknown };
-  if (!res.ok || !out.images?.[0]) throw new Error(`fal result ${res.status}: ${JSON.stringify(out.detail ?? out)}`);
-  if (out.has_nsfw_concepts?.[0]) throw new Error("fal safety checker blocked the image; adjust the prompt");
-  const img = await fetch(out.images[0].url);
-  return { bytes: Buffer.from(await img.arrayBuffer()), mimeType: out.images[0].content_type ?? "image/png", seed: out.seed ?? input.seed ?? 0, model };
+  const out = (await res.json()) as T & { detail?: unknown };
+  if (!res.ok) throw new Error(`fal result ${res.status}: ${JSON.stringify(out.detail ?? out).slice(0, 500)}`);
+  return out;
+}
+
+export async function falDownload(url: string): Promise<Buffer> {
+  const dl = await fetch(url);
+  if (!dl.ok) throw new Error(`fal download ${dl.status}: ${url}`);
+  return Buffer.from(await dl.arrayBuffer());
 }
 
 /**
