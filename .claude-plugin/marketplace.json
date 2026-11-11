@@ -1,0 +1,11 @@
+{
+  "name": "character-forge",
+  "owner": { "name": "Dzmitry Drynau" },
+  "plugins": [
+    {
+      "name": "character-forge",
+      "source": "./",
+      "description": "Strong, coherent characters via a variant tournament: card + T-pose concept."
+    }
+  ]
+}

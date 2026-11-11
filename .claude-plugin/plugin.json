@@ -1,0 +1,14 @@
+{
+  "name": "character-forge",
+  "version": "0.3.0",
+  "description": "Strong, coherent characters for film, games, ads and books: a variant tournament with independent coherence reviewers, critics and a judge; character card + T-pose concept.",
+  "author": { "name": "Dzmitry Drynau" },
+  "license": "MIT",
+  "keywords": ["character", "screenwriting", "gamedev", "concept-art", "mcp"],
+  "mcpServers": {
+    "character-forge": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/index.js"]
+    }
+  }
+}

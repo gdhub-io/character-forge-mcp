@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "character-forge": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": { "CHARACTER_FORGE_DIR": "./characters" }
+    }
+  }
+}
