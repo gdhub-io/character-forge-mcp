@@ -1,0 +1,393 @@
+{
+  "meta": {
+    "name": "Marta Vell",
+    "medium": "game",
+    "genre": "post-apocalyptic",
+    "mode": "random",
+    "seed": 1337,
+    "logline": "A storm-reader who sold her silence the night her town drowned must decide, on the night of the next great wave, whether to call a child's true forecast a lie — the price of getting the town's bell back.",
+    "tagline": "She heard it coming. She said nothing."
+  },
+  "core": {
+    "wound": "Raised by a lighthouse-keeper father who dismissed her forecasts — and, when she was right, made it her fault; at 26 she heard the Rising coming three days out and sold her silence to the first man who ever paid for her gift.",
+    "lie": "I am only worth what my gift is worth to someone — and I've already proved what I'm worth.",
+    "truth": "I am worth saving even when I have nothing left to give.",
+    "central_paradox": "The best storm-reader alive is the reason a town drowned unwarned: the gift that should have saved them is the instrument of her sin, and the survival instinct that makes her brilliant is aimed at proving she deserves to drown.",
+    "dramatic_question": "On the night of the Hundred-Year Wave, will Marta stay silent again to get the bell back — or tell the truth and let herself be saved?",
+    "spark_links": "A keeper's daughter whose gift was dismissed at home became a hired forecaster for the only people who valued it; the salvage cartel is simply whoever pays; the drowned coast makes her private betrayal the shape of the whole world; the horn she finally sounded too late is what deafened her."
+  },
+  "goals": {
+    "want": "Get the drowned town's bronze bell back from Doran Hale's salvage yard and hang it in the lighthouse again.",
+    "need": "Accept that she is worth saving with nothing left to give — no gift, no penance, no payment.",
+    "motivation": "The bell is the warning that should have rung the night of the Rising; every year she offers Hale her savings for it, and every year he refuses — he doesn't want credits, he wants a forecast.",
+    "arc_goal": "Make peace with the past",
+    "goal_climax": "On the night of the Hundred-Year Wave, at the lighthouse wall the rafts read their forecasts from, she must chalk one word: CALM, as Hale demands — calling Pell's true forecast a child's mistake, keeping her secret and getting the bell — or WAVE, signed with her own name and the confession that she knew in the Rising too.",
+    "conflicting_goals": "Hale's price for the bell is the same crime again, made worse: dismiss a girl's true forecast, exactly as her father dismissed hers. The want can only be bought by betraying the need.",
+    "scene_goal_example": "Get Pell to unsay her forecast in front of the raft elders — and fail, because the girl won't lie for her."
+  },
+  "identification": {
+    "methods": [
+      {
+        "method": "Superpower",
+        "how": "She feels pressure drops in her right ear and names a storm's arrival to the hour. In play, Forecast reveals weather three in-game days ahead; the core loop is reading weather, piloting the skiff through the reef ring, and chalking warnings that win or lose the rafts' trust."
+      },
+      {
+        "method": "Underemployed",
+        "how": "The finest navigator on the coast scrapes barnacles off Hale's hulls for food, because she will never again take payment for a forecast."
+      },
+      {
+        "method": "Helps others",
+        "how": "Every dawn she chalks the forecast on the lighthouse's seaward wall, where every raft can read it; nobody knows the chalk is hers except Hale."
+      }
+    ],
+    "flaws": [
+      {
+        "category": "physical",
+        "flaw": "Deaf in her left ear",
+        "how_it_shows": "She always turns her right side to people and misses everything said on her left; in play, threats from the left are silent."
+      },
+      {
+        "category": "personality",
+        "flaw": "Self-destructive",
+        "how_it_shows": "Carries a safety line and never clips on; takes the worst reef runs for the smallest pay."
+      }
+    ],
+    "superpower": "Storm-sense: she hears weather fronts days before instruments catch them.",
+    "vulnerability": "Sudden loud noise overloads the sense — a gunshot or a horn blast leaves her disoriented for a minute (a stun state in play).",
+    "sympathy_hook": "She gives her coat to a raft boy who stole her boots, then walks home barefoot over frost.",
+    "first_appearance": "Dawn, the drowned lighthouse: she licks a finger, tests the wind, chalks STORM — 3 DAYS on the seaward wall in letters a metre high, and is gone before the first raft wakes. This is the Forecast tutorial.",
+    "jeopardy": "Every reef run without a line could be her last, and Hale holds a receipt that can end her in the raft town."
+  },
+  "psychology": {
+    "states": {
+      "passive": "Eight years of the same day: scrape hulls, chalk the wall, offer Hale her savings for the bell, be refused.",
+      "reactive": "Pell forecasts the Hundred-Year Wave and nobody on the rafts believes a raft child; they wait for the chalk.",
+      "active": "Charts the impossible harbor approach on her own forearm in grease pencil and doesn't sleep until every raft is moving."
+    },
+    "emotional_baseline": "Quietly broken but functional; dry and cold on the surface, tender only with children and weather.",
+    "inner_monologue": [
+      "Glass is falling. Say nothing.",
+      "You were worth four hundred credits once. That's the price. Remember it.",
+      "One more run. Then you can rest."
+    ],
+    "interprets_experience": "Everything that goes wrong is her fault; everything that goes right was luck or someone else's doing.",
+    "psychological_issues": "Survivor's guilt; insomnia in any wind, because she cannot stop listening; she taps her father's barometer every hour.",
+    "insecurity": "That without the storm-sense she is nothing, and nobody would keep her around for a day.",
+    "strong_beliefs": "The sea keeps accounts. Every debt gets paid, and she means to pay hers in full.",
+    "strongest_trigger": "The sound of a foghorn — the one she kept silent for three days, then sounded too late.",
+    "childhood": "Raised as an apprentice, not a daughter: her father drilled her in morse and optics but laughed at her forecasts, so love came only as instructions and approval only for being useful.",
+    "visual_device": "Audio mix: her left channel is muffled and characters on her left speak only in subtitles; when she finally tells the truth, the mix opens into full stereo for the first time in the game."
+  },
+  "description": {
+    "name_meaning": "Marta, 'lady of the house' — a keeper whose house is underwater; Vell is a coast word for the salt crust a tide leaves on stone: what remains after the water goes.",
+    "age": "34",
+    "gender": "Woman",
+    "species": "Human",
+    "cultural_background": "Third-generation Saltreach coast folk: knot-lore, salt-cod cooking and a sea creole that turns weather words into verbs ('he's backing', 'don't squall at me').",
+    "physical": {
+      "height_build": "Tall (182 cm), lean and ropey, broad shoulders and forearms from hauling rigging.",
+      "face": "Weathered olive skin, wind-chapped cheeks, sharp nose, pale grey eyes that look past people toward the horizon.",
+      "hair": "Black, thick and coarse, chopped to the jaw with a knife and worn loose: always a curtain over her deaf left ear and the scar behind it, always hooked behind her right ear so the hearing ear stays bare.",
+      "first_impression": "A lighthouse that walked off its rock, leaning: tall, coatless in the cold, head tipped to one side, listening to the weather instead of you."
+    },
+    "life_events": [
+      {
+        "age": "9",
+        "event": "She predicted a squall her father laughed off; when the fleet was lost, he told the town she had 'called it'.",
+        "effect": "Learned that being right is dangerous, and that at home her gift was worth nothing."
+      },
+      {
+        "age": "26",
+        "event": "She heard the Rising coming three days out and signed Doran Hale's receipt — four hundred credits to stay silent until his fleet cleared the harbor; when her father, for the first time in his life, asked her whether a storm was coming, she said no.",
+        "effect": "Proved the lie to herself: she is worth exactly what someone pays for her gift, and what she did with it is unforgivable."
+      },
+      {
+        "age": "30",
+        "event": "She walked into the winter sea at dawn; Pell, a raft girl of seven, swam out with a line and dragged her back.",
+        "effect": "The first person who ever saved her for nothing — a debt she can't understand, so she repays it by teaching Pell to read storms."
+      }
+    ],
+    "hobbies": [
+      "Tuning salvaged bells by ear, using only her right side",
+      "Logging pressure readings in a notebook bound with fish skin",
+      "Teaching Pell knots she pretends not to care about"
+    ],
+    "speech": {
+      "manner": "Short, exact, in coast creole; long silences on purpose; jokes only about her own death, and only when someone is about to be kind to her.",
+      "pet_words": [
+        "Glass is falling.",
+        "Mind my left.",
+        "Chalk's free."
+      ],
+      "sample_lines": [
+        "Three days. Out of the south, and hungry.",
+        "Drowned once already. Didn't take.",
+        "Don't squall at me, girl. Read the sky, not my face."
+      ]
+    },
+    "sociology": {
+      "status": "Outcast labourer, tolerated for her usefulness; whispered about as 'the keeper's girl who lived'.",
+      "education": "No schooling; trained by her father in navigation, optics and morse.",
+      "money": "Saves every credit toward the bell and lives on what hull-scraping pays in food.",
+      "friends_family": "Father drowned in the flood. Her only bond is Pell, the raft girl she is teaching; Corin Abbas, the soup-raft widow, keeps asking her what she heard the night of the Rising.",
+      "place": "The stilt slums of New Saltreach, built on the drowned rooftops of the old town.",
+      "world_events": "The Rising drowned half the coast; Hale's cartel now owns the harbor berths, the salvage and the only radio, and each storm season pushes more families onto rafts."
+    },
+    "biggest_disappointment": "Her father drowned trusting her: the one time he finally believed her forecast was the time she lied to him.",
+    "most_valued": "The truth about the weather, even when nobody wants to hear it.",
+    "secret_dream": "To hear the bell ring from the lighthouse and sleep through a storm while someone else keeps watch; she cannot picture a future beyond that night.",
+    "missing": "Someone who wants her around when the sky is clear."
+  },
+  "fears": {
+    "fears": [
+      {
+        "fear": "Being exposed: the town learning she heard the Rising coming",
+        "root": "Hale keeps the receipt she signed with her keeper's mark; it convicts her and no one else.",
+        "conscious": true
+      },
+      {
+        "fear": "Being loved for herself rather than for her gift",
+        "root": "Her father's approval was only ever for usefulness; love without a price feels like a trap.",
+        "conscious": false
+      }
+    ],
+    "mask": "Cold competence: she makes herself useful in small, anonymous ways so no one gets close enough to ask who she is.",
+    "courage_source": "Pell, who trusts her completely and is learning to hear storms — Marta refuses to let her inherit a silence.",
+    "overcoming": "She signs the warning with her own name and confesses on the wall before Hale can show the receipt — and the feared thing, the town knowing, turns out to be survivable."
+  },
+  "uniqueness": {
+    "archetype": "Lighthouse keeper / guardian",
+    "twist": "The guardian who caused the catastrophe she now guards against — by staying silent, with the very gift meant to warn.",
+    "quirks": [
+      "Licks a finger and tests the wind even indoors — the folk trick her father mocked, which she trusts more than his instruments",
+      "Taps morse on any surface when nervous — always the same words: NO STORM, the lie she told him",
+      "Carries a coiled safety line everywhere and never clips on",
+      "Describes people as weather instead of saying what she feels",
+      "Leaves mid-sentence whenever someone tries to thank her"
+    ],
+    "lifestyle": {
+      "tastes": "Listens only to old recorded shipping forecasts; finds music 'too loud on purpose'.",
+      "shopping": "Pays in labor at the capsized-ferry market; refuses anything offered for a forecast.",
+      "food": "Salt cod eaten standing up, always facing the sea.",
+      "vehicle": "A patched skiff whose outboard she starts by ear, steering with her right side to the wind.",
+      "love_style": "Shows love only as warnings — chalked forecasts, a coat on a thief's shoulders; flinches from touch.",
+      "sore_spot": "Being called 'keeper'.",
+      "nonverbal_tics": "Tilts her head right to listen; rubs the scar behind her left ear when she lies.",
+      "talents": "Tunes bells by ear; navigates reefs at night by the sound of surf.",
+      "spirituality": "Believes the sea keeps accounts; drops a coin from the gallery before every big decision."
+    },
+    "stress_relief": "Swims in the winter sea at dawn until she can't feel anything.",
+    "dream_vacation": "A city with no coastline, where nobody has ever asked her about the weather."
+  },
+  "backstory": {
+    "biography": "Marta grew up in the Saltreach lighthouse as her father's apprentice rather than his daughter. She learned morse before she could read and heard storms before the barometer moved, but he laughed at her forecasts, and when she was right he made it her fault: at nine she predicted a squall he dismissed, the fleet was lost, and he told the town she had 'called it'. The first man who ever paid for her gift was Doran Hale, a salvager who bought forecasts by the week. At twenty-six she heard the Rising coming three days out and signed his receipt — four hundred credits to say nothing until his fleet had cleared the harbor. On the second night her father, for the first time in his life, asked her if a storm was coming. She said no. On the third night she ran for the foghorn as the water rose and sounded it at point-blank range — too late for the town, and loud enough to burst her left eardrum. Her father drowned in his bed. Four years later she walked into the winter sea; a raft girl of seven named Pell swam out with a line and dragged her back. Since then Marta scrapes Hale's hulls for food, chalks the forecast free on the lighthouse wall every dawn, teaches Pell to hear storms, and saves every credit for the town's bronze bell — which hangs as a trophy in Hale's salvage yard, and which he will not sell for money.",
+    "world": {
+      "who_rules": "The Tide Cartel owns the harbor berths, the salvage rights and the only working radio; Doran Hale makes every decision that matters.",
+      "boundaries": "The reef ring around New Saltreach: inside it lie cartel water and rationed life; beyond it is the open storm sea, which nobody crosses without a pilot — and the Hundred-Year Wave the elders whisper about.",
+      "hierarchy": "Cartel captains, then licensed divers, then rooftop dwellers, then the 'wet' who live on rafts.",
+      "good_and_bad": "Good is paying your debts and sharing a forecast; the worst crime on the coast is hoarding a warning.",
+      "worth_dying_for": "A dry berth for your children.",
+      "worth_living_for": "The rare glass-calm mornings when the drowned town is visible below the surface.",
+      "best_and_worst": "Best: a season with no storms. Worst: the Hundred-Year Wave, with no warning.",
+      "survival_vs_comfort": "Survival — though people still trade salt for perfume salvaged from drowned shops."
+    },
+    "connection_to_past": "She is the reason the town drowned unwarned, and the bell she wants is the warning that should have rung that night.",
+    "distance_from_peers": "Everyone she grew up with is dead or works for Hale; she alone does neither, but takes his wages.",
+    "daily_life": "Scrapes hulls for food, chalks the wall at dawn, sleeps sitting up in the lighthouse gallery with her boots on, and prays only by counting waves.",
+    "decision_style": "She drops a coin from the gallery and listens to which wave takes it; under real pressure she skips the ritual and jumps.",
+    "key_locations": [
+      "The drowned lighthouse: the top three floors stand above water; its seaward wall is the town's forecast board, white with eight years of her chalk",
+      "Hale's salvage yard on a capsized ferry, where the town bell hangs as a trophy over the scrap scales",
+      "Pell's raft, painted with Marta's old forecasts so the girl can practise reading them"
+    ],
+    "contradictions": [
+      {
+        "with_whom": "Pell, the 11-year-old raft girl she is teaching",
+        "behavior": "Patient and almost playful — and, without noticing, as dismissive of the girl's forecasts as her father was of hers; Pell pressures the lie by loving her for nothing."
+      },
+      {
+        "with_whom": "Doran Hale, cartel boss",
+        "behavior": "Obedient, useful, almost grateful to his face — he is the only one who ever paid for her gift, which is exactly the lie."
+      },
+      {
+        "with_whom": "Corin Abbas, soup-raft widow whose husband drowned in the Rising",
+        "behavior": "Evasive and sarcastic: Corin suspects the truth and keeps asking for it, pressing on the secret from the side of the dead."
+      }
+    ]
+  },
+  "traits": {
+    "energy": "Low in calm weather, explosive in storms",
+    "temperament": "Melancholic with choleric bursts",
+    "social": "Strong introvert",
+    "habits": [
+      "Taps the barometer glass every hour",
+      "Sleeps sitting up, boots on",
+      "Turns her right side to every room"
+    ],
+    "best_trait": "Survivor: no one alive reads a storm better or has lived through more of them.",
+    "worst_trait": "Self-destructive: she believes she deserves to drown and keeps taking risks to prove it.",
+    "other_traits": [
+      "Stubborn",
+      "Observant",
+      "Dark humor"
+    ],
+    "reactions": [
+      {
+        "situation": "Someone thanks her",
+        "reaction": "Leaves the room mid-sentence."
+      },
+      {
+        "situation": "A foghorn sounds",
+        "reaction": "Freezes and counts the seconds aloud, the way her father taught her to time thunder."
+      },
+      {
+        "situation": "A child is in danger",
+        "reaction": "Acts instantly, with no plan and no line."
+      }
+    ],
+    "others_say": [
+      "She's never wrong about the weather. People, though — she's wrong about every one of them.",
+      "Stand on her left and you don't exist. Some days I think she likes it that way."
+    ]
+  },
+  "destiny": {
+    "ordinary_world": "Grim routine of hull-scraping and chalked forecasts in New Saltreach.",
+    "void": "Guilt that no penance fills: she is alive, but has stopped living.",
+    "threshold": "To check Pell's forecast she sails past the reef ring for the first time since the flood, hears the Wave coming, and returns to find Hale waiting with an offer: the bell, for one word of chalk.",
+    "ordeal": "The Wave night, at the lighthouse wall with the chalk in her hand and the rafts watching: CALM gets her the bell and keeps her secret; WAVE costs her both.",
+    "transformation": "The player's branch. If she writes WAVE, she signs it and confesses on the wall, loses the bell, and when the gallery floods she clips onto the line Pell throws her — the first time she lets herself be saved. If she writes CALM, she gets the bell, the rafts stay put, and she becomes her father and Hale's instrument for good.",
+    "ending": "In the truth ending she gives her four hundred credits to Corin's soup raft as restitution; the town hauls the bell out of Hale's wrecked yard and hangs it in the lighthouse themselves — given, not bought — and Marta sleeps through the next storm while Pell keeps watch."
+  },
+  "look": {
+    "shape_language": "One tall, unbroken vertical — the lighthouse that walked off its rock: long straight planes, squared shoulders, hard-edged straight-cut clothing. The column is always tipped a few degrees to the right, toward her hearing ear, so the upright, cold, useful defense carries a permanent lean that betrays the wound. The only round shape on her is the brass disc of her father's barometer at the sternum.",
+    "silhouette": "In black fill: a very tall, narrow figure with no coat in cold weather, head canted right, a heavy fall of jaw-length hair on the left and a bare ear and neck on the right; straight-legged work bibs make an upright column, and a long-handled hull scraper adds a second vertical. It deliberately avoids the post-apocalyptic stock of undercut-and-braid, long duster, goggles and bandoliers: a labourer's outline, lopsided only by how she listens.",
+    "perfection": "Split by design: her tools are immaculate — polished barometer brass, honed scraper, squared chalk — while her body and clothes are left to rot: unravelling jersey, mismatched boots, cut knuckles, no coat. She keeps whatever is useful to others and neglects herself; the lie made into objects.",
+    "body": {
+      "head_heights": 8.4,
+      "shoulders": 1.25,
+      "hips": 0.85,
+      "legs": 1.05,
+      "arms": 1.05,
+      "shoulder_tilt": -0.4,
+      "head_tilt": 0.4,
+      "stoop": 0.1,
+      "knees": "straight",
+      "why": "Tall and long-limbed from her father's side; eight years of hauling rigging built broad shoulders on a lean frame with narrow hips. The left shoulder sits lower from carrying the safety-line coil on it every shift. The head cants about 6° right, toward her only hearing ear, ever since the foghorn blast burst the left eardrum."
+    },
+    "blocking": {
+      "hair": "#17181B",
+      "skin": "#B88A6A",
+      "top": "#1E2838",
+      "bottom": "#46555A",
+      "footwear_left": "#141414",
+      "footwear_right": "#6B3E22",
+      "accessories": [
+        {
+          "where": "left_shoulder",
+          "color": "#7A705E",
+          "size": "medium",
+          "item": "coiled rope safety line"
+        },
+        {
+          "where": "waist",
+          "color": "#3B3A30",
+          "size": "medium",
+          "item": "webbing belt with scraper hook and chalk pouch"
+        },
+        {
+          "where": "chest",
+          "color": "#A07A3A",
+          "size": "small",
+          "item": "small brass barometer on twine"
+        }
+      ]
+    },
+    "signature_item": {
+      "item": "Her father's brass pocket aneroid barometer, palm-sized, with a hairline crack across the glass exactly where her fingernail lands.",
+      "story": "The instrument he trusted over her ears. On the second night of the Rising its needle was falling when he asked if a storm was coming and she said no. She took it after he drowned in his bed and has tapped it every hour for eight years; the crack is her own tapping, wearing through.",
+      "how_carried": "On tarred twine around her neck, tucked behind the bib so its round face shows at the edge; she pulls it out, taps, pushes it back without looking. On the Wave night she never checks it — she already knows. In the truth ending she leaves it on the ledge under the chalk wall; in the CALM ending the crack spreads across the whole glass and she keeps tapping a dial she can no longer read."
+    },
+    "marks": [
+      {
+        "mark": "Pale crescent scar, about 4 cm, curving along the hairline",
+        "location": "Behind the LEFT ear, hidden under the curtain of hair",
+        "origin": "The third night of the Rising: the water threw her against the foghorn's brass mouth as she sounded it at point-blank range — the same blast that burst her eardrum."
+      },
+      {
+        "mark": "Rows of small white nicks and half-healed cuts, permanently dusted with chalk",
+        "location": "Knuckles and backs of both hands, worst on the right (working hand)",
+        "origin": "Eight years of scraping barnacles off Hale's hulls for food, then chalking the wall at dawn with the same hands."
+      },
+      {
+        "mark": "Grease-pencil chart of the harbor approach — soundings, bearings, a tide time circled twice",
+        "location": "Inner LEFT forearm, wrist to elbow; Wave-night state only",
+        "origin": "In her active state she charts the impossible approach on her own arm; the only mark she gives herself on purpose."
+      }
+    ],
+    "movement": {
+      "gait": "Long, quiet, rolling deck strides, right shoulder leading, so she moves slightly crabwise with her hearing side toward whoever is ahead; never hurries in calm weather, breaks into a sudden sprint in a storm.",
+      "idle_pose": "Faces the sea, not the camera: weight on the left leg, head tilted right, arms crossed high with one hand flat over the barometer; every hour she breaks the pose to tap it.",
+      "signature_gesture": "Licks a fingertip and holds it up to the wind — indoors, mid-conversation — the folk trick her father mocked.",
+      "under_stress": "A fingernail taps morse on the nearest hard surface, always N-O S-T-O-R-M; at a foghorn she freezes and counts seconds aloud; when she lies, her hand slips under the left curtain of hair to the scar."
+    },
+    "outfit": [
+      {
+        "piece": "Navy fisherman's gansey, tight-knit wool, worn inside out, cuffs unravelling and pushed to the elbow",
+        "why": "Saltreach families knit their own pattern into ganseys so the sea's dead can be identified; this is the keeper family's pattern, worn reversed so it doesn't show — heritage and hiding at once. It faces out again only in the truth ending."
+      },
+      {
+        "piece": "Cartel-issue rubberised canvas bib overalls, slate grey, Hale's tide-mark stencil in rust on the back of the bib",
+        "why": "Hull-scraper's kit: she takes his wages and is marked as his where she can't see it."
+      },
+      {
+        "piece": "Thick webbing belt with a scraper hook and a canvas pocket for a squared lump of chalk",
+        "why": "Her two jobs on one strap: the paid one for Hale and the free one for the rafts."
+      },
+      {
+        "piece": "Odd boots: black rubber diver's boot on the left, cracked brown leather sea-boot on the right, both laced tight because she sleeps in them",
+        "why": "Her own boots were stolen by the raft boy she gave her coat to; she paid in labour for whatever the market had. No coat in any version — she gave it away."
+      }
+    ],
+    "palette": [
+      {
+        "name": "Whitewash Chalk",
+        "hex": "#E6E2D6",
+        "meaning": "The free forecast, truth given anonymously: the wall, the dust on her hands, the warning she can still sign."
+      },
+      {
+        "name": "Drowned Slate",
+        "hex": "#46555A",
+        "meaning": "The sea over the old town and her work bibs: guilt as daily clothing."
+      },
+      {
+        "name": "Keeper Navy",
+        "hex": "#1E2838",
+        "meaning": "The lighthouse family and her father's house, worn inside out against her skin."
+      },
+      {
+        "name": "Bell Bronze",
+        "hex": "#A07A3A",
+        "meaning": "The want: used only on the barometer rim and the town bell, linking her father's instrument to the warning that never rang."
+      },
+      {
+        "name": "Cartel Rust",
+        "hex": "#A8502E",
+        "meaning": "Hale and the debt: the stencil on her back, the receipt, his yard — on her only where she can't see it."
+      }
+    ],
+    "props": [
+      "Squared lump of lighthouse whitewash chalk",
+      "Long-handled hull scraper",
+      "Fish-skin-bound pressure logbook",
+      "One old coin for the gallery ritual",
+      "Coiled safety line on the left shoulder, clip hanging free (in Act 3 she clips onto Pell's line instead)"
+    ],
+    "story_reads": [
+      "She is listening for a storm no one else can hear yet: head tilted right, finger to the wind, eyes on the horizon instead of you.",
+      "She has given away more than she has: no coat in sleet, odd boots, ruined hands — but a polished brass instrument kept at her heart.",
+      "She works for someone who owns her: a gang stencil on her back she never turns to look at."
+    ],
+    "art_style": "Stylized 3D with hand-painted textures over simplified, slightly elongated forms (about 8.5 heads tall, long shins and forearms); flat readable planes; cold diffuse coastal light with a hard chalk-white rim from the sea side; low saturation so bronze and rust are the only warm notes; her left side sits in deeper shadow in key art.",
+    "turnaround_notes": "Lock the left/right asymmetry in every view. LEFT: jaw-length hair covering ear and scar, black rubber diver's boot, safety-line coil on the shoulder. RIGHT: hair hooked behind a bare ear, brown leather boot, scraper hook on the belt. FRONT: barometer disc at the top edge of the bib, gansey seams visible (inside out), head canted ~6° right even in the neutral pose. BACK: rust tide-mark stencil centred on the bib. Hands always chalk-dusted. Story-state variants: Wave night (soaked, hair slicked back revealing the scar, chart on the inner left forearm); truth ending (gansey right side out, no barometer)."
+  }
+}
