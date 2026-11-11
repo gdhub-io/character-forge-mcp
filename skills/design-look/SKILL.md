@@ -12,4 +12,4 @@ Requires the `character-forge` MCP server (tools named `character_*`).
 3. Merge its `look` JSON, and any `description.physical` changes, into the card. Save with `character_save` and `overwrite: true` (keep `meta.slug`).
 4. Run `character_check` with the id. If the LOOK or RESTRAINT questions expose weak links, fix them and save again.
 5. Call `character_concept` with the id (and the user's `style`/`views`, if given).
-6. Report to the user in their language: the signature item, and the 3 things a stranger reads in 3 seconds. Include the paths to card.html and concept.png, or say the prompt was returned because no image key is set.
+6. Report to the user in their language: the signature item, and the 3 things a stranger reads in 3 seconds. Include the paths to card.md and concept.png, or say the prompt was returned because no image key is set.

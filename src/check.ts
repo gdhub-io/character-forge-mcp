@@ -75,7 +75,7 @@ export function checkCard(c: CharacterCard): CheckResult {
     `CONTRADICTIONS: Does each secondary character (${c.backstory.contradictions.map((x) => x.with_whom).join("; ")}) pressure the lie from a different side?`,
     `ARC: Is "${c.destiny.transformation}" precisely the move from the lie to the truth?`,
     `LOOK: Does every look element show a part of the story? Is the signature item "${c.look.signature_item.item}" rooted in the backstory? Does each mark (${c.look.marks.map((m) => m.mark).join("; ")}) come from a real event in the biography?`,
-    `RESTRAINT: Is the look carried by 1-2 strong symbols, or is every detail an on-the-nose symbol? Leave at least one detail that invites a question instead of answering one.`,
+    `RESTRAINT: Is the look carried by 1-2 strong symbols, or is every detail an on-the-nose symbol? Count how often the main motif repeats across name, marks, props, locations and world — more than two or three is a gimmick. Leave at least one detail that invites a question instead of answering one.`,
     `SPARKS: Does "${c.core.spark_links}" make the job, world and archetype feel inevitable rather than pasted on?`,
     `STRENGTH: Could this character be swapped into another story without changes? If yes, they are not specific enough. Name one scene only THIS character could play.`,
     `VOICE: Could you tell who is speaking from the sample lines alone, with the name removed?`,

@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { generateConcept, VIEWS } from "../concept.js";
-import { text } from "./util.js";
+import { reply, text } from "./util.js";
 
 export function registerConcept(server: McpServer) {
   server.registerTool(
@@ -31,15 +31,15 @@ export function registerConcept(server: McpServer) {
     async ({ id, dry_run, pose_image, control_scale, mode, ...opts }): Promise<CallToolResult> => {
       const r = await generateConcept(id, { ...opts, control: mode, poseImage: pose_image, controlScale: control_scale, dryRun: dry_run });
       if (!r.generated) {
-        return { content: [text(`${r.reason} T-pose prompt — paste into any image model:\n\n${r.prompt}`)], structuredContent: { prompt: r.prompt, generated: false } };
+        return reply(`${r.reason} T-pose prompt — paste into any image model:\n\n${r.prompt}`, { prompt: r.prompt, generated: false });
       }
       const { image } = r;
       const content: CallToolResult["content"] = [
-        text(`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${r.html}`),
+        text(`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${r.card}`),
       ];
       // Shown inline so the user sees the concept in chat; skipped for very large files.
       if (image.bytes.length < 4_000_000) content.push({ type: "image", data: image.bytes.toString("base64"), mimeType: image.mimeType });
-      return { content, structuredContent: { prompt: r.prompt, generated: true, file: r.file, provider: image.provider, model: image.model, seed: image.seed } };
+      return { content, structuredContent: { message: content[0].type === "text" ? content[0].text : "", prompt: r.prompt, generated: true, file: r.file, provider: image.provider, model: image.model, seed: image.seed } };
     },
   );
 }

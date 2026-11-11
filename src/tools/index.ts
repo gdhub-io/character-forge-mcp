@@ -7,6 +7,11 @@ import { registerSave } from "./save.js";
 import { registerConcept } from "./concept.js";
 import { registerLibrary } from "./library.js";
 import { registerMedia } from "./media.js";
+import { registerScene } from "./scene.js";
+import { registerVoice } from "./voice.js";
+import { registerTheme } from "./theme.js";
+import { registerPick } from "./pick.js";
+import { registerTranslate } from "./translate.js";
 
 export function registerTools(server: McpServer) {
   registerMethod(server);
@@ -17,4 +22,9 @@ export function registerTools(server: McpServer) {
   registerConcept(server);
   registerLibrary(server);
   registerMedia(server);
+  registerScene(server);
+  registerVoice(server);
+  registerTheme(server);
+  registerPick(server);
+  registerTranslate(server);
 }

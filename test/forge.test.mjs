@@ -16,6 +16,20 @@ const { checkCard } = await import(path.join(root, "dist/check.js"));
 const { WOUNDS } = await import(path.join(root, "dist/engine.js"));
 const { mannequinPng, poseKeypoints, AVERAGE_BODY } = await import(path.join(root, "dist/pose.js"));
 
+/** Runs fn with a fresh, temporary library, restoring CHARACTER_FORGE_DIR afterwards. */
+async function withLibrary(fn) {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "cf-lib-"));
+  const prev = process.env.CHARACTER_FORGE_DIR;
+  process.env.CHARACTER_FORGE_DIR = dir;
+  try {
+    return await fn(dir);
+  } finally {
+    if (prev === undefined) delete process.env.CHARACTER_FORGE_DIR;
+    else process.env.CHARACTER_FORGE_DIR = prev;
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 test("roll is deterministic per seed and respects overrides", () => {
   assert.deepEqual(roll({ seed: 42 }), roll({ seed: 42 }));
   assert.notDeepEqual(roll({ seed: 42 }), roll({ seed: 43 }));
@@ -102,7 +116,7 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
     const { tools } = await client.listTools();
     assert.deepEqual(
       tools.map((t) => t.name).sort(),
-      ["character_check", "character_concept", "character_get", "character_list", "character_method", "character_prompt", "character_prompt_save", "character_role", "character_roll", "character_save"],
+      ["character_check", "character_concept", "character_get", "character_list", "character_method", "character_pick", "character_prompt", "character_prompt_save", "character_role", "character_roll", "character_save", "character_scene", "character_theme", "character_translate", "character_video", "character_voice", "character_voice_line", "character_voice_translation"],
     );
     const { prompts } = await client.listPrompts();
     assert.equal(prompts.length, 2);
@@ -129,7 +143,8 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
     assert.ok(!saved.isError, saved.content?.[0]?.text);
     const id = saved.structuredContent.id;
     assert.equal(id, "marta-vell");
-    for (const f of ["card.json", "card.md", "card.html"]) assert.ok(existsSync(path.join(dir, id, f)), f);
+    for (const f of ["card.json", "card.md"]) assert.ok(existsSync(path.join(dir, id, f)), f);
+    assert.ok(!existsSync(path.join(dir, id, "card.html")), "no card.html");
 
     const again = await client.callTool({ name: "character_save", arguments: { card: example } });
     assert.equal(again.structuredContent.id, "marta-vell-2");
@@ -146,6 +161,9 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
       arguments: { id, kind: "song", sections: [{ label: "Title", text: "Chalk's Free" }, { label: "Style", text: "sea shanty, folk" }] },
     });
     assert.ok(existsSync(promptSaved.structuredContent.file));
+    const theme = await client.callTool({ name: "character_prompt", arguments: { id, kind: "theme" } });
+    assert.match(theme.content[0].text, /Composition plan/);
+    assert.match(theme.content[0].text, /Dramatic question/);
 
     const list = await client.callTool({ name: "character_list", arguments: {} });
     assert.equal(list.structuredContent.items.length, 2);
@@ -228,4 +246,40 @@ test("colour blocking paints zones and keeps the character's left and right", ()
   assert.ok(!plain.png.equals(blocked.png), "images should differ");
   // Without zone colours the blocking style falls back to the grey mannequin.
   assert.ok(mannequinPng("front", card.look.body, "blocking").png.equals(plain.png), "images should be identical");
+});
+
+test("tournament variants are drafts; picking a winner keeps it and deletes the other variants", async () => {
+  await withLibrary(async (dir) => {
+  const { saveCard, pickWinner } = await import(path.join(root, "dist/store.js"));
+  const variant = (name, v) => ({ ...example, meta: { ...example.meta, slug: undefined, name, group: "g1", variant: v } });
+  const a = await saveCard(variant("Alpha One", "A"));
+  const b = await saveCard(variant("Beta Two", "B"));
+  const solo = await saveCard({ ...example, meta: { ...example.meta, slug: undefined, name: "Solo Three" } });
+  assert.ok(a.dir.includes(path.join("_drafts", "alpha-one")), a.dir);
+  assert.ok(!solo.dir.includes("_drafts"), solo.dir);
+  await saveCard({ ...variant("Alpha One", "A"), meta: { ...variant("Alpha One", "A").meta, slug: "alpha-one" } }, { overwrite: true });
+  assert.ok(existsSync(path.join(dir, "_drafts", "alpha-one", "card.json")), "overwrite keeps the draft in place");
+  const r = await pickWinner("alpha-one");
+  assert.deepEqual(r.deleted, ["beta-two"]);
+  assert.ok(existsSync(path.join(dir, "alpha-one", "card.json")));
+  assert.ok(!existsSync(b.dir));
+  });
+});
+
+test("a translation keeps the original's structure and fixed values", async () => {
+  await withLibrary(async (dir) => {
+  const { saveCard, saveTranslation } = await import(path.join(root, "dist/store.js"));
+  const { slug } = await saveCard(example);
+  const ru = structuredClone(example);
+  ru.meta.tagline = "Она слышала. Она молчала.";
+  ru.description.gender = "Женщина";
+  const file = await saveTranslation(slug, "ru", ru);
+  assert.ok(file.endsWith("card.ru.json"));
+  const broken = structuredClone(ru);
+  broken.look.palette[0].hex = "#000000";
+  await assert.rejects(() => saveTranslation(slug, "ru", broken), /must stay/);
+  const shorter = structuredClone(ru);
+  shorter.uniqueness.quirks.push("Лишняя причуда.");
+  await assert.rejects(() => saveTranslation(slug, "ru", shorter), /length/);
+  });
 });

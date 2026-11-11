@@ -102,16 +102,41 @@ Read the whole card, the core first. Then derive the card's \`look\` section:
 - movement: gait, idle pose, signature gesture, under stress — from psychology, traits and habits.
 - outfit: inner to outer; each piece says something (sociology, world, defense, history).
 - palette: 3-6 colours, each with a meaning in the story.
-- story_reads: exactly 3 things a stranger understands in 3 seconds.
+- story_reads: exactly 3 things a stranger understands in 3 seconds. If the character is a villain or a threat, one of
+  them must be "this person is dangerous", carried by stance, gaze, expression and silhouette, never by ugliness alone:
+  a strange body reads as pitiable unless the face and posture are in control.
 - blocking: the colour block-in for the concept (#RRGGBB) — hair, skin (or fur/scales), top, bottom, and footwear for
   the character's LEFT and RIGHT foot separately. These colours steer the generated concept, so pick the dominant
   real colour of each zone (often from the palette), not an accent.
-Restraint: carry the look with 1-2 strong symbols; don't repeat a motif across many fields; leave one
+Restraint: carry the look with 1-2 strong symbols; don't repeat a motif across many fields (name, marks,
+props, locations, world) — a motif everywhere reads as a gimmick, not a person; leave one
 detail that invites a question instead of answering one. Keep description.physical (body, face, hair)
 consistent with the look, and fix it if needed.
 
 Output: the complete \`look\` object as JSON, any description.physical changes as JSON, then 3 lines of
 rationale (what you cut and why).
+`.trim();
+
+const EDITOR_GUIDE = `
+ROLE: EDITOR. The story is finished and approved; you make it readable. Your reader is a visitor who has never
+heard of this character or their world and reads each field on its own, in any order, once.
+
+Test every field: would that reader understand it on the first read, without the rest of the card? Fix what fails.
+- Plain narrative prose: who did what, when, why. Short sentences, concrete nouns and verbs, one idea per sentence.
+- Who and why: every person a field mentions is identified ("a child" → which child, who she is to them), and every
+  claim that something follows ("so the town will believe her") shows the reason inside the same field.
+- Explain every name, place, event and world term the first time a field uses it, in a few words
+  ("the Rising, the flood that drowned half the coast"); never assume the reader saw another field.
+- No telegraphese, no chains of semicolons or em-dashes, no stacked metaphors, no riddles, no writerly flourish.
+  A striking image stays only if it is also clear.
+- Narrating voice: tune it to the character so the telling itself carries depth (a spare, salt-dry character gets
+  short, plain, weathered sentences; a playful child gets warm, light ones). Voice never costs clarity.
+- The character's own words (inner_monologue, speech.pet_words, speech.sample_lines, others_say, quoted lines)
+  stay in their voice: fix only what a stranger can't follow.
+- Change no facts, names, numbers, sides or causal links; add nothing new. Same length or shorter.
+- Do not touch ids, slugs, enums, hex colours, look.body, look.blocking or meta.seed/variant/verdict.
+
+Output: the complete revised card JSON, then up to 10 lines "field: what was unclear → what you did".
 `.trim();
 
 export const ROLE_GUIDES = {
@@ -120,6 +145,7 @@ export const ROLE_GUIDES = {
   judge: JUDGE_GUIDE,
   author: AUTHOR_DEFENSE_GUIDE,
   designer: DESIGNER_GUIDE,
+  editor: EDITOR_GUIDE,
 } as const;
 
 export const TOURNAMENT_PROTOCOL = `
@@ -135,10 +161,12 @@ VARIANT TOURNAMENT — produce N competing variants of one concept and ship the 
 5. DEFENSE: author fixes or rebuts each critique once (role "author").
 6. JUDGMENT: one judge compares all revised variants (role "judge") and picks the winner.
    Optionally fold the "steal" idea into the winner.
-7. RECORD: write meta.verdict into every variant (winner / runner-up / rejected + score + summary),
-   save with overwrite.
+7. RECORD: write meta.verdict into the winner and save with overwrite; then character_pick moves it from the
+   drafts into the library and deletes the other variants (losers are not kept: note who they were for the report).
 8. LOOK: an independent designer (role "designer") derives the winner's look section from its story.
    Author merges it, saves with overwrite, then generates the A-pose concept — for the winner only.
+8b. EDIT: an independent editor (role "editor") rewrites the winner's text for a reader who knows nothing of
+   the world: plain, clear narration in a voice tuned to the character; no facts change. Save with overwrite.
 9. REPORT to the user: winner card, plus one line per losing variant (who they were, why they lost).
 
 Best results: run each reviewer as a separate agent with fresh context (Claude Code: the forge-character

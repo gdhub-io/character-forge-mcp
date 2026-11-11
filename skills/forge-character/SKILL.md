@@ -10,6 +10,7 @@ Requires the `character-forge` MCP server (tools named `character_*`).
 
 ## 0. Setup
 - Call `character_method` once (method + protocol).
+- Languages: English is always the original. If the user names other languages (e.g. "also in Russian"), note them for step 8c.
 - Decide the mode:
   - **Random**: the user gave little or nothing. Anchor = the role they named, if any.
   - **Brief**: the user described what matters. Every variant must keep ALL of it. Anchor = the role from the brief; fix medium/genre/setting from the brief.
@@ -40,13 +41,19 @@ Spawn the `character-judge` agent with the 3 card.json paths, the brief/anchor, 
 Optionally fold the judge's "steal" idea into the winner and re-save.
 
 ## 7. Record
-Write `meta.verdict` (`winner` / `runner-up` / `rejected`, score, summary) into every variant and re-save with overwrite.
+Variants are saved as drafts (`_drafts/` in the library). Write `meta.verdict` (`winner`, score, summary) into the winner and re-save with overwrite, then call `character_pick` with the winner's id: it moves the winner into the library and deletes the other variants. Losers are not kept, so note who they were for the report first.
 
 ## 8. Look & concept — winner only
 Spawn the `character-designer` agent with the winner's card.json path. Merge its `look` (and any `description.physical` changes), re-save with overwrite.
 Call `character_concept` for the WINNER only.
 
+## 8b. Edit — winner only
+Spawn the `character-editor` agent with the winner's card.json path. It returns the card rewritten for a reader who knows nothing of the world (plain narration in a voice tuned to the character, no facts changed). Validate with `character_check`, re-save with overwrite.
+
+## 8c. Languages — only if the user asked for more than English
+Run the `translate-character` skill for each extra language (the card is free; the voice is paid and needs a yes). When the voice is made later, pass `text_ru` to `character_voice` so both languages are recorded at once.
+
 ## 9. Report to the user (in their language)
-- Winner: name, logline, why it won (2–3 sentences), signature item, path to card.html (and concept.png).
+- Winner: name, logline, why it won (2–3 sentences), signature item, path to card.md (and concept.png).
 - One line per losing variant: who they were and their fatal flaw.
 - Keep it short; the card itself is in the files.

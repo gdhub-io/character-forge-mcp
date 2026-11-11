@@ -90,7 +90,8 @@ export function resolveStyle(card: CharacterCard, style?: string): string {
   return !style ? DEFAULT_ART_STYLE : style === "card" ? card.look.art_style : style;
 }
 
-const pronoun = (gender: string) => (/^(w|f|girl)/i.test(gender) ? "her" : /^(m|boy)/i.test(gender) ? "his" : "their");
+/** Possessive pronoun from the card's free-text gender: "her", "his" or "their". */
+export const pronoun = (gender: string) => (/^(w|f|girl)/i.test(gender) ? "her" : /^(m|boy)/i.test(gender) ? "his" : "their");
 
 /** Where a character's own side appears on the sheet, spelled out (models read "left" as the image's left). */
 function sideNote(p: string): string {
@@ -170,6 +171,8 @@ export function gptCharacterPrompt(card: CharacterCard, style: string): string {
     `MARKS: ${lk.marks.map((m) => `${m.mark} — ${m.location}`).join("; ")}.`,
     `SIGNATURE ITEM, also drawn on its own beside the figures: ${lk.signature_item.item}.`,
     `WEAR AND CARE: ${lk.perfection}`,
+    // What a stranger must read in 3 seconds steers the face and stance (a villain must look dangerous, not pitiable).
+    `READS AT A GLANCE (show it in the face, gaze and stance): ${lk.story_reads.join(" ")}`,
     `COLOURS: ${lk.palette.map((c) => `${c.name} ${c.hex}`).join(", ")}.`,
     `MUST KEEP: ${lk.turnaround_notes}`,
     sideNote(p),
@@ -223,7 +226,7 @@ export function buildTposePrompt(c: CharacterCard, opts: ConceptOptions = {}): s
 
 export type ConceptResult =
   | { generated: false; prompt: string; reason: string }
-  | { generated: true; prompt: string; file: string; html: string; image: GeneratedImage };
+  | { generated: true; prompt: string; file: string; card: string; image: GeneratedImage };
 
 /** The whole concept pipeline, shared by the MCP tool and the CLI. */
 export async function generateConcept(id: string, opts: ConceptOptions & { dryRun?: boolean } = {}): Promise<ConceptResult> {
@@ -235,10 +238,10 @@ export async function generateConcept(id: string, opts: ConceptOptions & { dryRu
   const image = await generateImage(prompt, card, opts.views ?? DEFAULT_VIEWS, opts);
   // The A-pose sheet is the card's concept; a custom pose is an extra sheet next to it.
   const styleSlug = opts.style ? `-${slugify(opts.style === "card" ? "card-style" : opts.style).slice(0, 40)}` : "";
-  const file = await saveConcept(id, image.bytes, prompt, opts.poseImage ? `concept-pose${styleSlug}.png` : styleSlug ? `concept${styleSlug}.png` : undefined);
+  const file = await saveConcept(id, image.bytes, image.prompt, opts.poseImage ? `concept-pose${styleSlug}.png` : styleSlug ? `concept${styleSlug}.png` : undefined);
   if (image.intermediate) await saveConcept(id, image.intermediate, "step 1: mannequin from skeleton", "concept-mannequin.png");
   const saved = await writeCard(card);
-  return { generated: true, prompt, file, html: saved.files.html, image };
+  return { generated: true, prompt: image.prompt, file, card: saved.files.markdown, image };
 }
 
 export interface GeneratedImage {
@@ -249,6 +252,8 @@ export interface GeneratedImage {
   seed?: number;
   /** Two-step GPT: the mannequin drawn in step 1. */
   intermediate?: Buffer;
+  /** The prompt actually sent to the model (the GPT path uses the full description, not the compact one). */
+  prompt: string;
 }
 
 /** fal + ControlNet: our own A-pose mannequin, or the pose extracted from a picture the user gives. */
@@ -275,12 +280,9 @@ async function generateImage(prompt: string, card: CharacterCard, views: Views, 
       prompt: `The reference image is an OpenPose skeleton (coloured stick figures on black). Draw a neutral grey artist's mannequin turnaround in exactly these poses and positions: smooth matte grey body, natural human anatomy, no clothes, no hair, no facial features, plain light-grey background. LEFT figure = front view, RIGHT figure = back view. Body: ${card.description.age}-year-old ${card.description.gender.toLowerCase()}, ${card.description.physical.height_build} ${bodyWords(card.look.body)}. ${sideNote(pronoun(card.description.gender))} Do not draw the skeleton itself.`,
     });
     const mannequinUrl = await falUpload(step1.bytes, step1.mimeType, "gpt-mannequin.png");
-    const r = await falControlGenerate({
-      ...control,
-      imageUrl: mannequinUrl,
-      prompt: `Dress this mannequin turnaround as the character below. Keep exactly the mannequin's pose, proportions, body asymmetries and the two figures' positions. ${layout}\n${gptCharacterPrompt(card, style)}`,
-    });
-    return { bytes: r.bytes, mimeType: r.mimeType, provider: "fal", model: r.model, seed: r.seed, intermediate: step1.bytes };
+    const dress = `Dress this mannequin turnaround as the character below. Keep exactly the mannequin's pose, proportions, body asymmetries and the two figures' positions. ${layout}\n${gptCharacterPrompt(card, style)}`;
+    const r = await falControlGenerate({ ...control, imageUrl: mannequinUrl, prompt: dress });
+    return { bytes: r.bytes, mimeType: r.mimeType, provider: "fal", model: r.model, seed: r.seed, intermediate: step1.bytes, prompt: dress };
   }
   // The GPT editor takes the reference as a guide, so it gets an explicit instruction about what to keep.
   const finalPrompt =
@@ -290,5 +292,5 @@ async function generateImage(prompt: string, card: CharacterCard, views: Views, 
         : gptBlockInPrompt(card, prompt, style)
       : prompt;
   const r = await falControlGenerate({ prompt: finalPrompt, ...control, seed: opts.seed, controlScale: opts.controlScale, strength: opts.strength });
-  return { bytes: r.bytes, mimeType: r.mimeType, provider: "fal", model: r.model, seed: r.seed };
+  return { bytes: r.bytes, mimeType: r.mimeType, provider: "fal", model: r.model, seed: r.seed, prompt: finalPrompt };
 }

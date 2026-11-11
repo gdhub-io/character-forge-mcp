@@ -212,7 +212,7 @@ const scale = (min: number, max: number, describe: string) => z.number().min(min
 /** Proportions and asymmetries: they build the pose skeleton, so every body is the character's own, not a template. */
 const BodySchema = z
   .object({
-    head_heights: scale(3, 9, "Standing height in head lengths, as drawn in the art style: ~4 small child, ~6 teen or stocky, 7-7.5 average adult, 8+ tall and elongated."),
+    head_heights: scale(3, 10, "Standing height in head lengths, as drawn in the art style: ~4 small child, ~6 teen or stocky, 7-7.5 average adult, 8+ tall and elongated, 9.5-10 fashion-sketch extreme."),
     shoulders: scale(0.6, 1.6, "Shoulder width vs an average adult of their sex: 1 average, 0.8 narrow, 1.3 broad."),
     hips: scale(0.6, 1.6, "Hip width vs an average adult of their sex: 1 average, 0.8 narrow, 1.3 wide."),
     legs: scale(0.8, 1.2, "Leg length vs average: 0.9 short-legged, 1.1 long-legged."),

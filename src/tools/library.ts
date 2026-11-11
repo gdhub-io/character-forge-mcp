@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { cardMarkdown, characterDir, listCards, listToText, loadCard, outputDir } from "../store.js";
-import { text } from "./util.js";
+import { reply, text } from "./util.js";
 
 export function registerLibrary(server: McpServer) {
   server.registerTool(
@@ -14,10 +14,7 @@ export function registerLibrary(server: McpServer) {
     },
     async ({ group }) => {
       const items = (await listCards()).filter((i) => !group || i.group === group);
-      return {
-        content: [text(listToText(items))],
-        structuredContent: { dir: outputDir(), items: items.map((i) => ({ ...i, updated: i.updated.toISOString() })) },
-      };
+      return reply(listToText(items), { dir: outputDir(), items: items.map((i) => ({ ...i, updated: i.updated.toISOString() })) });
     },
   );
 

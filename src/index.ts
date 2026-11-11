@@ -1,12 +1,15 @@
 #!/usr/bin/env node
+import { readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createServer } from "./server.js";
 import { RollOptionsSchema, rollToText } from "./random.js";
-import { listCards, listToText, loadCard, loadCardFile, saveCard, writeCard } from "./store.js";
+import { listCards, listToText, loadCard, loadCardFile, saveCard, saveTranslation, writeCard } from "./store.js";
 import { buildTposePrompt, DEFAULT_VIEWS, generateConcept, VIEWS, type Views } from "./concept.js";
 import { checkCard, checkToText } from "./check.js";
+import { generateIdleVideo, generateScene, type VideoModel } from "./scene.js";
 import { MEDIA_KINDS, mediaBrief, type MediaKind } from "./media.js";
+import { designVoice, speakLine } from "./voice.js";
 
 const HELP = `character-forge — MCP server + CLI for building characters
 
@@ -16,8 +19,10 @@ Usage:
   character-forge validate <card.json> check a card against the schema
   character-forge check <card.json>    red flags + coherence interview for a draft card
   character-forge save <card.json> [--overwrite]
-                                       validate and save into the library (json + md + html)
-  character-forge render <id>          re-render card.md / card.html of a saved character
+                                       validate and save into the library (json + md)
+  character-forge translate <id> <translated.json> [--lang ru]
+                                       save a translation of a saved card as card.<lang>.json
+  character-forge render <id>          re-render card.md of a saved character
   character-forge prompt <id> [--style S] [--views ${VIEWS.join("|")}]
                                        print the T-pose image prompt
   character-forge concept <id> [--style S] [--views V] [--seed N] [--control 0-1] [--pose picture]
@@ -25,6 +30,14 @@ Usage:
                                        --pose puts the character in the pose of a picture → concept-pose.png
   character-forge media <id> --kind ${MEDIA_KINDS.join("|")}
                                        print the brief for writing one generation prompt
+  character-forge scene <id> [--prompt P] [--notes N] [--quality low|medium|high]
+                                       the character in their environment (scene.png, ≈$0.05)
+  character-forge video <id> [--prompt P] [--notes N] [--seconds 8] [--model kling|veo] [--loop frame|crossfade|off] [--audio]
+                                       looping idle clip from scene.png (Kling ≈$0.084/s silent; Veo $0.15/s with sound)
+  character-forge voice <id> --description D --text T [--pitch -2]
+                                       design the character's own voice (ElevenLabs for adults, Qwen + pitch for minors)
+  character-forge say <id> --text T --name N
+                                       speak one line in that voice → assets/voice/lines/N.mp3
   character-forge list                 list saved characters
 
 Env:
@@ -48,6 +61,7 @@ async function main() {
     allowPositionals: true,
     options: {
       seed: { type: "string" },
+      lang: { type: "string" },
       variants: { type: "string" },
       anchor: { type: "string" },
       medium: { type: "string" },
@@ -59,11 +73,22 @@ async function main() {
       views: { type: "string" },
       extra: { type: "string" },
       kind: { type: "string" },
+      prompt: { type: "string" },
+      notes: { type: "string" },
+      quality: { type: "string" },
+      seconds: { type: "string" },
+      loop: { type: "string" },
+      audio: { type: "boolean" },
+      model: { type: "string" },
       pose: { type: "string" },
       mode: { type: "string" },
       strength: { type: "string" },
       figure: { type: "string" },
       control: { type: "string" },
+      description: { type: "string" },
+      text: { type: "string" },
+      pitch: { type: "string" },
+      name: { type: "string" },
     },
   });
   const views = (values.views ?? DEFAULT_VIEWS) as Views;
@@ -101,12 +126,18 @@ async function main() {
       return;
     case "save": {
       const saved = await saveCard(await loadCardFile(arg("card.json path")), { overwrite: values.overwrite });
-      console.log(`Saved as "${saved.slug}"\n  ${saved.files.html}\n  ${saved.files.markdown}\n  ${saved.files.json}`);
+      console.log(`Saved as "${saved.slug}"\n  ${saved.files.markdown}\n  ${saved.files.json}`);
+      return;
+    }
+    case "translate": {
+      // character-forge translate <id> <file.json> --lang ru
+      const file = await saveTranslation(arg("id"), values.lang ?? "ru", JSON.parse(await readFile(positionals[1] ?? fail("Missing translated card.json path."), "utf8")));
+      console.log(`Translation saved\n  ${file}`);
       return;
     }
     case "render": {
       const saved = await writeCard(await loadCard(arg("id")));
-      console.log(`Rendered\n  ${saved.files.html}\n  ${saved.files.markdown}`);
+      console.log(`Rendered\n  ${saved.files.markdown}`);
       return;
     }
     case "prompt":
@@ -116,13 +147,34 @@ async function main() {
       console.error("Generating…");
       const r = await generateConcept(arg("id"), conceptOpts);
       if (!r.generated) fail(`${r.reason} Use \`prompt\` to get the text.`);
-      console.log(`Concept (${r.image.provider}/${r.image.model}${r.image.seed !== undefined ? `, seed ${r.image.seed}` : ""})\n  ${r.file}\n  ${r.html}`);
+      console.log(`Concept (${r.image.provider}/${r.image.model}${r.image.seed !== undefined ? `, seed ${r.image.seed}` : ""})\n  ${r.file}\n  ${r.card}`);
       return;
     }
     case "media": {
       const kind = values.kind as MediaKind;
       if (!MEDIA_KINDS.includes(kind)) fail(`--kind must be one of: ${MEDIA_KINDS.join(", ")}`);
       console.log(mediaBrief(await loadCard(arg("id")), kind));
+      return;
+    }
+    case "scene": {
+      const r = await generateScene(arg("id"), { prompt: values.prompt, notes: values.notes, quality: values.quality as "low" | "medium" | "high" | undefined });
+      console.log(`Scene: ${r.file}`);
+      return;
+    }
+    case "video": {
+      const r = await generateIdleVideo(arg("id"), { prompt: values.prompt, notes: values.notes, seconds: values.seconds ? Number(values.seconds) : undefined, loop: values.loop as "frame" | "crossfade" | "off" | undefined, audio: values.audio, model: values.model as VideoModel | undefined });
+      console.log(`Video (${r.seconds}s): ${r.file}`);
+      return;
+    }
+    case "voice": {
+      if (!values.description || !values.text) fail("voice needs --description and --text");
+      const r = await designVoice(arg("id"), { description: values.description!, text: values.text!, pitchSemitones: values.pitch ? Number(values.pitch) : undefined });
+      console.log(`Voice (${r.engine}):\n${r.files.join("\n")}`);
+      return;
+    }
+    case "say": {
+      if (!values.text || !values.name) fail("say needs --text and --name");
+      console.log(await speakLine(arg("id"), { text: values.text!, name: values.name! }));
       return;
     }
     case "list":

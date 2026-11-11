@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { checkCard, checkToText } from "../check.js";
 import { loadCard, validateCard } from "../store.js";
-import { text } from "./util.js";
+import { reply, text } from "./util.js";
 
 export function registerCheck(server: McpServer) {
   server.registerTool(
@@ -31,7 +31,7 @@ export function registerCheck(server: McpServer) {
         return { isError: true, content: [text("Pass either card or id.")] };
       }
       const r = checkCard(parsed);
-      return { content: [text(checkToText(r))], structuredContent: { warnings: r.warnings, questions: r.questions } };
+      return reply(checkToText(r), { warnings: r.warnings, questions: r.questions });
     },
   );
 }

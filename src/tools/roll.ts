@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { RollOptionsSchema, rollToText } from "../random.js";
-import { text } from "./util.js";
+import { reply } from "./util.js";
 
 export function registerRoll(server: McpServer) {
   server.registerTool(
@@ -14,7 +14,7 @@ export function registerRoll(server: McpServer) {
     },
     async (args) => {
       const r = rollToText(args);
-      return { content: [text(r.text)], structuredContent: r.data as unknown as Record<string, unknown> };
+      return reply(r.text, r.data as unknown as Record<string, unknown>);
     },
   );
 }

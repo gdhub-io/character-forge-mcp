@@ -2,11 +2,11 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { MEDIA_KINDS, mediaBrief, saveMedia } from "../media.js";
 import { loadCard } from "../store.js";
-import { text } from "./util.js";
+import { reply, text } from "./util.js";
 
 const KIND = z
   .enum(MEDIA_KINDS)
-  .describe("concept = T-pose sheet · illustration = key-art scene · voice = TTS voice design · video = Seedance-style clip · song = Suno");
+  .describe("concept = T-pose sheet · illustration = key-art scene · voice = TTS voice design · video = Seedance-style clip · song = Suno · theme = instrumental leitmotif (ElevenLabs Music composition plan)");
 
 export function registerMedia(server: McpServer) {
   server.registerTool(
@@ -14,7 +14,7 @@ export function registerMedia(server: McpServer) {
     {
       title: "Generation prompt brief (on request)",
       description:
-        "ONLY when the user asks for a specific prompt. Returns the rules and card material for writing ONE generation prompt for a saved character — concept, illustration, voice, video or song. Write it, then call character_prompt_save. Prompts only; no generator is called. Never run this as part of creating a character.",
+        "ONLY when the user asks for a specific prompt. Returns the rules and card material for writing ONE generation prompt for a saved character — concept, illustration, voice, video, song or theme. Write it, then call character_prompt_save. Prompts only; no generator is called. Never run this as part of creating a character.",
       inputSchema: { id: z.string().describe("Character id."), kind: KIND },
       annotations: { readOnlyHint: true },
     },
@@ -25,7 +25,7 @@ export function registerMedia(server: McpServer) {
     "character_prompt_save",
     {
       title: "Save a generation prompt",
-      description: "Saves one written generation prompt into the character's media/ folder as <kind>.md (overwrites the previous one of that kind).",
+      description: "Saves one written generation prompt into the character's prompts/ folder as <kind>.md (overwrites the previous one of that kind).",
       inputSchema: {
         id: z.string().describe("Character id."),
         kind: KIND,
@@ -35,7 +35,7 @@ export function registerMedia(server: McpServer) {
     async ({ id, kind, sections }) => {
       const card = await loadCard(id);
       const file = await saveMedia(id, card.meta.name, { kind, sections });
-      return { content: [text(`Saved ${kind} prompt: ${file}`)], structuredContent: { file } };
+      return reply(`Saved ${kind} prompt: ${file}`, { file });
     },
   );
 }
