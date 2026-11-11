@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/* Character colours come in as --c-* on the page root (see App); everything else derives from them. */
+@theme inline {
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-deep: var(--c-deep);
+  --color-shade: var(--c-shade);
+  --color-fg: var(--c-text);
+  --color-dim: color-mix(in oklab, var(--c-text) 65%, transparent);
+  --color-line: color-mix(in oklab, var(--c-text) 15%, transparent);
+  --color-glass: color-mix(in oklab, var(--c-deep) 74%, transparent);
+  --color-best: #7fb08e;
+  --color-worst: #d9735a;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--c-text) 20%, transparent) transparent;
+}
+
+/* Switching characters, forge-style: the new scene is revealed from the right (where the character stands) behind a
+   soft edge, starting hot (bright, blurred, slightly enlarged) and cooling into focus; the text rises in after it. */
+.forge-in {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 48.5%, #000 51.5%, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 48.5%, #000 51.5%, #000 100%);
+  -webkit-mask-size: 250% 100%;
+  mask-size: 250% 100%;
+  animation:
+    forge-reveal 1.4s cubic-bezier(0.65, 0, 0.35, 1) both,
+    forge-cool 2s ease-out both;
+}
+
+@keyframes forge-reveal {
+  from {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+  to {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+
+/* The hot seam that travels with the reveal edge: the edge sits at 125% → -25% of the width (mask maths above). */
+.forge-seam {
+  position: absolute;
+  inset-block: 0;
+  width: 2px;
+  background: color-mix(in oklab, var(--c-accent) 70%, white);
+  box-shadow:
+    0 0 12px 2px var(--c-accent),
+    0 0 60px 14px color-mix(in oklab, var(--c-accent) 45%, transparent);
+  pointer-events: none;
+  animation: forge-seam 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes forge-seam {
+  from {
+    left: 125%;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    left: -25%;
+    opacity: 0;
+  }
+}
+
+@keyframes forge-cool {
+  from {
+    filter: brightness(1.6) saturate(1.4) blur(14px);
+    transform: scale(1.06);
+  }
+  to {
+    filter: none;
+    transform: none;
+  }
+}
+
+.rise-in > * {
+  animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.rise-in > :nth-child(1) { animation-delay: 0.35s; }
+.rise-in > :nth-child(2) { animation-delay: 0.45s; }
+.rise-in > :nth-child(3) { animation-delay: 0.58s; }
+.rise-in > :nth-child(4) { animation-delay: 0.68s; }
+.rise-in > :nth-child(5) { animation-delay: 0.78s; }
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forge-in,
+  .forge-seam,
+  .rise-in > * {
+    animation-duration: 1ms;
+    animation-delay: 0s;
+  }
+}

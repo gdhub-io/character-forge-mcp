@@ -1,0 +1,92 @@
+[
+  {
+    "slug": "teo-halloran",
+    "kicker": "Machine whisperer",
+    "blurb": "A ten-year-old who hears what any stuck machine needs fixes the whole street, but lets his brass puppet Clack talk for him since the city laughed at his voice.",
+    "focus": "72% 50%",
+    "avatar": {
+      "x": 0.178,
+      "y": 0.02,
+      "w": 0.169
+    },
+    "theme": {
+      "accent": "#E3B23C",
+      "accentInk": "#1E1405",
+      "deep": "#160F09",
+      "shade": "#140D07F0",
+      "text": "#F6EBD6"
+    },
+    "acoustics": {
+      "reverbSeconds": 0.55,
+      "wet": 0.22,
+      "lowpassHz": 8500,
+      "musicDuck": 0.3
+    },
+    "i18n": {
+      "ru": {
+        "kicker": "Заклинатель машин",
+        "blurb": "Десятилетний мальчик слышит, что нужно любой заевшей машине, и чинит всю улицу. Но говорит за него латунная кукла Клак: над его голосом смеялся весь город."
+      }
+    }
+  },
+  {
+    "slug": "marta-vell",
+    "kicker": "Storm-reader",
+    "blurb": "She heard the great wave coming and sold her silence. Now a child has forecast the next one — and Marta is the only one who could make the town believe her.",
+    "focus": "70% 50%",
+    "avatar": {
+      "x": 0.23,
+      "y": 0.005,
+      "w": 0.12
+    },
+    "theme": {
+      "accent": "#D2774C",
+      "accentInk": "#1A0F0A",
+      "deep": "#0C1215",
+      "shade": "#0A1013F2",
+      "text": "#EEEAE1"
+    },
+    "acoustics": {
+      "reverbSeconds": 0.15,
+      "wet": 0.08,
+      "lowpassHz": 11000,
+      "musicDuck": 0.3
+    },
+    "i18n": {
+      "ru": {
+        "kicker": "Слышит бури",
+        "blurb": "Она услышала великую волну и продала молчание. Новую предсказала Пелл, девочка с плота. Но город верит лишь мелу на стене маяка — а пишет его тайно Марта."
+      }
+    }
+  },
+  {
+    "slug": "pike-ostrander",
+    "kicker": "Underdeck giant",
+    "blurb": "A clinic trial stretched ten-year-old Pike to 2.35 m and killed his friend Nell. Now he guards the Underdeck's kids, and the doctor is coming back.",
+    "focus": "72% 50%",
+    "avatar": {
+      "x": 0.235,
+      "y": 0.01,
+      "w": 0.09
+    },
+    "theme": {
+      "accent": "#F2B045",
+      "accentInk": "#1A1206",
+      "deep": "#100E0C",
+      "shade": "#0E0C0AF2",
+      "text": "#EFE9DF"
+    },
+    "acoustics": {
+      "reverbSeconds": 0.6,
+      "wet": 0.2,
+      "lowpassHz": 9000,
+      "musicDuck": 0.3
+    },
+    "i18n": {
+      "ru": {
+        "kicker": "Великан Андердека",
+        "blurb": "Испытание в клинике вытянуло десятилетнего Пайка до 2,35 м и убило его подругу Нелл. Теперь он охраняет детей Андердека, а доктор возвращается."
+      }
+    }
+  }
+]
