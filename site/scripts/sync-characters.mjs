@@ -31,7 +31,9 @@ const LIMITS = { blurb: 160, tagline: 40 };
 const tooLong = [];
 const hasLibrary = existsSync(library);
 if (!hasLibrary)
-	console.log(`No character library at ${library}: using the media already in public/characters.`);
+	console.log(
+		`No character library at ${library}: using the media already in public/characters.`,
+	);
 
 for (const { slug, blurb, i18n } of showcase) {
 	for (const [lang, text] of [
