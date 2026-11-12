@@ -6,6 +6,8 @@ name: Release
 on:
   push:
     branches: [main]
+  # By hand: finishes a release whose publish job failed part-way (npm is skipped if the version is already there).
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,7 +31,7 @@ jobs:
   # doesn't keep a token and dependency install scripts don't run. Tests already passed on main in CI.
   publish:
     needs: release
-    if: ${{ needs.release.outputs.created }}
+    if: ${{ needs.release.outputs.created || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -45,19 +47,32 @@ jobs:
       # Trusted publishing (OIDC) needs npm 11.5+; pinned, not "latest".
       - run: npm install -g npm@11.21.2
       - run: npm ci --ignore-scripts && npm run build
-      # Trusted publishing when it is set up on npmjs.com; otherwise the NPM_TOKEN secret.
-      - run: npm publish --provenance --access public
+      - id: pkg
+        run: echo "spec=$(node -p "require('./package.json').name + '@' + require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      # Trusted publishing when it is set up on npmjs.com; otherwise the NPM_TOKEN secret. Skipped when this version
+      # is already on npm, so a failed job can be re-run.
+      - run: |
+          if npm view "$SPEC" version >/dev/null 2>&1; then
+            echo "$SPEC is already on npm"
+          else
+            npm publish --provenance --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SPEC: ${{ steps.pkg.outputs.spec }}
       # The MCP Registry only holds metadata (server.json) pointing at the npm package, so it goes after npm.
       # The publisher is pinned and checked against its release digest; GitHub OIDC proves the io.github.gdhub-io
       # namespace, no token needed.
       - env:
           MCP_PUBLISHER_VERSION: v1.8.9
           MCP_PUBLISHER_SHA256: 4d527ca8f1ced0394c962dc925c2a4a4addef441cbefd62501c875e9481823a8
+          SPEC: ${{ steps.pkg.outputs.spec }}
         run: |
           curl -sSfL -o mcp-publisher.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
           echo "${MCP_PUBLISHER_SHA256}  mcp-publisher.tar.gz" | sha256sum -c -
           tar xzf mcp-publisher.tar.gz mcp-publisher
+          # The Registry checks the version on npm, which can take a minute to show a fresh publish.
+          for i in $(seq 1 30); do npm view "$SPEC" version >/dev/null 2>&1 && break; sleep 10; done
           ./mcp-publisher login github-oidc
-          ./mcp-publisher publish
+          for i in 1 2 3; do ./mcp-publisher publish && exit 0; sleep 30; done
+          exit 1
