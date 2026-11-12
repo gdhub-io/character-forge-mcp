@@ -6,8 +6,13 @@ const START_DELAY_S = 0.7;
 const FADE_IN_S = 0.15;
 const FADE_OUT_S = 0.8;
 
-/** A decaying stereo noise burst: a cheap, believable room impulse for a ConvolverNode. */
+/** A decaying stereo noise burst: a cheap, believable room impulse for a ConvolverNode. Built once per room size. */
+const impulses = new WeakMap<AudioContext, Map<number, AudioBuffer>>();
 function roomImpulse(ctx: AudioContext, seconds: number): AudioBuffer {
+	const forCtx = impulses.get(ctx) ?? new Map<number, AudioBuffer>();
+	impulses.set(ctx, forCtx);
+	const cached = forCtx.get(seconds);
+	if (cached) return cached;
 	const length = Math.max(1, Math.round(ctx.sampleRate * seconds));
 	const buf = ctx.createBuffer(2, length, ctx.sampleRate);
 	for (let ch = 0; ch < 2; ch++) {
@@ -15,6 +20,7 @@ function roomImpulse(ctx: AudioContext, seconds: number): AudioBuffer {
 		for (let i = 0; i < length; i++)
 			data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 3;
 	}
+	forCtx.set(seconds, buf);
 	return buf;
 }
 

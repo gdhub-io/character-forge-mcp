@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { config } from "./config.js";
 import { characterDir, writeJson } from "./store.js";
 
 /** One paid generation, as recorded in <character>/costs.json. Amounts are estimates from models.json pricing. */
@@ -64,4 +65,20 @@ export function costsToText(slug: string, l: CostLedger): string {
 	return [`${slug}: about $${l.totalUsd} spent (${kinds})`, ...lines].join(
 		"\n",
 	);
+}
+
+/** What an idle video costs, from models.json pricing: the one place that knows how video is billed. */
+export function videoUsd(
+	model: "kling" | "veo",
+	seconds: number,
+	audio = false,
+): number {
+	const p = config().pricing.video;
+	const perSecond =
+		model === "veo"
+			? audio
+				? p.veo.second
+				: p.veo.secondSilent
+			: p.kling.second;
+	return perSecond * seconds;
 }

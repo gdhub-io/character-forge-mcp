@@ -104,7 +104,11 @@ export async function saveAsset(
 const ASSET_EXT = /\.(png|jpe?g|webp|gif|mp4|webm|mov|wav|mp3|ogg|m4a|flac)$/i;
 
 /** Moves files from the old flat layout (concept.png, scene-prompt.txt, media/*.md) into assets/ and prompts/. */
+const migrated = new Set<string>();
 async function migrateLayout(dir: string): Promise<void> {
+	// Once per folder per process: after that the layout is current, and loadCard/listCards run often.
+	if (migrated.has(dir)) return;
+	migrated.add(dir);
 	const names = await readdir(dir).catch(() => [] as string[]);
 	const moves: [string, string][] = [];
 	for (const n of names) {
@@ -262,6 +266,7 @@ export async function saveTranslation(
 export async function pickWinner(
 	winner: string,
 ): Promise<{ winner: string; dir: string; deleted: string[] }> {
+	SlugSchema.parse(winner); // a plain id: "../x" must not move folders outside the library
 	const drafts = path.join(outputDir(), DRAFTS_DIR);
 	const from = path.join(drafts, winner);
 	const to = path.join(outputDir(), winner);

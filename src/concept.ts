@@ -1,16 +1,10 @@
-import { readFile } from "node:fs/promises";
 import { apiKey, config } from "./config.js";
 import { recordCost } from "./costs.js";
-import {
-	falControlGenerate,
-	falDownload,
-	falUpload,
-	isUrl,
-	toImageUrl,
-} from "./fal.js";
+import { falControlGenerate, falUpload, toImageUrl } from "./fal.js";
 import { type FigureStyle, mannequinPng } from "./pose.js";
 import { type CharacterCard, slugify } from "./schema.js";
 import { loadCard, pickWinner, saveConcept, writeCard } from "./store.js";
+import { readUserImage } from "./userimage.js";
 
 export const VIEWS = ["front", "front-back", "front-side-back"] as const;
 export type Views = (typeof VIEWS)[number];
@@ -26,11 +20,11 @@ export interface ConceptOptions {
 	poseImage?: string;
 	/** Seed for reproducible results. */
 	seed?: number;
-	/** How our mannequin steers the image: img2img (default: it is the starting canvas) or a ControlNet condition. */
-	control?: "img2img" | "gpt" | "gpt2" | "pose" | "depth" | "canny";
+	/** How our figure steers the image: gpt (default: a pose reference for GPT Image), img2img (Z-Image repaints it) or a ControlNet condition. Only gpt is in regular use; the rest are kept for experiments. */
+	control?: "img2img" | "gpt" | "pose" | "depth" | "canny";
 	/** img2img: how much to repaint the mannequin, 0-1 (default 0.85). */
 	strength?: number;
-	/** The mannequin drawing (see FigureStyle); default: colour blocking with volume when look.blocking exists, else grey shaded. */
+	/** The figure drawing (see FigureStyle); default: the pose skeleton for gpt, otherwise colour blocking with volume (grey shaded without look.blocking). */
 	figure?: FigureStyle;
 	/** How strictly to follow the pose, 0-1 (default 0.75). */
 	controlScale?: number;
@@ -107,12 +101,6 @@ export function clip(text: string, max: number): string {
 		.replace(/[.,;:\s—-]+$/, "");
 }
 
-/**
- * Builds a compact image prompt for an A-pose model sheet. Z-Image reads at most 512 tokens and silently
- * drops the rest, so the budget is ~1700 characters and the order is by importance: what gets cut last
- * matters least. Pose and proportions are already in the skeleton, so the text spends nothing on them
- * beyond the asymmetries the skeleton can't show.
- */
 /**
  * One house style for every concept, so a library reads as one project. Pass `style` to see the same character in
  * another look (`"card"` = the designer's suggestion in look.art_style); those sheets are saved next to concept.png.
@@ -290,6 +278,12 @@ function gptBlockInPrompt(
 		.join("\n");
 }
 
+/**
+ * Builds a compact image prompt for an A-pose model sheet. Z-Image reads at most 512 tokens and silently
+ * drops the rest, so the budget is ~1700 characters and the order is by importance: what gets cut last
+ * matters least. Pose and proportions are already in the skeleton, so the text spends nothing on them
+ * beyond the asymmetries the skeleton can't show.
+ */
 export function buildTposePrompt(
 	c: CharacterCard,
 	opts: ConceptOptions = {},
@@ -303,7 +297,7 @@ export function buildTposePrompt(
 			: "Front: face straight to camera, eyes forward; back: seen squarely from behind";
 	const layout = opts.poseImage
 		? "one full-body figure in exactly the pose of the control image"
-		: `${VIEW_TEXT[views]}, A-pose, arms angled down. ${facing}. Left/right mean ${d.gender.toLowerCase().startsWith("w") || d.gender.toLowerCase().startsWith("f") ? "her" : d.gender.toLowerCase().startsWith("m") ? "his" : "their"} own sides`;
+		: `${VIEW_TEXT[views]}, A-pose, arms angled down. ${facing}. Left/right mean ${pronoun(d.gender)} own sides`;
 	return [
 		`Character model sheet, ${layout}. Style: ${clip(resolveStyle(c, opts.style), 100)}.`,
 		`${c.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${d.species.toLowerCase()}: ${clip(d.physical.height_build, 70)}; ${bodyWords(lk.body)}.`,
@@ -356,8 +350,8 @@ export async function generateConcept(
 	await recordCost(id, {
 		kind: "concept",
 		model: image.model,
-		detail: image.intermediate ? "two-step sheet" : "model sheet",
-		usd: config().pricing.concept.image * (image.intermediate ? 2 : 1),
+		detail: "model sheet",
+		usd: config().pricing.concept.image,
 	});
 	// The A-pose sheet is the card's concept; a custom pose is an extra sheet next to it.
 	const styleSlug = opts.style
@@ -373,13 +367,6 @@ export async function generateConcept(
 				? `concept${styleSlug}.png`
 				: undefined,
 	);
-	if (image.intermediate)
-		await saveConcept(
-			id,
-			image.intermediate,
-			"step 1: mannequin from skeleton",
-			"concept-mannequin.png",
-		);
 	const saved = await writeCard(card);
 	return {
 		generated: true,
@@ -396,13 +383,11 @@ export interface GeneratedImage {
 	provider: string;
 	model: string;
 	seed?: number;
-	/** Two-step GPT: the mannequin drawn in step 1. */
-	intermediate?: Buffer;
 	/** The prompt actually sent to the model (the GPT path uses the full description, not the compact one). */
 	prompt: string;
 }
 
-/** fal + ControlNet: our own A-pose mannequin, or the pose extracted from a picture the user gives. */
+/** Our own A-pose figure as the reference (GPT Image by default), or the pose taken from a picture the user gives. */
 async function generateImage(
 	prompt: string,
 	card: CharacterCard,
@@ -430,53 +415,28 @@ async function generateImage(
 		// Default (best in tests): our skeleton as the pose reference for GPT Image + the full, unclipped description.
 		const mode = opts.control ?? "gpt";
 		const figure =
-			mode === "gpt2"
+			opts.figure ??
+			(mode === "gpt"
 				? "skeleton"
-				: (opts.figure ??
-					(mode === "gpt"
-						? "skeleton"
-						: card.look.blocking
-							? "blocking-lit"
-							: "shaded"));
+				: card.look.blocking
+					? "blocking-lit"
+					: "shaded");
 		const mq = mannequinPng(views, card.look.body, figure, card.look.blocking);
 		const imageUrl = await falUpload(
 			mq.png,
 			"image/png",
 			`mannequin-${figure}-${views}.png`,
 		);
-		const pre = mode === "gpt2" ? "gpt" : mode;
-		control = { imageUrl, width: mq.width, height: mq.height, preprocess: pre };
+		control = {
+			imageUrl,
+			width: mq.width,
+			height: mq.height,
+			preprocess: mode,
+		};
 	}
 	const style = resolveStyle(card, opts.style);
 	const layout =
 		"Character model sheet: two full-body views of the SAME person side by side, same scale, A-pose with arms angled down — LEFT figure = front view, face looking straight at the camera, eyes forward; RIGHT figure = seen squarely from behind. Identical outfit, items and asymmetries in both views.";
-	if (control.preprocess === "gpt" && opts.control === "gpt2") {
-		// Step 1: a natural-looking neutral mannequin with this body, posed by our skeleton. Step 2: dress it.
-		const step1 = await falControlGenerate({
-			...control,
-			prompt: `The reference image is an OpenPose skeleton (coloured stick figures on black). Draw a neutral grey artist's mannequin turnaround in exactly these poses and positions: smooth matte grey body, natural human anatomy, no clothes, no hair, no facial features, plain light-grey background. LEFT figure = front view, RIGHT figure = back view. Body: ${card.description.age}-year-old ${card.description.gender.toLowerCase()}, ${card.description.physical.height_build} ${bodyWords(card.look.body)}. ${sideNote(pronoun(card.description.gender))} Do not draw the skeleton itself.`,
-		});
-		const mannequinUrl = await falUpload(
-			step1.bytes,
-			step1.mimeType,
-			"gpt-mannequin.png",
-		);
-		const dress = `Dress this mannequin turnaround as the character below. Keep exactly the mannequin's pose, proportions, body asymmetries and the two figures' positions. ${layout}\n${gptCharacterPrompt(card, style)}`;
-		const r = await falControlGenerate({
-			...control,
-			imageUrl: mannequinUrl,
-			prompt: dress,
-		});
-		return {
-			bytes: r.bytes,
-			mimeType: r.mimeType,
-			provider: "fal",
-			model: r.model,
-			seed: r.seed,
-			intermediate: step1.bytes,
-			prompt: dress,
-		};
-	}
 	// The GPT editor takes the reference as a guide, so it gets an explicit instruction about what to keep.
 	const finalPrompt =
 		control.preprocess === "gpt"
@@ -510,11 +470,7 @@ export async function importConcept(
 	image: string,
 ): Promise<{ file: string; card: string }> {
 	await loadCard(id); // the character must exist
-	const bytes = isUrl(image)
-		? await falDownload(image)
-		: await readFile(image).catch(() => {
-				throw new Error(`Concept image not found: ${image}`);
-			});
+	const { bytes } = await readUserImage(image);
 	const file = await saveConcept(id, bytes, `IMPORTED from ${image}`);
 	const saved = await writeCard(await loadCard(id));
 	return { file, card: saved.files.markdown };

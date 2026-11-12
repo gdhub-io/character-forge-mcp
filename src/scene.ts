@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { DEFAULT_ART_STYLE, pronoun } from "./concept.js";
 import { config } from "./config.js";
-import { recordCost } from "./costs.js";
+import { recordCost, videoUsd } from "./costs.js";
 import { falQueue, falUpload } from "./fal.js";
 import { ffmpeg, run, transform } from "./ffmpeg.js";
 import type { CharacterCard } from "./schema.js";
@@ -217,18 +217,11 @@ export async function generateIdleVideo(
 			: out.bytes;
 	const bytes = audio ? await normalizeAudio(looped) : looped;
 	const file = await saveAsset(id, "idle.mp4", bytes, prompt);
-	const price = config().pricing.video;
-	const perSecond =
-		model === "veo"
-			? audio
-				? price.veo.second
-				: price.veo.secondSilent
-			: price.kling.second;
 	await recordCost(id, {
 		kind: "video",
 		model: endpoint,
 		detail: `${seconds} s${audio ? ", with sound" : ""}`,
-		usd: perSecond * seconds,
+		usd: videoUsd(model, seconds, audio),
 	});
 	return { file, prompt, seconds };
 }

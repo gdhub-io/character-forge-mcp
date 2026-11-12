@@ -16,13 +16,15 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Known vulnerabilities in what ships (not dev tools) fail the build.
+      - run: npm audit --omit=dev --audit-level=high
       # Builds, then runs the unit tests and an end-to-end MCP client/server test. Never calls paid APIs.
       - run: npm test
 
@@ -30,13 +32,15 @@ jobs:
     name: Site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: site/package-lock.json
       - run: npm ci
+        working-directory: site
+      - run: npm audit --omit=dev --audit-level=high
         working-directory: site
       # Type-check and build with the media committed in site/public/characters.
       - run: npm run build

@@ -24,6 +24,7 @@ If the working tree has unrelated changes, stop and ask what to do with them.
 ## 5. Review
 - `npm run lint` and `npm test` must pass (one at a time; they are heavy for this machine).
 - Run the `code-review` skill on the branch and fix confirmed findings.
+- Run the `security-check` skill on the branch and fix confirmed findings.
 - Re-read the full diff (`git diff main...HEAD`) as a stranger: no debug leftovers, no keys, nothing from `characters/`.
 
 ## 6. Pull request that closes the issue

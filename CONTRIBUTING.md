@@ -75,7 +75,7 @@ Nobody pushes to `main`. Every change, including the maintainers', answers an is
 5. **Review.** Re-read your diff as a stranger. `npm run lint` and `npm test` must pass.
 6. **Pull request.** Fill in the template and start the description with `Closes #<number>`: a check requires it, and merging closes the issue. The title must follow [Conventional Commits](https://www.conventionalcommits.org); see [Commit and PR titles](#commit-and-pr-titles).
 
-With [Claude Code](https://claude.com/claude-code), run `/contribute` in the repo: `/intent` writes the intent into the issue and branches from it, then and walks through the rest, including `/simplify` for the refactor and `/code-review` for the review.
+With [Claude Code](https://claude.com/claude-code), run `/contribute` in the repo: `/intent` writes the intent into the issue and branches from it, then `/contribute` walks through the rest, including `/simplify` for the refactor and `/code-review` plus `/security-check` for the review.
 
 ## Commit and PR titles
 

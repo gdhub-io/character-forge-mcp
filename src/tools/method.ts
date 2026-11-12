@@ -3,7 +3,7 @@ import { METHOD_GUIDE, referenceLists } from "../methodology.js";
 import { TOURNAMENT_PROTOCOL } from "../tournament.js";
 import { text } from "./util.js";
 
-const CARD_FORMAT = `CARD FORMAT: character_save's input schema is the card: sections meta, core, goals, identification, psychology, description, fears, uniqueness, backstory, traits, destiny, visual — with every field and its minimum/exact counts. The VISUAL section feeds the T-pose concept: describe body, face, hair, outfit layers with materials, palette and silhouette concretely enough for a concept artist.`;
+const CARD_FORMAT = `CARD FORMAT: character_save's input schema is the card: sections meta, core, goals, identification, psychology, description, fears, uniqueness, backstory, traits, destiny, look — with every field and its minimum/exact counts. description.physical holds only body, face and hair; LOOK (written by the designer from the finished story) holds everything visual else: shape language, silhouette, the body's proportions, colour blocking, signature item, marks with origins, movement, outfit with reasons, palette with meanings and what reads in three seconds. Every visual output (the A-pose concept, scenes, prompts) is built from it.`;
 
 export function registerMethod(server: McpServer) {
 	server.registerTool(

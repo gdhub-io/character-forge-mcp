@@ -129,14 +129,36 @@ export function config(): ModelsConfig {
 	} catch {
 		return DEFAULTS;
 	}
+	let merged: ModelsConfig;
 	try {
-		return merge(
+		merged = merge(
 			DEFAULTS as unknown as Plain,
 			JSON.parse(raw) as Plain,
 		) as unknown as ModelsConfig;
 	} catch (e) {
 		throw new Error(`${file} is not valid JSON: ${(e as Error).message}`);
 	}
+	return checkProvider(merged, file);
+}
+
+/**
+ * The key goes with every request to the provider URLs, so a config may only name fal's own https hosts and a
+ * fal key variable: a stray models.json can't send the key, or another secret, anywhere else.
+ */
+function checkProvider(c: ModelsConfig, file: string): ModelsConfig {
+	const { apiKeyEnv, queueUrl, uploadUrl } = c.providers.fal;
+	if (!/^[A-Z0-9_]*FAL[A-Z0-9_]*$/.test(apiKeyEnv))
+		throw new Error(
+			`${file}: apiKeyEnv must name a fal key variable, e.g. FAL_KEY`,
+		);
+	for (const u of [queueUrl, uploadUrl]) {
+		const { protocol, hostname } = new URL(u);
+		if (protocol !== "https:" || !/(^|\.)fal\.(run|ai|media)$/.test(hostname))
+			throw new Error(
+				`${file}: provider URLs must be fal.ai https addresses, got ${u}`,
+			);
+	}
+	return c;
 }
 
 /** The provider's API key, from the environment variable the config names. */

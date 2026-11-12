@@ -1,6 +1,6 @@
 ---
 name: design-look
-description: Design or redesign the look of a saved character-forge character from its story — signature item, marks with origins, movement, silhouette, perfection vs. flaws, palette — then regenerate the T-pose concept. Use when the user asks to design, rework or improve a character's appearance, costume, attribute or concept art.
+description: Design or redesign the look of a saved character-forge character from its story — signature item, marks with origins, movement, silhouette, perfection vs. flaws, palette — then regenerate the A-pose concept. Use when the user asks to design, rework or improve a character's appearance, costume, attribute or concept art.
 ---
 
 # Design a character's look from the story

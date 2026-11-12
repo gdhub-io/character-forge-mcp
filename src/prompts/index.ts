@@ -12,7 +12,7 @@ export function registerPrompts(server: McpServer) {
 		{
 			title: "Random character",
 			description:
-				"A random but strong, coherent character: 3 competing variants, the strongest wins and gets a T-pose concept.",
+				"A random but strong, coherent character: 3 competing variants, the strongest wins and gets a A-pose concept.",
 			argsSchema: {
 				medium: z.string().optional().describe(MEDIUMS.join(", ")),
 				genre: z.string().optional(),

@@ -1,6 +1,6 @@
 ---
 name: character-prompts
-description: Write generation prompts for a saved character-forge character, only the kinds the user asks for — concept (T-pose sheet), illustration (a key-art scene from their story), voice (TTS voice design + audition script), video (Seedance-style clip), song (Suno style + lyrics), theme (instrumental leitmotif for a looping background, as an ElevenLabs Music composition plan). Prompts only; no generator is called. Use when the user asks for a prompt, a voice, a video, a song, background music / a theme or an illustration of a character.
+description: Write generation prompts for a saved character-forge character, only the kinds the user asks for — concept (A-pose sheet), illustration (a key-art scene from their story), voice (TTS voice design + audition script), video (an image-to-video clip), song (Suno style + lyrics), theme (instrumental leitmotif for a looping background, as an ElevenLabs Music composition plan). Prompts only; no generator is called. Use when the user asks for a prompt, a voice, a video, a song, background music / a theme or an illustration of a character.
 ---
 
 # Generation prompts for a character (on request only)

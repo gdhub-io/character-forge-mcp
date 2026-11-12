@@ -88,19 +88,3 @@ export function Switcher(props: {
 		</div>
 	);
 }
-
-export function shortMedium(m: string): string {
-	return (
-		(
-			{
-				advertising: "Ad",
-				game: "Game",
-				film: "Film",
-				book: "Book",
-				animation: "Animation",
-				comics: "Comics",
-				tabletop: "Tabletop",
-			} as Record<string, string>
-		)[m] ?? m
-	);
-}

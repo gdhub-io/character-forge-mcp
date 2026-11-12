@@ -1,6 +1,6 @@
 ---
 name: forge-character
-description: Create a strong, coherent character (film, game, ad, book) with the character-forge MCP. Runs a variant tournament — 3 variants of the same concept, independent coherence reviewers and critics argue against each, the author defends once, a judge picks the strongest, which gets a T-pose concept. Use when the user asks for a character, hero, NPC, mascot, protagonist or villain, random or from a brief.
+description: Create a strong, coherent character (film, game, ad, book) with the character-forge MCP. Runs a variant tournament — 3 variants of the same concept, independent coherence reviewers and critics argue against each, the author defends once, a judge picks the strongest, which gets an A-pose concept. Use when the user asks for a character, hero, NPC, mascot, protagonist or villain, random or from a brief.
 ---
 
 # Forge a character (variant tournament)
@@ -54,7 +54,8 @@ Spawn the `character-editor` agent with the winner's card.json path. It returns 
 ## 8c. Languages — only if the user asked for more than English
 Run the `translate-character` skill for each extra language (the card is free; the voice is paid and needs a yes). When the voice is made later, pass `translations: [{ lang: "ru", text }]` to `character_voice` so every language is recorded in one call, each performed fresh from the description.
 
-## 9. Report to the user (in their language)
+## 9. Show the card and report (in the user's language)
+- Call `character_get` for the winner and show the card: it comes back as a Markdown document the app can display.
 - Winner: name, logline, why it won (2–3 sentences), signature item, path to card.md (and concept.png).
 - One line per losing variant: who they were and their fatal flaw.
-- Keep it short; the card itself is in the files.
+- Keep the report short: the card is shown above.

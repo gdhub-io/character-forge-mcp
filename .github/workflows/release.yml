@@ -1,50 +1,63 @@
 name: Release
 
-# On every push to main, Release Please keeps a release PR up to date (version bump in package.json and
-# .claude-plugin/plugin.json and server.json, CHANGELOG.md). Merging that PR tags the release, creates the GitHub
-# release, publishes the package to npm and lists the new version in the official MCP Registry.
+# On every push to main, Release Please keeps a release PR up to date (version bump in package.json,
+# .claude-plugin/plugin.json and server.json, CHANGELOG.md). Merging that PR tags the release and creates the GitHub
+# release; the publish job then puts the package on npm and the new version in the official MCP Registry.
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+  contents: read
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      created: ${{ steps.release.outputs.release_created }}
     steps:
       - id: release
-        uses: googleapis/release-please-action@v5
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         with:
           # A personal token lets CI run on the release PR (PRs opened with GITHUB_TOKEN don't trigger workflows).
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
 
-      - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v7
-      - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-node@v7
+  # Only the OIDC token for npm provenance and the Registry login, no write access to the repo; the checkout
+  # doesn't keep a token and dependency install scripts don't run. Tests already passed on main in CI.
+  publish:
+    needs: release
+    if: ${{ needs.release.outputs.created }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      # Trusted publishing (OIDC) needs npm 11.5+.
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm install -g npm@latest
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm ci && npm test
+      # Trusted publishing (OIDC) needs npm 11.5+; pinned, not "latest".
+      - run: npm install -g npm@11.21.2
+      - run: npm ci --ignore-scripts && npm run build
       # Trusted publishing when it is set up on npmjs.com; otherwise the NPM_TOKEN secret.
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance --access public
+      - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       # The MCP Registry only holds metadata (server.json) pointing at the npm package, so it goes after npm.
-      # The publisher is pinned; GitHub OIDC proves the io.github.gdhub-io namespace, no token needed.
-      - if: ${{ steps.release.outputs.release_created }}
-        env:
+      # The publisher is pinned and checked against its release digest; GitHub OIDC proves the io.github.gdhub-io
+      # namespace, no token needed.
+      - env:
           MCP_PUBLISHER_VERSION: v1.8.9
+          MCP_PUBLISHER_SHA256: 4d527ca8f1ced0394c962dc925c2a4a4addef441cbefd62501c875e9481823a8
         run: |
-          curl -sSfL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          curl -sSfL -o mcp-publisher.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
+          echo "${MCP_PUBLISHER_SHA256}  mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf mcp-publisher.tar.gz mcp-publisher
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish

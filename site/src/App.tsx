@@ -37,10 +37,12 @@ export default function App() {
 	if (!list) return <div className="h-full bg-black" />;
 	const section = GUIDE_SECTIONS.find((s) => s === hash);
 	if (hash === "how-it-works" || section) {
-		// The guide's pictures are Teo's; its colours stay Marta's, like the design.
-		const teo = list.find((c) => c.slug === "teo-halloran") ?? list[0];
-		const marta = list.find((c) => c.slug === "marta-vell") ?? list[0];
-		return <HowItWorks c={{ ...teo, theme: marta.theme }} focus={section} />;
+		// Chosen in showcase.json ("guide"), like the design: one character's pictures, another's colours.
+		const pictures = list.find((c) => c.guide === "pictures") ?? list[0];
+		const palette = list.find((c) => c.guide === "palette") ?? pictures;
+		return (
+			<HowItWorks c={{ ...pictures, theme: palette.theme }} focus={section} />
+		);
 	}
 	return <Showcase list={list} />;
 }

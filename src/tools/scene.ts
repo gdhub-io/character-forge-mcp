@@ -1,8 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { nextHint } from "../next.js";
 import { generateIdleVideo, generateScene, VIDEO_FAMILIES } from "../scene.js";
-import { reply } from "./util.js";
+import { shown } from "./util.js";
 
 // Corrections for one take, in plain words, on top of the default prompt: no code change and no restart.
 const NOTES = z
@@ -18,7 +17,12 @@ export function registerScene(server: McpServer) {
 		{
 			title: "Character in their environment (still)",
 			description:
-				"ONLY on request. Draws the character in their own place doing what they usually do (an idle moment), using concept.png as the character reference (GPT Image 2.6 edit, ≈$0.05 at medium). Saves scene.png — the first and last frame for character_video. Write a specific prompt from the card (location, idle pose, light) or omit it for a default.",
+				"ONLY on request. Draws the character in their own place doing what they usually do (an idle moment), using concept.png as the character reference. Saves scene.png — the first and last frame for character_video. Write a specific prompt from the card (location, idle pose, light) or omit it for a default.",
+			annotations: {
+				openWorldHint: true,
+				destructiveHint: false,
+				idempotentHint: false,
+			},
 			inputSchema: {
 				id: z.string(),
 				prompt: z
@@ -36,7 +40,13 @@ export function registerScene(server: McpServer) {
 		},
 		async ({ id, prompt, notes, quality }) => {
 			const r = await generateScene(id, { prompt, notes, quality });
-			return reply(`Scene saved: ${r.file}${nextHint(id)}`, { ...r });
+			return shown(
+				id,
+				`Scene saved: ${r.file}`,
+				[r.file],
+				"For a fix, call character_scene again with notes saying what to change; for a different scene, a new prompt.",
+				{ ...r },
+			);
 		},
 	);
 
@@ -45,7 +55,12 @@ export function registerScene(server: McpServer) {
 		{
 			title: "Looping idle video",
 			description:
-				"ONLY on request, after character_scene. Animates scene.png into a looping idle clip (default Kling O1 Standard ≈ $0.084/s, silent; veo ≈ $0.15/s with sound). See loop for how the clip is closed into a loop. Confirm the cost with the user first.",
+				"ONLY on request, after character_scene. Animates scene.png into a looping idle clip (Kling by default, silent; Veo can add sound). See loop for how the clip is closed into a loop. Paid: tell the user the price from character_next and wait for a yes.",
+			annotations: {
+				openWorldHint: true,
+				destructiveHint: false,
+				idempotentHint: false,
+			},
 			inputSchema: {
 				id: z.string(),
 				prompt: z
@@ -74,13 +89,13 @@ export function registerScene(server: McpServer) {
 					.boolean()
 					.optional()
 					.describe(
-						"Veo only: default true ($0.15/s; $0.10/s without). Kling has no sound.",
+						"Veo only: default true (sound costs more). Kling has no sound.",
 					),
 				model: z
 					.enum(VIDEO_FAMILIES)
 					.optional()
 					.describe(
-						"Default from models.json. kling (Kling O1 Standard ≈$0.084/s, no sound) · veo (Veo 3.1 Fast 720p, native sound $0.15/s or silent $0.10/s, 4/6/8 s).",
+						"Default from models.json. kling (no sound) · veo (optional native sound; 4/6/8 s).",
 					),
 			},
 		},
@@ -93,9 +108,13 @@ export function registerScene(server: McpServer) {
 				audio,
 				model,
 			});
-			return reply(`Video saved: ${r.file} (${r.seconds}s)${nextHint(id)}`, {
-				...r,
-			});
+			return shown(
+				id,
+				`Video saved: ${r.file} (${r.seconds}s)`,
+				[r.file],
+				"For a fix or a new take, call character_video again with notes saying what to change.",
+				{ ...r },
+			);
 		},
 	);
 }

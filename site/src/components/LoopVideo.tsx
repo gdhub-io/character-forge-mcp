@@ -109,6 +109,8 @@ export function LoopVideo({
 				<video
 					ref={b}
 					{...common}
+					// The twin only plays near the end of each loop: fetch its data then, not twice up front.
+					preload="metadata"
 					style={{ ...common.style, opacity: front === 1 ? 1 : 0 }}
 				/>
 			)}

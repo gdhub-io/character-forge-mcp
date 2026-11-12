@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerPrompts } from "./prompts/index.js";
+import { registerResources } from "./resources.js";
 import { registerTools } from "./tools/index.js";
 
 export const VERSION: string = JSON.parse(
@@ -21,6 +22,7 @@ Always write cards in English, whatever language the user writes in.
 After a character exists, media is made only on request, one paid step at a time (ask before each): concept →
 location → idle video → voice (spoken in the video's moment, every language); music after the location. When the
 user asks what's next, call character_next and offer what it lists, with prices.
+Every step returns what it made (card, image, video, sound, prompt): show it to the user and offer a fix or a new take.
 `.trim();
 
 export function createServer(): McpServer {
@@ -30,5 +32,6 @@ export function createServer(): McpServer {
 	);
 	registerTools(server);
 	registerPrompts(server);
+	registerResources(server);
 	return server;
 }
