@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { buildTposePrompt } from "./concept.js";
-import type { CharacterCard } from "./schema.js";
+import { type CharacterCard, temperamentLine } from "./schema.js";
 import { loadCard, promptFile, savePrompt } from "./store.js";
 
 /**
@@ -26,7 +26,7 @@ function visualAnchors(c: CharacterCard): string {
 	const d = c.description;
 	const lk = c.look;
 	return [
-		`${d.age}, ${d.gender}, ${d.species}. ${d.physical.height_build} ${d.physical.face} ${d.physical.hair}`,
+		`${d.age}, ${d.gender}, ${c.core.dna.species}. ${d.physical.height_build} ${d.physical.face} ${d.physical.hair}`,
 		`Marks: ${join(lk.marks.map((m) => `${m.mark} (${m.location})`))}`,
 		`Signature item: ${lk.signature_item.item} — ${lk.signature_item.how_carried}`,
 		`Outfit: ${join(lk.outfit.map((o) => o.piece))}`,
@@ -68,7 +68,8 @@ function material(c: CharacterCard, kind: MediaKind): string {
 				`Pet words: ${join(d.speech.pet_words)}`,
 				`Sample lines: ${join(d.speech.sample_lines)}`,
 				`Inner monologue: ${join(p.inner_monologue)}`,
-				`Emotional baseline: ${p.emotional_baseline} · Energy: ${c.traits.energy} · Temperament: ${c.traits.temperament}`,
+				`Emotional baseline: ${p.emotional_baseline} · Temperament: ${temperamentLine(c)}`,
+				`In life: ${c.traits.personality}`,
 				`Strongest trigger: ${p.strongest_trigger}`,
 				`Where we hear them: ${join(b.key_locations)}; world: ${d.sociology.place}`,
 				`THE MOMENT VISITORS SEE while the voice plays (scene and idle video): ${b.key_locations[0]} — ${lk.movement.idle_pose}`,
@@ -105,7 +106,8 @@ function material(c: CharacterCard, kind: MediaKind): string {
 				`Mask: ${c.fears.mask}`,
 				`Dramatic question: ${core.dramatic_question}`,
 				`States — passive: ${p.states.passive} | active: ${p.states.active}`,
-				`Emotional baseline: ${p.emotional_baseline} · Energy: ${c.traits.energy} · Temperament: ${c.traits.temperament} · Social: ${c.traits.social}`,
+				`Emotional baseline: ${p.emotional_baseline} · Temperament: ${temperamentLine(c)}`,
+				`In life: ${c.traits.personality}`,
 				`Gait: ${lk.movement.gait} · Speech: ${d.speech.manner}`,
 				`World & culture: ${d.cultural_background}; ${d.sociology.place}`,
 				`Signature item: ${lk.signature_item.item}`,

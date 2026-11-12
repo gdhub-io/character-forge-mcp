@@ -181,9 +181,12 @@ async function main() {
 			);
 			return;
 		case "save": {
-			const saved = await saveCard(await loadCardFile(arg("card.json path")), {
-				overwrite: values.overwrite,
-			});
+			const saved = await saveCard(
+				await loadCardFile(arg("card.json path"), { stored: false }),
+				{
+					overwrite: values.overwrite,
+				},
+			);
 			console.log(
 				`Saved as "${saved.slug}"\n  ${saved.files.markdown}\n  ${saved.files.json}`,
 			);

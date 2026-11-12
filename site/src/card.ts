@@ -2,6 +2,16 @@
 
 type Pair = { label: string; text: string };
 
+const SCALES = [
+	["extraversion", "Extraversion"],
+	["neuroticism", "Neuroticism"],
+	["agreeableness", "Agreeableness"],
+	["conscientiousness", "Conscientiousness"],
+	["openness", "Openness"],
+	["sensitivity", "Sensitivity"],
+] as const;
+type Scale = { value: number; plasticity: number; shows: string };
+
 export interface Card {
 	meta: {
 		name: string;
@@ -12,6 +22,12 @@ export interface Card {
 		tagline: string;
 	};
 	core: {
+		/** Cards from before the DNA layer have no temperament. */
+		dna?: {
+			temperament?: Record<(typeof SCALES)[number][0], Scale>;
+			ancestry?: string;
+			born_differences?: string[];
+		};
 		wound: string;
 		lie: string;
 		truth: string;
@@ -44,7 +60,6 @@ export interface Card {
 		name_meaning: string;
 		age: string;
 		gender: string;
-		species: string;
 		cultural_background: string;
 		physical: {
 			height_build: string;
@@ -53,6 +68,9 @@ export interface Card {
 			first_impression: string;
 		};
 		speech: { manner: string; pet_words: string[]; sample_lines: string[] };
+		life_events: {
+			changes?: { characteristic: string; to: number | string }[];
+		}[];
 		secret_dream: string;
 		missing: string;
 	};
@@ -82,9 +100,7 @@ export interface Card {
 		best_trait: string;
 		worst_trait: string;
 		other_traits: string[];
-		energy: string;
-		temperament: string;
-		social: string;
+		personality: string;
 		others_say: string[];
 	};
 	destiny: {
@@ -120,6 +136,13 @@ export type Block =
 			items: { lead: string; text: string }[];
 	  }
 	| { type: "cards"; items: (Pair & { tone?: "best" | "worst" })[] }
+	| {
+			type: "radar";
+			title?: string;
+			/** Born value and, when life moved it, the value now (0-100). */
+			axes: { label: string; born: number; now?: number }[];
+			legend: { born: string; now: string };
+	  }
 	| { type: "image"; src: string; alt: string; download?: string }
 	| {
 			type: "palette";
@@ -135,6 +158,9 @@ export interface Section {
 	blocks: Block[];
 }
 
+/** " → 30 now" when a life event moved a born value, nothing otherwise. */
+const nowText = (born: number, now: number | string | undefined) =>
+	now === undefined || now === born ? "" : ` → ${now} now`;
 const q = (s: string) => `“${s.replace(/^["“]|["”]$/g, "")}”`;
 /** "Self-destructive: she believes…" → "Self-destructive". */
 const head = (s: string) => s.split(":")[0].trim();
@@ -160,6 +186,14 @@ export function sections(c: Card, concept?: string): Section[] {
 	const them = { her: "her", his: "him", their: "them" }[possessive(c)];
 	const methods = id.methods.filter((m) => !/superpower/i.test(m.method));
 	const flaws = id.flaws.filter((x) => !same(x.flaw, t.worst_trait));
+	const dna = core.dna;
+	const temperament = dna?.temperament;
+	// What life made of the born temperament: the last change to each scale wins.
+	const now = new Map(
+		d.life_events
+			.flatMap((e) => e.changes ?? [])
+			.map((x) => [x.characteristic, x.to] as const),
+	);
 	return [
 		{
 			n: "00",
@@ -185,6 +219,30 @@ export function sections(c: Card, concept?: string): Section[] {
 					label: "The question the story answers",
 					text: core.dramatic_question,
 				},
+				...(temperament
+					? [
+							{
+								type: "radar" as const,
+								title: "Born with",
+								axes: SCALES.map(([k, label]) => {
+									const v = now.get(`temperament.${k}`);
+									return {
+										label,
+										born: temperament[k].value,
+										now: typeof v === "number" ? v : undefined,
+									};
+								}),
+								legend: { born: "Born", now: "Now" },
+							},
+							{
+								type: "list" as const,
+								items: SCALES.map(([k, label]) => ({
+									lead: label,
+									text: `${temperament[k].value}/100${nowText(temperament[k].value, now.get(`temperament.${k}`))} · ${temperament[k].shows}`,
+								})),
+							},
+						]
+					: []),
 			],
 		},
 		{
@@ -267,7 +325,18 @@ export function sections(c: Card, concept?: string): Section[] {
 					rows: [
 						["Name", d.name_meaning],
 						["Age", d.age],
+						...(dna?.ancestry
+							? [["Lineage", dna.ancestry] as [string, string]]
+							: []),
 						["Background", d.cultural_background],
+						...(dna?.born_differences?.length
+							? [
+									["Born with", dna.born_differences.join("; ")] as [
+										string,
+										string,
+									],
+								]
+							: []),
 						["Build", d.physical.height_build],
 						["Face", d.physical.face],
 						["Hair", d.physical.hair],
@@ -370,6 +439,7 @@ export function sections(c: Card, concept?: string): Section[] {
 			kicker: "Best & worst",
 			title: "One wound, two faces",
 			blocks: [
+				{ type: "prose", title: "In life", text: t.personality },
 				{
 					type: "cards",
 					items: [
@@ -379,12 +449,7 @@ export function sections(c: Card, concept?: string): Section[] {
 				},
 				{
 					type: "rows",
-					rows: [
-						["Other traits", t.other_traits.join(" · ")],
-						["Energy", t.energy],
-						["Temperament", t.temperament],
-						["Social", t.social],
-					],
+					rows: [["Other traits", t.other_traits.join(" · ")]],
 				},
 				{ type: "quotes", title: "What others say", items: t.others_say },
 			],

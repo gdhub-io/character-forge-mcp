@@ -43,7 +43,7 @@ Only the winner is kept and gets an A-pose concept. The variants are written as 
 
 For diagrams of how a character is built (the core chain, what shapes them, their path, how the audience gets to know them, and the tournament), see [character-anatomy.md](character-anatomy.md).
 
-The card opens with the **core** (wound, lie, truth, central paradox, dramatic question) and then follows a 9-section character-development method inspired by Sherri Sheridan's *Developing Digital Short Films* and Michael Dougan's "one best / one worst / three other traits" formula (see [License and credits](../README.md#license-and-credits)):
+The card opens with the **core**: the **DNA** (what the character was born or made with: a temperament of six 0–100 scales, from withdrawn to outgoing, calm to anxious, rebel to accommodating, chaotic to orderly, practical to curious, and how hard surroundings shape them; and the innate appearance), then the wound that landed on it, the lie, the truth, the central paradox and the dramatic question. It then follows a 9-section character-development method inspired by Sherri Sheridan's *Developing Digital Short Films* and Michael Dougan's "one best / one worst / three other traits" formula (see [License and credits](../README.md#license-and-credits)):
 
 1. **Goals**: *want* (external, can change) vs. *need* (inner, carries the theme), motivation, goals that exclude each other, and the goal's climax
 2. **Identification**: why the audience bonds with the character: flaws, a superpower balanced by a vulnerability, a sympathy hook…
@@ -52,7 +52,7 @@ The card opens with the **core** (wound, lie, truth, central paradox, dramatic q
 5. **Fears**: conscious and unconscious fears, the mask, and how the character overcomes them
 6. **Universal + unique**: an archetype with a twist and at least 5 filmable quirks
 7. **Backstory & world**: who rules the world, what is worth dying for, plus secondary characters who reveal the hero's contradictions
-8. **Traits**: energy, temperament, one best trait, one worst trait, three others, and typical reactions
+8. **Traits**: who they are in life (mood, energy, how they are with others, what they love), one best trait, one worst trait, three others, and typical reactions
 9. **Destiny**: the void in the ordinary world, the threshold, the ordeal, the transformation
 
 The schema checks that the card is complete: at least 3 identification methods, exactly 3 inner-monologue lines, exactly 3 life events, at least 5 quirks, and so on. When the model leaves something out, the server returns the exact field paths to fix.
@@ -100,7 +100,7 @@ Prompts are saved to `<character>/prompts/<kind>.md`. Writing a prompt never cal
 
 Every media step is built from the card and saved in the character's folder: generated files in `assets/`, the prompt behind each one in `prompts/`, and what it cost in `costs.json`.
 
-- **Concept sheet** (`character_concept`): character-forge draws a faceless A-pose figure from the card's `look.body` (the character's own proportions and asymmetries, front and back) and gives it to GPT Image as the pose reference, with the full description of the look. Options: `style` (`card` for the designer's suggestion, or any style text; saved as `concept-<style>.png`), `pose_image` (put the character in the pose of any picture → `concept-pose.png`), `seed`, `dry_run` (prompt only). `mode` switches to the older pipelines (Z-Image image-to-image or ControlNet), kept for experiments. Without `FAL_KEY` you get a ready prompt.
+- **Concept sheet** (`character_concept`): character-forge draws a faceless A-pose figure from the card's body (the proportions they were born with, as life changed them, plus their posture; front and back) and gives it to GPT Image as the pose reference, with the full description of the look. Options: `style` (`card` for the designer's suggestion, or any style text; saved as `concept-<style>.png`), `pose_image` (put the character in the pose of any picture → `concept-pose.png`), `seed`, `dry_run` (prompt only). `mode` switches to the older pipelines (Z-Image image-to-image or ControlNet), kept for experiments. Without `FAL_KEY` you get a ready prompt.
 - **Location** (`character_scene`): the concept placed in a key location from the card, in the character's idle pose. It is the first frame of the video.
 - **Idle video** (`character_video`): 8 seconds by default. Kling (silent) or Veo (optional sound); the end is crossfaded into the start so it loops without a seam.
 - **Voice** (`character_voice`): a voice designed from the card (ElevenLabs for adults, Qwen for children), saying a few lines about the moment the video shows. Every language is a fresh performance from a translated script, not a dub.

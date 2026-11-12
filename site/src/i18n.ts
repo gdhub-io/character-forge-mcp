@@ -136,9 +136,17 @@ const RU: Record<string, string> = {
 	"Best trait": "Лучшая черта",
 	"Worst trait": "Худшая черта",
 	"Other traits": "Другие черты",
-	Energy: "Энергия",
-	Temperament: "Темперамент",
-	Social: "Общительность",
+	"Born with": "С чем родился",
+	Born: "От рождения",
+	Now: "Сейчас",
+	"In life": "Какой в жизни",
+	Lineage: "Родословная",
+	Extraversion: "Общительность",
+	Neuroticism: "Тревожность",
+	Agreeableness: "Уступчивость",
+	Conscientiousness: "Собранность",
+	Openness: "Открытость",
+	Sensitivity: "Чувствительность",
 	"What others say": "Что о нём говорят",
 	"Ordinary world": "Обычный мир",
 	"The void": "Пустота",
@@ -185,6 +193,16 @@ export function localizeSections(list: Section[], lang: Lang): Section[] {
 					return {
 						...b,
 						items: b.items.map((x) => ({ ...x, label: tr(lang, x.label)! })),
+					};
+				case "radar":
+					return {
+						...b,
+						title: tr(lang, b.title),
+						axes: b.axes.map((x) => ({ ...x, label: tr(lang, x.label)! })),
+						legend: {
+							born: tr(lang, b.legend.born)!,
+							now: tr(lang, b.legend.now)!,
+						},
 					};
 				case "timeline":
 					return {

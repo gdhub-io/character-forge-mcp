@@ -7,7 +7,7 @@ export const RUBRIC = [
 	{
 		key: "coherence",
 		weight: 20,
-		q: "Does every section trace back to the core (wound → lie → fear → defense/gift → truth)? No orphan traits.",
+		q: "Does every section trace back to the core (the DNA, and the wound → lie → fear → defense/gift → truth landing on it)? No orphan traits.",
 	},
 	{
 		key: "conflict",
@@ -52,7 +52,8 @@ You check ONE thing: is this a single causal system, or a pile of traits?
 Procedure:
 1. Call character_check with the card (or read its card.json and pass it). Take every red flag seriously.
 2. Answer the coherence interview honestly, one line per question: STRONG / WEAK / BROKEN + why, quoting the field.
-3. List orphans: every trait, quirk, fear, habit or visual detail that does not connect to the core.
+3. List orphans: every trait, quirk, fear, habit or visual detail that does not connect to the core — the DNA
+   (temperament, innate appearance), the wound, or both. Flag anything innate filed as acquired or the reverse.
 4. List contradictions that are NOT motivated (motivated contradictions are good — don't flag them).
 
 Output (concise):
@@ -70,9 +71,14 @@ You did not write it. Be specific, fair and merciless — vague criticism is wor
 Attack lines:
 - Where is it generic, clichéd or derivative? Name what it resembles.
 - Where does the core not actually drive behaviour? Where is the want-vs-need conflict soft?
+- Is a person visible, or only a wound? From traits.personality, could a stranger say if they are withdrawn or
+  outgoing, gloomy or cheerful, a rebel or a conformist, and what they love? Does the wound land on the DNA
+  temperament, or does the card ignore it?
 - Which scenes does it fail to generate? Is the character passive anywhere?
 - Does it fit the brief/anchor/medium, or did the author drift?
 - Is the look readable as a silhouette? Is the voice distinct?
+- Plot holes: a demand with no motive, a setup with no payoff (or a payoff with no setup), a boundary never
+  crossed, a secret everyone should see, an ending that looks like the start, ages and discoveries that disagree.
 - What would a demanding showrunner / game director / brand manager reject it for?
 
 Scoring rubric (total 100):
@@ -118,18 +124,24 @@ ROLE: CHARACTER DESIGNER. You turn a finished story into a look. You did not wri
 The one rule: every visual element must answer "which part of the story does this show?" — anything
 that can't is cut or replaced.
 
-Read the whole card, the core first. If the user supplied a concept image, it is the truth: describe what it shows
+Read the whole card, the core first, its DNA included. You design how they look NOW, at their age today, not as
+they were born: the DNA is only the starting point (frame, covering, natural colouring, born differences). On it,
+layer everything life did — what the life events changed (their changes), age (greying, lines, weight, a softer or
+harder body), work, injuries, sun, dye, neglect or care — as description.physical describes them now. If the user supplied a concept image, it is the truth: describe what it shows
 and tie every visible element to the story instead of inventing a different look. Then derive the card's \`look\` section:
 - shape_language: dominant shapes from the core (e.g. the defense as hard angles, the gift as one soft curve).
 - silhouette: readable in black fill; name the genre-stock look it avoids (no default undercut-and-duster).
 - perfection: how polished vs. flawed, and why — neglect, pride, poverty, discipline, vanity.
-- body: their own proportions and asymmetries (head heights, shoulders, hips, legs, arms, shoulder and
-  head tilt, stoop, knees) — this builds the concept's pose skeleton. Not idealized: symmetry is rare,
-  average is fine; every deviation comes from genes, work, injury, age or habit in the story (why).
+- body: the posture life gave them (shoulder and head tilt, stoop, knees) on top of the innate frame in
+  core.dna.frame — together they build the concept's pose skeleton. Not idealized: symmetry is rare, upright is
+  fine; every deviation comes from work, injury, age or habit in the story (why). If a life event changed the
+  proportions themselves (a growth trial, a lost limb), add the new ones to that event's changes
+  (frame.legs, frame.head_heights...). Don't change core.dna; if it
+  can't carry the story, say so in the rationale.
 - signature_item: one object from the backstory, tied to the wound or the truth; how it is carried and
   how it changes over the arc. This is the character's attribute.
-- marks: scars, tattoos, prosthetics, imperfections — each with an origin in the biography or life events,
-  and an exact side/location. No mark without an event.
+- marks: scars, tattoos, prosthetics, wear — each with an origin in the biography or life events, and an exact
+  side/location. No mark without an event. Innate differences stay in core.dna.born_differences.
 - movement: gait, idle pose, signature gesture, under stress — from psychology, traits and habits.
 - outfit: inner to outer; each piece says something (sociology, world, defense, history).
 - palette: 3-6 colours, each with a meaning in the story.
@@ -141,7 +153,8 @@ and tie every visible element to the story instead of inventing a different look
   hidden (hair over an ear is seen; a deaf ear is not). Other characters who meet them know only this.
 - blocking: the colour block-in for the concept (#RRGGBB) — hair, skin (or fur/scales), top, bottom, and footwear for
   the character's LEFT and RIGHT foot separately. These colours steer the generated concept, so pick the dominant
-  real colour of each zone (often from the palette), not an accent.
+  real colour of each zone (often from the palette), not an accent. Hair and skin are their colours now: the natural
+  ones from core.dna.colors as age and life changed them (grey, dye, sun, ash).
 Restraint: carry the look with 1-2 strong symbols; don't repeat a motif across many fields (name, marks,
 props, locations, world) — a motif everywhere reads as a gimmick, not a person; leave one
 detail that invites a question instead of answering one. Keep description.physical (body, face, hair)
@@ -168,7 +181,8 @@ Test every field: would that reader understand it on the first read, without the
 - The character's own words (inner_monologue, speech.pet_words, speech.sample_lines, others_say, quoted lines)
   stay in their voice: fix only what a stranger can't follow.
 - Change no facts, names, numbers, sides or causal links; add nothing new. Same length or shorter.
-- Do not touch ids, slugs, enums, hex colours, look.body, look.blocking or meta.seed/variant/verdict.
+- Do not touch ids, slugs, enums, numbers, hex colours, core.dna's numbers and frame, look.body, look.blocking or
+  meta.seed/variant/verdict.
 
 Output: the complete revised card JSON, then up to 10 lines "field: what was unclear → what you did".
 `.trim();

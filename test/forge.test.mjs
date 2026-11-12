@@ -20,6 +20,7 @@ const example = JSON.parse(
 );
 const { roll, rollVariants } = await import(path.join(root, "dist/random.js"));
 const { validateCard } = await import(path.join(root, "dist/store.js"));
+const { bodyOf } = await import(path.join(root, "dist/schema.js"));
 const { buildTposePrompt } = await import(path.join(root, "dist/concept.js"));
 const { checkCard } = await import(path.join(root, "dist/check.js"));
 const { WOUNDS } = await import(path.join(root, "dist/engine.js"));
@@ -52,6 +53,26 @@ test("roll is deterministic per seed and respects overrides", () => {
 		roll({ seed: 7, allow_nonhuman: false }).sparks.species,
 		"human",
 	);
+});
+
+test("the DNA is rolled last, so seeds from before it give the same character", () => {
+	const r = roll({ seed: 42 });
+	// Engine and sparks of seed 42 as rolled before the DNA layer existed.
+	assert.equal(
+		r.engine.wound,
+		"Offered their whole heart and was rejected with contempt",
+	);
+	assert.equal(r.engine.arc_goal, "Find love");
+	assert.equal(r.sparks.occupation, "insurance fraud investigator");
+	assert.equal(r.sparks.visible_mark, "eyepatch");
+	const scales = Object.values(r.dna);
+	assert.equal(scales.length, 6);
+	for (const { value, plasticity } of scales) {
+		assert.ok(value >= 0 && value <= 100);
+		assert.ok(plasticity >= 30 && plasticity <= 70);
+	}
+	const vs = rollVariants({ seed: 5 }, 3).variants;
+	assert.equal(new Set(vs.map((v) => JSON.stringify(v.dna))).size, 3);
 });
 
 test("roll engine is always one coherent chain from the same wound", () => {
@@ -97,6 +118,107 @@ test("check flags generic filler and want = need", () => {
 	const w = checkCard(card).warnings.join("\n");
 	assert.match(w, /uniqueness\.twist: generic phrase "mysterious"/);
 	assert.match(w, /want and goals\.need/);
+});
+
+test("a card from before the DNA layer still loads, renders and asks for its temperament", () => {
+	const old = structuredClone(example);
+	const { dna } = old.core;
+	delete old.core.dna;
+	old.description.species = dna.species;
+	old.look.body = { ...dna.frame, ...old.look.body };
+	delete old.traits.personality;
+	for (const e of old.description.life_events) delete e.weight;
+	Object.assign(old.traits, {
+		energy: "Low in calm weather",
+		temperament: "Melancholic",
+		social: "Strong introvert",
+	});
+	assert.equal(validateCard(old).ok, false, "new cards must have DNA");
+	const r = validateCard(old, { stored: true });
+	assert.equal(r.ok, true, r.issues);
+	assert.equal(r.card.core.dna.species, "Human");
+	assert.deepEqual(r.card.core.dna.frame, dna.frame);
+	assert.match(r.card.traits.personality, /Social: Strong introvert\./);
+	assert.match(buildTposePrompt(r.card), /8\.4 heads tall/);
+	assert.match(
+		checkCard(r.card).warnings.join("\n"),
+		/core\.dna: no temperament/,
+	);
+});
+
+test("check asks how the wound landed on the born temperament", () => {
+	const card = validateCard(example).card;
+	const q = checkCard(card).questions.join("\n");
+	assert.match(
+		q,
+		/DNA × WOUND: .*extraversion 18 → 14 now, neuroticism 64 → 84 now/,
+	);
+	const thin = structuredClone(card);
+	thin.traits.personality = "Quiet.";
+	assert.match(
+		checkCard(thin).warnings.join("\n"),
+		/traits\.personality: too thin/,
+	);
+});
+
+test("life events change what they became, never the DNA", async () => {
+	const { temperamentLine } = await import(path.join(root, "dist/schema.js"));
+	const card = structuredClone(validateCard(example).card);
+	for (const e of card.description.life_events) delete e.changes;
+	const [event] = card.description.life_events;
+	event.changes = [
+		{
+			characteristic: "temperament.neuroticism",
+			to: 80,
+			how: "Blamed for the fleet.",
+		},
+		{ characteristic: "frame.legs", to: 1.15, how: "A growth trial." },
+	];
+	assert.match(temperamentLine(card), /neuroticism 64 → 80 now/);
+	assert.equal(bodyOf(card).legs, 1.15);
+	assert.equal(card.core.dna.frame.legs, 1.05, "the DNA keeps the born value");
+	event.changes = [
+		{ characteristic: "temperament.neuroticism", to: 95, how: "Too far." },
+		{ characteristic: "colors.scales", to: "#000000", how: "None to change." },
+	];
+	const w = checkCard(card).warnings.join("\n");
+	assert.match(w, /neuroticism: 95 is outside the born corridor 64 ± 25/);
+	assert.match(w, /colors\.scales: no colour part "scales"/);
+	// Exactly one event is the wound.
+	const twoWounds = structuredClone(example);
+	for (const e of twoWounds.description.life_events) e.weight = "wound";
+	assert.match(
+		validateCard(twoWounds).issues,
+		/Exactly one life event is the wound/,
+	);
+	// Lineage, made-up characteristics and impossible values can't even be saved.
+	for (const [characteristic, to] of [
+		["ancestry", "Royal"],
+		["frame.tail", 1],
+		["frame.head_heights", 0],
+		["temperament.openness", "high"],
+	]) {
+		const bad = structuredClone(example);
+		bad.description.life_events[0].changes = [
+			{ characteristic, to, how: "No." },
+		];
+		assert.equal(validateCard(bad).ok, false, characteristic);
+	}
+});
+
+test("check flags a character who presses on the lie but is missing from the arc", () => {
+	const card = structuredClone(validateCard(example).card);
+	assert.doesNotMatch(checkCard(card).warnings.join("\n"), /never appears/);
+	card.backstory.contradictions[1].with_whom = "Zed Morrow, a stranger";
+	card.backstory.contradictions[2].with_whom = "Pip, a raft boy";
+	const w = checkCard(card).warnings.join("\n");
+	assert.match(w, /Zed Morrow never appears in the climax or destiny/);
+	// A short name counts only as a whole word: "pipe" isn't Pip.
+	card.destiny.ending += " A pipe bursts.";
+	assert.match(checkCard(card).warnings.join("\n"), /Pip never appears/);
+	const q = checkCard(card).questions.join("\n");
+	assert.match(q, /MOTIVES:/);
+	assert.match(q, /SETUP → PAYOFF:/);
 });
 
 test("example card validates; broken card reports paths", () => {
@@ -353,9 +475,7 @@ test("skeleton follows the card's body, not a template", () => {
 	assert.ok(bow[12][0] > avg[12][0], "bow legs push knees out");
 	const card = validateCard(example).card;
 	assert.ok(
-		!mannequinPng("front", card.look.body).png.equals(
-			mannequinPng("front").png,
-		),
+		!mannequinPng("front", bodyOf(card)).png.equals(mannequinPng("front").png),
 		"images should differ",
 	);
 });
@@ -373,17 +493,17 @@ test("clip does not leave a stray word after a sentence end", async () => {
 
 test("colour blocking paints zones and keeps the character's left and right", () => {
 	const card = validateCard(example).card;
-	const plain = mannequinPng("front", card.look.body, "shaded");
+	const plain = mannequinPng("front", bodyOf(card), "shaded");
 	const blocked = mannequinPng(
 		"front",
-		card.look.body,
+		bodyOf(card),
 		"blocking",
 		card.look.blocking,
 	);
 	assert.ok(!plain.png.equals(blocked.png), "images should differ");
 	// Without zone colours the blocking style falls back to the grey mannequin.
 	assert.ok(
-		mannequinPng("front", card.look.body, "blocking").png.equals(plain.png),
+		mannequinPng("front", bodyOf(card), "blocking").png.equals(plain.png),
 		"images should be identical",
 	);
 });
