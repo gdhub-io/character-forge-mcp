@@ -87,7 +87,7 @@ You get a full character card. Then ask for more, one step at a time: *"Draw the
 
 ## How it works
 
-Every character grows from one wound that shaped them: it taught them a false belief, the belief breeds a fear, the fear hides behind their worst trait, and the same wound gave them their best one. Their story is learning the truth. So nothing about them is random filler.
+Every character is born with a temperament and a body of their own, and one wound lands on them: it taught them a false belief, the belief breeds a fear, the fear hides behind their worst trait, and the same wound gave them their best one. The same hurt shapes a shy, sensitive child differently from a bold, thick-skinned one. Their story is learning the truth. So nothing about them is random filler.
 
 Three versions of your idea are written. Independent reviewers check each one and argue against it, a judge keeps the strongest, a designer draws its look from the story, and an editor makes every line easy to read.
 

@@ -1,9 +1,12 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { METHOD_GUIDE, referenceLists } from "../methodology.js";
+import { CARD_USE } from "../schema.js";
 import { TOURNAMENT_PROTOCOL } from "../tournament.js";
 import { text } from "./util.js";
 
-const CARD_FORMAT = `CARD FORMAT: character_save's input schema is the card: sections meta, core, goals, identification, psychology, description, fears, uniqueness, backstory, traits, destiny, look — with every field and its minimum/exact counts. description.physical holds only body, face and hair; LOOK (written by the designer from the finished story) holds everything visual else: shape language, silhouette, the body's proportions, colour blocking, signature item, marks with origins, movement, outfit with reasons, palette with meanings and what reads in three seconds. Every visual output (the A-pose concept, scenes, prompts) is built from it.`;
+const CARD_FORMAT = `CARD FORMAT: character_save's input schema is the card: sections meta, core (with core.dna), goals, identification, psychology, description, fears, uniqueness, backstory, traits, destiny, look — with every field and its minimum/exact counts. core.dna holds what they were born with (temperament, innate appearance and frame); description.physical holds how body, face and hair look now; LOOK (written by the designer from the finished story) holds everything visual else: shape language, silhouette, acquired posture, colour blocking, signature item, marks with origins, movement, outfit with reasons, palette with meanings and what reads in three seconds. Every visual output (the A-pose concept, scenes, prompts) is built from it.
+
+PLAYING A CHARACTER (a scene, a meeting): ALWAYS in mind — ${CARD_USE.always.join(", ")} (fears: the conscious ones); write these from inside, knowing only what the character knows. AUTHOR ONLY, the character doesn't know it — ${CARD_USE.author.join(", ")}. VISUAL, for images and video — ${CARD_USE.visual.join(", ")}. Everything else is recalled when the moment calls for it.`;
 
 export function registerMethod(server: McpServer) {
 	server.registerTool(

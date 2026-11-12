@@ -10,10 +10,74 @@
     "tagline": "She heard it coming. She said nothing."
   },
   "core": {
+    "dna": {
+      "temperament": {
+        "extraversion": {
+          "value": 18,
+          "plasticity": 40,
+          "shows": "As a girl she preferred the lamp room to the harbor kids; she was happiest alone with the weather."
+        },
+        "neuroticism": {
+          "value": 64,
+          "plasticity": 50,
+          "shows": "Born a worrier: even as a child she watched the sky for the worst and slept badly before storms."
+        },
+        "agreeableness": {
+          "value": 34,
+          "plasticity": 45,
+          "shows": "Hard to sway from the start: she kept forecasting however often her father laughed."
+        },
+        "conscientiousness": {
+          "value": 78,
+          "plasticity": 35,
+          "shows": "Orderly by nature: she logged the barometer in a child's hand before anyone asked her to."
+        },
+        "openness": {
+          "value": 44,
+          "plasticity": 40,
+          "shows": "Practical, not dreamy: she trusted pressure, wind and sound over stories."
+        },
+        "sensitivity": {
+          "value": 82,
+          "plasticity": 60,
+          "shows": "An orchid: what the people around her did went deep, for better or worse."
+        }
+      },
+      "species": "Human",
+      "sex": "Female",
+      "ancestry": "Saltreach coast fisher stock, three generations on the same shore; the tall, long-limbed line comes from her father's side of lighthouse keepers.",
+      "body_plan": "Biped (human).",
+      "covering": "Olive skin that weathers and chaps easily; thick, coarse, straight black hair.",
+      "colors": [
+        {
+          "part": "skin",
+          "hex": "#C29676"
+        },
+        {
+          "part": "hair",
+          "hex": "#17181B"
+        },
+        {
+          "part": "eyes",
+          "hex": "#A9B2B8"
+        }
+      ],
+      "face": "A sharp nose, high cheekbones and pale grey eyes set wide.",
+      "frame": {
+        "head_heights": 8.4,
+        "shoulders": 1.25,
+        "hips": 0.85,
+        "legs": 1.05,
+        "arms": 1.05
+      },
+      "build_tendency": 22,
+      "born_differences": []
+    },
     "wound": "Her father, a lighthouse keeper, waved off her weather forecasts and blamed her when they came true. At 26 she heard the Rising, the flood that drowned her town, coming three days early. She took money to stay silent from the first man who ever paid for her gift.",
+    "self_story": "My father never believed my forecasts and blamed me when they came true. The night I heard the Rising coming, Hale was the first man ever to pay for what I hear, and I took his money and told my father no storm was coming. The town drowned because I stayed quiet. I know exactly what I'm worth.",
     "lie": "I am only worth what my gift is worth to someone — and I've already proved what I'm worth.",
     "truth": "I am worth saving even when I have nothing left to give.",
-    "central_paradox": "She is the best storm-reader alive, and she is the reason her town drowned without warning. The gift that should have saved them is the tool she betrayed them with. The survival instinct that makes her brilliant now drives her to prove she deserves to drown.",
+    "central_paradox": "She is the best storm-reader alive, and she is the reason her town drowned without warning. The gift that should have saved them is the tool she betrayed them with. The survival instinct that makes her brilliant now drives her to prove she deserves to drown. The betrayal hit a born orchid who already expected the worst, so it turned inward: she doesn't defend herself, she punishes herself.",
     "dramatic_question": "The Hundred-Year Wave, the giant wave the elders whisper about, is coming. Will Marta stay silent again to win back her drowned town's bell? Or will she tell the truth and let herself be saved?",
     "spark_links": "Her lighthouse-keeper father dismissed her gift, so she sold forecasts to the only people who valued it. The salvage cartel that rules the coast is simply whoever paid. The drowned coast makes her private betrayal the shape of the whole world. The foghorn she sounded too late is what deafened her."
   },
@@ -22,8 +86,8 @@
     "need": "Accept that she is worth saving with nothing left to give: no gift, no penance, no payment.",
     "motivation": "The bell should have rung a warning the night of the Rising, the flood that drowned the town. Every year she offers Hale, the cartel boss who holds it, her savings for it. Every year he refuses. He doesn't want her credits. He wants a forecast.",
     "arc_goal": "Make peace with the past",
-    "goal_climax": "The Hundred-Year Wave is coming. The raft people read their forecasts from the lighthouse wall, and Marta must chalk one word there. If she writes CALM, as the cartel boss Hale demands, she calls her pupil Pell's true forecast a child's mistake, keeps her secret and gets the bell. If she writes WAVE, she signs it with her own name and confesses that she knew the Rising was coming too.",
-    "conflicting_goals": "Hale, the cartel boss, will trade the bell only for the same crime again, made worse. She must dismiss a girl's true forecast, exactly as her father dismissed hers. She can only get what she wants by betraying what she needs.",
+    "goal_climax": "The Hundred-Year Wave is coming. The raft people read their forecasts from the lighthouse wall, and Marta must chalk one word there. If she writes CALM, as the cartel boss Hale demands so that the rafts won't jam the reef channel his fleet needs to escape, she calls her pupil Pell's true forecast a child's mistake, keeps her secret and gets the bell. If she writes WAVE, she signs it with her own name and confesses that she knew the Rising was coming too.",
+    "conflicting_goals": "Hale, the cartel boss, will trade the bell only for the same crime again, made worse. His fleet must run out through the one reef channel before the Wave; if the raft people flee through it first, they jam it and his ships drown with them. So he needs the rafts to stay put, and she must dismiss a girl's true forecast, exactly as her father dismissed hers. She can only get what she wants by betraying what she needs.",
     "scene_goal_example": "Get Pell, the raft girl she teaches, to take back her forecast in front of the raft elders. She fails, because the girl won't lie for her."
   },
   "identification": {
@@ -80,32 +144,60 @@
     "visual_device": "In the audio mix her left channel is muffled, and characters on her left speak only in subtitles. When she finally tells the truth, the mix opens into full stereo for the first time in the game."
   },
   "description": {
-    "name_meaning": "Marta means 'lady of the house', and she is a keeper whose house is underwater. Vell is a coast word for the salt crust a tide leaves on stone: what remains after the water goes.",
+    "name_meaning": "Marta means 'lady of the house', and her house is underwater. Vell is a coast word for the salt crust a tide leaves on stone: what remains after the water goes.",
     "age": "34",
     "gender": "Woman",
-    "species": "Human",
     "cultural_background": "Her family has lived on the Saltreach coast for three generations. Her people keep knot-lore, cook salt cod and speak a sea creole that turns weather words into verbs ('he's backing', 'don't squall at me').",
     "physical": {
       "height_build": "Tall (182 cm), lean and ropey, with broad shoulders and forearms from hauling rigging.",
       "face": "Weathered olive skin, wind-chapped cheeks, a sharp nose, pale grey eyes that look past people toward the horizon.",
       "hair": "Black, thick and coarse, chopped to the jaw with a knife and worn loose. On the left it always hangs like a curtain over her deaf ear and the scar behind it. On the right it is always hooked back, so her hearing ear stays bare.",
-      "first_impression": "Like a lighthouse that walked off its rock and leans. She is tall and coatless in the cold, her head tipped to one side, listening to the weather instead of to you."
+      "first_impression": "Tall and coatless in the cold, leaning a little, her head tipped to one side: she is listening to the weather instead of to you."
     },
     "life_events": [
       {
         "age": "9",
+        "weight": "major",
         "event": "She predicted a squall her father laughed off. When the fleet was lost, he told the town she had 'called it' and let the blame fall on her.",
-        "effect": "She learned that being right is dangerous, and that at home her gift was worth nothing."
+        "effect": "She learned that being right is dangerous, and that at home her gift was worth nothing.",
+        "changes": [
+          {
+            "characteristic": "temperament.agreeableness",
+            "to": 18,
+            "how": "Blamed for the lost fleet, she stopped trying to please anyone at home."
+          }
+        ]
       },
       {
         "age": "26",
+        "weight": "wound",
         "event": "She heard the Rising, the flood that drowned the town, coming three days out. She signed a receipt for Doran Hale, a salvager: four hundred credits to stay silent until his fleet cleared the harbor. Then her father, for the first time in his life, asked her if a storm was coming. She said no.",
-        "effect": "It proved what she already believed: she is worth exactly what someone pays for her gift. And what she did with it is unforgivable."
+        "effect": "It proved what she already believed: she is worth exactly what someone pays for her gift. And what she did with it is unforgivable.",
+        "changes": [
+          {
+            "characteristic": "temperament.neuroticism",
+            "to": 84,
+            "how": "The paid silence and the drowned town left her braced for the worst every hour."
+          },
+          {
+            "characteristic": "temperament.extraversion",
+            "to": 8,
+            "how": "She cut herself off from the town she had betrayed."
+          }
+        ]
       },
       {
         "age": "30",
+        "weight": "major",
         "event": "She walked into the winter sea at dawn. Pell, a seven-year-old girl who lived on a raft, swam out with a line and dragged her back.",
-        "effect": "Pell was the first person ever to save her for nothing. Marta can't understand that debt, so she repays it by teaching Pell to read storms."
+        "effect": "Pell was the first person ever to save her for nothing. Marta can't understand that debt, so she repays it by teaching Pell to read storms.",
+        "changes": [
+          {
+            "characteristic": "temperament.extraversion",
+            "to": 14,
+            "how": "Pell is the one person she lets near."
+          }
+        ]
       }
     ],
     "hobbies": [
@@ -143,7 +235,7 @@
     "fears": [
       {
         "fear": "Being exposed: the town learning she heard the Rising, the flood that drowned the old town, coming",
-        "root": "Hale, the cartel boss, keeps the receipt she signed with her keeper's mark. It convicts her and no one else.",
+        "root": "Hale, the cartel boss, keeps the receipt she signed with the lighthouse mark her father taught her. It convicts her and no one else.",
         "conscious": true
       },
       {
@@ -217,9 +309,7 @@
     ]
   },
   "traits": {
-    "energy": "Low in calm weather, explosive in storms",
-    "temperament": "Melancholic with choleric bursts",
-    "social": "Strong introvert",
+    "personality": "Withdrawn and dry. She sleeps alone in the lighthouse gallery and talks to almost no one. In calm weather she is slow, flat and gloomy; when a storm comes she sharpens, gives orders and loses her temper fast. She never leads by choice, but in a storm the rafts follow her because she is right. She doesn't argue, she simply does what she has already decided; only with Hale, who pays, is she obedient to his face. Her only company is Pell; she avoids crowds, music and touch. What she loves: barometers, old recorded shipping forecasts, the hour before a squall and teaching Pell knots.",
     "habits": [
       "Taps the barometer glass every hour",
       "Sleeps sitting up, boots on",
@@ -264,16 +354,11 @@
     "silhouette": "In solid black: a very tall, narrow figure with no coat in cold weather, head tilted right. A heavy fall of jaw-length hair on the left, a bare ear and neck on the right. Straight-legged work bib overalls make an upright column, and a long-handled hull scraper adds a second vertical. It deliberately avoids stock post-apocalyptic looks: undercut-and-braid hair, long duster coat, goggles, bandoliers. It is a labourer's outline, lopsided only by how she listens.",
     "perfection": "Split by design. Her tools are immaculate: polished barometer brass, honed scraper, squared chalk. Her body and clothes are left to rot: unravelling jersey, mismatched boots, cut knuckles, no coat. She looks after whatever is useful to others and neglects herself. Her belief that she is worth only her usefulness, made into objects.",
     "body": {
-      "head_heights": 8.4,
-      "shoulders": 1.25,
-      "hips": 0.85,
-      "legs": 1.05,
-      "arms": 1.05,
       "shoulder_tilt": -0.4,
       "head_tilt": 0.4,
       "stoop": 0.1,
       "knees": "straight",
-      "why": "Tall and long-limbed from her father's side; eight years of hauling rigging built broad shoulders on a lean frame with narrow hips. The left shoulder sits lower from carrying the safety-line coil on it every shift. The head cants about 6° right, toward her only hearing ear, ever since the foghorn blast burst the left eardrum."
+      "why": "Eight years of hauling rigging broadened her shoulders further. The left shoulder sits lower from carrying the safety-line coil on it every shift. The head cants about 6° right, toward her only hearing ear, ever since the foghorn blast burst the left eardrum."
     },
     "blocking": {
       "hair": "#17181B",
@@ -388,6 +473,7 @@
       "She has given away more than she has: no coat in sleet, odd boots, ruined hands, but a polished brass instrument kept at her heart.",
       "She works for someone who owns her: a gang stencil on her back she never turns to look at."
     ],
+    "stranger_view": "A tall woman in her mid-thirties, lean and ropey, with broad shoulders and heavy forearms. Weathered olive skin, wind-chapped cheeks, a sharp nose and pale grey eyes that keep drifting past you toward the horizon. Black hair chopped roughly to the jaw: on the left it hangs like a curtain over her ear, on the right it is hooked back. She wears a navy knitted sweater inside out with unravelling cuffs, grey rubberised bib overalls with a rust-coloured stencil on the back, a webbing belt with a hook and a pocket of chalk, and odd boots: black rubber on the left, cracked brown leather on the right. A small brass dial on a string shows at the edge of her bib, and her knuckles are covered in small nicks dusted with chalk. She stands with her head tilted to the right and walks in long, rolling strides, right shoulder first.",
     "art_style": "Stylized 3D with hand-painted textures over simplified, slightly elongated forms (about 8.5 heads tall, long shins and forearms). Flat, readable planes. Cold, diffuse coastal light with a hard chalk-white rim light from the sea side. Low saturation, so bronze and rust are the only warm notes. In key art her left side sits in deeper shadow.",
     "turnaround_notes": "Lock the left/right asymmetry in every view. LEFT: jaw-length hair covering ear and scar, black rubber diver's boot, safety-line coil on the shoulder. RIGHT: hair hooked behind a bare ear, brown leather boot, scraper hook on the belt. FRONT: barometer disc at the top edge of the bib, gansey seams visible (inside out), head canted ~6° right even in the neutral pose. BACK: rust tide-mark stencil centred on the bib. Hands always chalk-dusted. Story-state variants: Hundred-Year Wave night (soaked, hair slicked back revealing the scar, chart on the inner left forearm); truth ending (gansey right side out, no barometer)."
   }

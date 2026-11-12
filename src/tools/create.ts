@@ -42,7 +42,7 @@ export function registerCreate(server: McpServer) {
 		{
 			title: "Start a new character",
 			description:
-				"The one way to start a character, from whatever the user gave: nothing (random), a text brief, a concept image, or a concept image plus a brief. Rolls coherent ENGINES (wound → lie → fear → worst trait / best trait → truth → arc) plus surprising SPARKS — by default 3 competing variants of the same concept for the variant tournament — and says how to treat the brief and the image. Same seed = same roll.",
+				"The one way to start a character, from whatever the user gave: nothing (random), a text brief, a concept image, or a concept image plus a brief. Rolls the DNA they are born with (a temperament of six 0-100 scales), a coherent ENGINE that lands on it (wound → lie → fear → worst trait / best trait → truth → arc) and surprising SPARKS — by default 3 competing variants of the same concept for the variant tournament — and says how to treat the brief and the image. Same seed = same roll.",
 			inputSchema: {
 				...RollOptionsSchema.shape,
 				variants: RollOptionsSchema.shape.variants.describe(
