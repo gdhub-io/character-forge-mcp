@@ -1,8 +1,8 @@
 /**
  * Character-development methodology as data.
  *
- * Based on Sherri Sheridan, "Developing Digital Short Films" (character chapter)
- * and Michael Dougan's "one best / one worst / three other traits" method.
+ * Inspired by Sherri Sheridan, "Developing Digital Short Films" (character chapter)
+ * and Michael Dougan's "one best / one worst / three other traits" method; retold in our own words (see README, Credits).
  * The lists feed `referenceLists()` (menus the model picks from); MEDIUMS…ARCHETYPES are also rolled.
  * The coherent core chains that rolls are built on live in engine.ts.
  */

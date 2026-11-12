@@ -71,7 +71,7 @@ Characters are always written in English.
 
 For diagrams of how a character is built (the core chain, what shapes them, their path, how the audience gets to know them, and the tournament), see [docs/character-anatomy.md](docs/character-anatomy.md).
 
-The card opens with the **core** (wound, lie, truth, central paradox, dramatic question) and then follows a 9-section character-development method based on Sherri Sheridan's *Developing Digital Short Films* and Michael Dougan's "one best / one worst / three other traits" formula:
+The card opens with the **core** (wound, lie, truth, central paradox, dramatic question) and then follows a 9-section character-development method inspired by Sherri Sheridan's *Developing Digital Short Films* and Michael Dougan's "one best / one worst / three other traits" formula (see [Credits](#credits)):
 
 1. **Goals**: *want* (external, can change) vs. *need* (inner, carries the theme), motivation, goals that exclude each other, and the goal's climax
 2. **Identification**: why the audience bonds with the character: flaws, a superpower balanced by a vulnerability, a sympathy hook…
@@ -226,6 +226,14 @@ The project layout:
 - `.claude-plugin/`: the plugin manifest
 
 `examples/marta-vell.json` is a complete reference card.
+
+## Generated media
+
+character-forge writes prompts and sends them to the models named in `models.json` (on fal.ai, with your own key); it saves whatever they return. The MIT license covers this tool, not what the models generate. Images, video, voices and music are subject to the terms of fal.ai and of each model's provider (for example OpenAI, Kling, Google, ElevenLabs, Qwen): what you may do with the results, commercial use included, and the rules about real people's likeness and voices. Check those terms before you use generated media in a product.
+
+## Credits
+
+The character method is inspired by Sherri Sheridan's book *Developing Digital Short Films* (its chapter on character) and Michael Dougan's "one best / one worst / three other traits" formula. The card's sections and reference lists follow the questions the book asks, retold in our own words and extended: the core chain (wound → lie → fear → defense / gift → truth), the variant tournament, the look derived from the story, and the media steps are this project's own. If the method works for you, read the book.
 
 ## License
 
