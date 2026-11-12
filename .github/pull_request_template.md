@@ -1,6 +1,8 @@
+Closes #
+
 ## What and why
 
-<!-- The intent: what this changes and why. Link the issue: Closes #… -->
+<!-- What this changes and why. The line above links the issue and closes it on merge: put its number there. -->
 
 ## How it was checked
 
@@ -8,6 +10,7 @@
 
 ## Checklist
 
+- [ ] The description starts with `Closes #<issue>`
 - [ ] The title follows Conventional Commits (`feat: …`, `fix: …`, `docs: …`); `!` for a breaking change
 - [ ] `npm run lint` and `npm test` pass
 - [ ] Simplified before review: no dead code, no duplicated helpers

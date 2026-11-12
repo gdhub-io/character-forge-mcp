@@ -64,7 +64,7 @@ The card's `look` section (shape language, silhouette, perfection, signature ite
 
 ## Workflow and releases
 
-- **Nobody pushes to `main`.** Every change goes intent → branch → develop (with tests) → refactor (`simplify`) → review (`code-review`, `npm run lint`, `npm test`) → pull request. The `contribute` skill (`.claude/skills/contribute`) walks through it; CONTRIBUTING.md is the human version.
+- **Nobody pushes to `main`.** Every change goes issue → branch linked to it (`gh issue develop N`) → develop (with tests) → refactor (`simplify`) → review (`code-review`, `npm run lint`, `npm test`) → pull request whose body starts with `Closes #N` (a check enforces it; merging closes the issue). The `contribute` skill (`.claude/skills/contribute`) walks through it; CONTRIBUTING.md is the human version.
 - **PR titles and commits follow Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `!` for breaking). PRs are squash-merged, so the title is the commit Release Please reads.
 - **Never bump versions or edit CHANGELOG.md by hand.** Release Please keeps a release PR open; merging it tags the version, writes the changelog, creates the GitHub release and publishes to npm (`.github/workflows/release.yml`).
 - CI (`.github/workflows/ci.yml`) runs lint and tests on Node 20 and 22 and type-checks the site. Tests must never call paid APIs.
