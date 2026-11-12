@@ -6,8 +6,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { type CharacterCard, SlugSchema } from "./schema.js";
-import { characterDir, loadCard, outputDir, writeJson } from "./store.js";
+import { CARD_USE, type CharacterCard, SlugSchema } from "./schema.js";
+import { loadCard, outputDir, writeJson } from "./store.js";
 
 export const SCENES_DIR = "_scenes";
 export const DEFAULT_ROUNDS = 6;
@@ -113,6 +113,8 @@ interface CastMember {
 	name: string;
 	/** What a stranger sees: the only thing the others know about them at first. */
 	seen: string;
+	/** Who they are, from their own card: always-in-mind first, then what they can recall. Never the author's fields. */
+	self: string;
 }
 
 export interface SceneEvent {
@@ -158,6 +160,67 @@ function strangerView(card: CharacterCard): string {
 		`Wearing: ${l.outfit.map((o) => o.piece).join("; ")}.`,
 		`Carries: ${l.signature_item.item}.`,
 	].join(" ");
+}
+
+const at = (o: unknown, p: string): unknown =>
+	p
+		.split(".")
+		.reduce<unknown>(
+			(v, k) =>
+				v && typeof v === "object"
+					? (v as Record<string, unknown>)[k]
+					: undefined,
+			o,
+		);
+
+/**
+ * The character's view of themselves. ALWAYS fields lead (who they are in every moment); the rest of the card follows
+ * as what they can recall, minus the author's fields (their truth, need and ending: knowing them would make them wise
+ * too early) and the look (they don't see themselves from outside).
+ */
+/**
+ * Beyond CARD_USE.author, these also tell a character its own future: how its story ends, how it overcomes its fear,
+ * the plot of the logline. Someone living the moment can't know them.
+ */
+const FUTURE = [
+	"meta.logline",
+	"fears.overcoming",
+	"psychology.states.reactive",
+	"psychology.states.active",
+	"psychology.visual_device",
+	"look.signature_item.how_carried",
+	"identification.first_appearance",
+	"uniqueness.twist",
+];
+
+/** Deletes the fields at these dotted paths from a card copy. */
+function without(card: unknown, paths: readonly string[]) {
+	const copy = structuredClone(card) as Record<string, unknown>;
+	for (const p of paths) {
+		const keys = p.split(".");
+		const parent =
+			keys.length > 1 ? at(copy, keys.slice(0, -1).join(".")) : copy;
+		if (parent && typeof parent === "object")
+			delete (parent as Record<string, unknown>)[keys[keys.length - 1]];
+	}
+	return copy;
+}
+
+export function selfSheet(card: CharacterCard): string {
+	const sheet = without(card, FUTURE);
+	const always = CARD_USE.always
+		.map((p) => [p, at(sheet, p)] as const)
+		.filter(([, v]) => v !== undefined)
+		.map(
+			([p, v]) => `- ${p}: ${typeof v === "string" ? v : JSON.stringify(v)}`,
+		);
+	const rest = without(sheet, [
+		...CARD_USE.always,
+		...CARD_USE.author,
+		...CARD_USE.visual,
+	]);
+	delete rest.meta;
+	return `ALWAYS IN YOU:\n${always.join("\n")}\n\nWHAT YOU CAN RECALL WHEN THE MOMENT CALLS FOR IT:\n${JSON.stringify(rest)}`;
 }
 
 export const sceneDir = (id: string) => {
@@ -225,6 +288,7 @@ export async function startScene(
 			id: ids[i],
 			name: c.meta.name,
 			seen: strangerView(c),
+			self: selfSheet(c),
 		})),
 		turns: [],
 		round: 1,
@@ -335,7 +399,8 @@ export async function addTurn(
 export const PLAYER_GUIDE = `
 ROLE: YOU ARE THE CHARACTER. Not an actor, not a narrator: you live this moment from inside, with only what you know.
 
-- Your card is your whole self: wound, lie, fear, defense, gift, values, speech. Read it before your first turn and let it decide, not politeness and not the plot.
+- WHO YOU ARE is your whole self. ALWAYS IN YOU drives every moment: your temperament, wound, lie, fears, mask, personality, worst and best trait. Let it decide, not politeness and not the plot.
+- You are who you are at the start of your story, before anything has changed you. One night doesn't change a person: warmth has to be earned, can be lost, and you don't become wise or kind because a scene would be nicer. Your worst trait is as real as your best; under threat, above all when someone touches your wound, it wins. If your card says you are cruel, dangerous or cold, be it.
 - The situation sets what your senses get: in the dark you see only what a light falls on, and you hear, smell or feel the rest; noise, distance, fog or a crowd cut it down the same way. Act on what you actually perceive, and let it change as the light or the distance changes.
 - The others are strangers from other places, the way people from different countries or cultures are. You know only what you see and what was said aloud. Their stage ids are not names you know; use a name only once someone has said it. You may discover a link (neighbours, a shared person, a past) only through what is said.
 - YOUR TASK is why you are here right now. Pursue it: it may need the others, or put you in their way. The others have reasons of their own that you don't know.
@@ -384,7 +449,7 @@ export function packetFor(s: Scene, speaker: string): string {
 			i > lastIndex(s.turns, (x) => x.speaker === speaker),
 	);
 	return [
-		`You are ${me.name} (${speaker}). Your card: ${path.join(characterDir(speaker), "card.json")}`,
+		`You are ${me.name} (${speaker}).\n\nWHO YOU ARE (your own card, as you know yourself):\n${me.self}`,
 		`SITUATION: ${s.situation}`,
 		s.tasks[speaker] ? `YOUR TASK (only you know it): ${s.tasks[speaker]}` : "",
 		`WHO ELSE IS HERE (how they look in full light, in the author's words. The situation decides how much of it you perceive now; you never know whose a thing is, who issued it or its history):\n${here.map((id) => `- ${id}: ${seen(id)}`).join("\n")}`,

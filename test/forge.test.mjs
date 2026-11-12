@@ -881,9 +881,17 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 			"a task is known only to its character",
 		);
 		assert.match(packetFor(r.scene, "ann-ash"), /YOUR TASK.*ANN-TASK/);
+		assert.match(packet, /WHO YOU ARE/);
 		assert.doesNotMatch(
 			packet,
-			/\bround\b/i,
+			new RegExp(
+				example.core.truth.slice(0, 30).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+			),
+			"a character never learns its own truth",
+		);
+		assert.doesNotMatch(
+			packet,
+			/\[round|round \d+ of/i,
 			"no game mechanics in what the character reads",
 		);
 		assert.match(
@@ -891,7 +899,11 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 			/drifting past you toward the horizon/,
 			"others are seen through stranger_view",
 		);
-		assert.doesNotMatch(packet, /deaf/, "not through the author's fields");
+		assert.doesNotMatch(
+			packet.split("WHO ELSE IS HERE")[1].split("WHAT HAS HAPPENED")[0],
+			/deaf/,
+			"others are seen without the author's fields",
+		);
 		assert.doesNotMatch(
 			packet,
 			/SECRET|Ann Ash/,
