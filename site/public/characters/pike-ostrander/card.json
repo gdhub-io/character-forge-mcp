@@ -1,0 +1,376 @@
+{
+  "meta": {
+    "name": "Pike Ostrander",
+    "slug": "pike-ostrander",
+    "medium": "film",
+    "genre": "sci-fi",
+    "mode": "brief",
+    "brief": "a very, very tall and thin character",
+    "seed": 1206484944,
+    "group": "1206484944",
+    "variant": "A",
+    "verdict": {
+      "status": "winner",
+      "score": 86,
+      "summary": "The only truly impossible climax: one reach, revenge or the boy he hates, paid for by letting Nell's killer go. The brief is the story itself: a child stretched into a giant on purpose."
+    },
+    "logline": "A corporate growth trial stretched a ten-year-old boy to two metres thirty-five. Now he uses his fists to guard the smaller children of the Underdeck, the flooded bottom level of the city. When the doctor who ran the trial comes back to sign up new children, Pike has to choose: take his revenge on her, or save the boy he hates and let her drive away free.",
+    "tagline": "Made tall. Made himself a weapon."
+  },
+  "core": {
+    "wound": "When Pike was seven, his mother signed him into Halden Bioworks' 'Reach' growth trial for the cash bonus she needed to keep their room. Dr. Ilse Marrow's daily injections stretched him to two metres by the age of nine, and he has kept growing ever since. The trial snapped his shin twice and killed Nell, the girl in the bed beside his. Halden paid a fine that was smaller than his mother's rent.",
+    "lie": "The world is ruled by predators. You're either the one with the reach, or you're the one they reach for.",
+    "truth": "His long reach is for pulling children to safety, even the children who betrayed others.",
+    "central_paradox": "The long body Halden built to sell is what lets him lift the Underdeck kids out of every flood and away from every recruiter's van. The same body is what makes him hit first. His protectiveness and his violence come from the same place.",
+    "dramatic_question": "When Dr. Marrow comes back to recruit new children, will Pike hurt her the way she hurt him, or will he give up the revenge he has built his life around in order to protect the kids?",
+    "spark_links": "He is a mentor to the younger children because he is the oldest survivor of the trial. He is very tall and thin because extra reach was exactly what the trial was trying to sell. The story is set in the slums of a 2090 megacity because only the poorest families sign their children into trials. He is violent because no adult was ever held to account for Nell's death."
+  },
+  "goals": {
+    "want": "To find Dr. Ilse Marrow when she comes back to the Underdeck to recruit, and make her feel what the injections felt like.",
+    "need": "To learn that his strength is for protecting people, not for paying them back, even when the person he protects is someone he despises.",
+    "motivation": "Nell died in the bed beside his and nobody came. If no court will make Marrow pay, he will.",
+    "arc_goal": "To learn compassion: to use his reach to shield even the people he hates, instead of using it to hit the people who hurt him.",
+    "goal_climax": "Marrow's van is pulling out of the flooded loading bay with Gus inside. Gus is an eight-year-old who sold the names of Pike's crew to the recruiters, and whose own father signed him into the trial for the bonus. Pike's heart is racing past its limit, and he has the strength for one last reach through the van window. He can drag Marrow out and beat her, or pull Gus free and let her go.",
+    "conflicting_goals": "Revenge means going for Marrow. Protection means saving Gus, the boy he hates most, while the woman responsible for Nell's death gets away.",
+    "scene_goal_example": "Tear the new recruitment flyer off the Underdeck noticeboard before any parent can read how big the bonus is."
+  },
+  "identification": {
+    "methods": [
+      {
+        "method": "Helps others",
+        "how": "When the Underdeck floods, he lifts the smaller kids one by one onto the cable trays, the metal shelves that carry power cables along the ceiling and stay above the water, holding each child clear of the flood."
+      },
+      {
+        "method": "Jeopardy",
+        "how": "The trial left his heart under constant strain. Every fight leaves him grey-faced and gasping, and the only clinic that could treat him belongs to Halden."
+      },
+      {
+        "method": "Mentor",
+        "how": "He teaches Pip and the other kids the climbing routes up to the cable trays and the hiding places recruiters never check, and makes them practise until they can do it in the dark."
+      }
+    ],
+    "flaws": [
+      {
+        "category": "physical",
+        "flaw": "A weak heart and fragile bones, both caused by the trial",
+        "how_it_shows": "He has to sit down after any effort, presses a fist to his breastbone, and wears a plastic brace on his left shin."
+      },
+      {
+        "category": "personality",
+        "flaw": "Violent",
+        "how_it_shows": "He throws the first punch at any adult in a clean coat, which in the Underdeck means a corporate worker or clinic staff. He has already broken a Halden recruiter's nose."
+      }
+    ],
+    "superpower": "Reach: at ten he is two metres thirty-five tall, with arms to match. He can climb to, grab and lift things that grown men cannot.",
+    "vulnerability": "His bones are as thin as pipe cleaners. One bad fall or one hard kick to the shin could break them again.",
+    "sympathy_hook": "Every night he folds himself into a drainage pipe next to the little ones, so they can sleep with their backs against his warm ribs.",
+    "first_appearance": "Night in the flooded Underdeck. A figure taller than any adult wades through black water, carrying three small children on his shoulders and in his arms. He sets them down on a cable tray, then turns, and we see that he has the face of a ten-year-old.",
+    "jeopardy": "His heart could give out in any fight, and Marrow wants him back as living proof that her trial works."
+  },
+  "psychology": {
+    "states": {
+      "passive": "He changes broken light panels for half pay, sleeps in the drainage pipe with his crew, and chases recruiters away from the noticeboard.",
+      "reactive": "A new Halden flyer goes up with Marrow's name on it: the Reach trial is starting again.",
+      "active": "He maps the route the Halden van takes through the Underdeck and sets up his crew to trap it."
+    },
+    "emotional_baseline": "On the outside he is watchful and hard. Underneath he is still a frightened child who wants someone to tuck him in at night.",
+    "inner_monologue": [
+      "Everyone's looking. Let them look.",
+      "Nell said it didn't hurt anymore. Then she stopped saying anything.",
+      "If I'm big enough, nobody gets taken."
+    ],
+    "interprets_experience": "He blames grown-ups for everything, and blames himself for Nell's death.",
+    "psychological_issues": "He has nightmares about hospital lights, flinches at the hiss of an injector, and won't let anyone touch his arms.",
+    "insecurity": "He fears he is no longer a boy, just a corporate product with a boy trapped inside it.",
+    "strong_beliefs": "Grown-ups in clean coats always win unless someone stops them by force.",
+    "strongest_trigger": "The cold hiss of a pressure injector, the needle-free device Marrow used on him every morning.",
+    "childhood": "His mother loved him but was worn out, and signed the trial papers so they could keep their room. Now she cannot look at him without crying. He cannot forgive her, and he cannot stop protecting her.",
+    "visual_device": "Doorways and ceilings. Every interior is framed so that Pike has to stoop, and the camera stays at his eye level, looking down on the adults. At the climax he kneels to Gus's height, and for the first time the camera comes down with him."
+  },
+  "description": {
+    "name_meaning": "A pike is both a long spear and a fish that strikes from cover. Ostrander is his mother's family name, from the Baltic districts of the city.",
+    "age": "10",
+    "gender": "Boy",
+    "species": "Human",
+    "cultural_background": "A third-generation Underdeck kid of mixed Baltic and Filipino descent. He speaks the clipped street pidgin of the lower levels.",
+    "physical": {
+      "height_build": "Two metres thirty-five at ten years old and still growing. He is painfully thin and all joints: long arms and legs, knock knees, a narrow chest, a small child's soft belly, and a head that looks too small for his body.",
+      "face": "A small, round child's face with big dark eyes, far too young for the body beneath it. Pale and freckled, with a chipped front tooth.",
+      "hair": "Black, shaved short by his mother with clippers and growing back unevenly.",
+      "first_impression": "From a distance he casts a grown man's shadow; up close he has a little boy's face."
+    },
+    "life_events": [
+      {
+        "age": "7",
+        "event": "His mother signed him into Halden's 'Reach' growth trial for the bonus money.",
+        "effect": "He learned that the people who love you can still sell you."
+      },
+      {
+        "age": "9",
+        "event": "Nell, the other child in his ward, died when her heart stopped in the bed next to his. Halden paid a small fine and carried on.",
+        "effect": "He learned that nobody comes to help kids like them."
+      },
+      {
+        "age": "9",
+        "event": "He broke a Halden recruiter's nose, and that recruiter never came back.",
+        "effect": "He learned that force works when nothing else does."
+      }
+    ],
+    "hobbies": [
+      "Collecting dead light panels and rewiring them into night-lights for the little ones",
+      "Racing paper boats down the flood channels",
+      "Drawing comics about a very tall superhero on scraps of cardboard"
+    ],
+    "speech": {
+      "manner": "A child's voice coming from high above you. He speaks Underdeck pidgin ('lah', 'quick-quick', 'ya?'), drops his verbs, borrows tough phrases from adults, and sometimes lets out a kid's giggle that he quickly swallows.",
+      "pet_words": [
+        "Up on the trays.",
+        "Clean coat.",
+        "Mine's the long arm."
+      ],
+      "sample_lines": [
+        "Clean coat on stair, lah. All up trays, quick-quick.",
+        "I'm ten. I'm just tall about it.",
+        "Nobody get taken. Not my deck, ya?"
+      ]
+    },
+    "sociology": {
+      "status": "An Underdeck street kid and the unofficial guardian of a crew of eight smaller children.",
+      "education": "Two years of slum school before the trial. He reads comics but struggles with long words.",
+      "money": "He is paid in food and old light panels, and hides credits in a sock to cover his mother's rent.",
+      "friends_family": "His mother Dana, who works double shifts and avoids his eyes; his crew of kids; and Gus, an eight-year-old who sells other children's names to the recruiters.",
+      "place": "The Underdeck: the flooded bottom level of the Spire District, below where any sunlight reaches and just above the sewers.",
+      "world_events": "Corporations pay slum families to test experimental treatments on their children, and for many families that bonus is the only way to keep a roof over their heads."
+    },
+    "biggest_disappointment": "His mother let him be taken away for money, and she still insists she did it for him.",
+    "most_valued": "His crew sleeping safely in the drainage pipe.",
+    "secret_dream": "To be small enough to sit on his mother's lap one more time.",
+    "missing": "A grown-up who will stand guard so that he doesn't have to."
+  },
+  "fears": {
+    "fears": [
+      {
+        "fear": "Dr. Ilse Marrow",
+        "root": "She ran the trial, held his arm still for the injections, and recorded his pain as data.",
+        "conscious": true
+      },
+      {
+        "fear": "That he is turning into a predator like her",
+        "root": "Every fight he wins feels good for a moment, and that frightens him.",
+        "conscious": false
+      }
+    ],
+    "mask": "A tough guy's stillness: he stands at his full height with his arms crossed and lets his size do the talking.",
+    "courage_source": "Pip, the smallest kid in his crew, who still believes he is a real superhero.",
+    "overcoming": "His fear stops mattering once he is acting to help someone else. At the climax he reaches into the van for Gus instead of for Marrow."
+  },
+  "uniqueness": {
+    "archetype": "Mentor",
+    "twist": "The mentor is a ten-year-old in a giant's body, teaching even smaller kids the climbing routes and hiding places that keep them off the recruiters' lists.",
+    "quirks": [
+      "He ducks under every doorway, even ones that are tall enough for him.",
+      "He holds kids above the floodwater by their armpits, counting under his breath.",
+      "He crosses his arms tightly to hide the injection scars on the insides of his elbows.",
+      "He eats sitting on the floor, so that he isn't taller than everyone else at the table.",
+      "He measures new kids against his knee and tells them they're taller than they look."
+    ],
+    "lifestyle": {
+      "tastes": "Old cartoon reruns on a cracked screen, and the brightest, sweetest drinks he can find.",
+      "shopping": "He scavenges, and trades his light-panel repairs for food at the noodle stall.",
+      "food": "Noodles, eaten standing up, with the broth always given to the littlest kid.",
+      "vehicle": "None. He walks everywhere, and can step over the barrier gates that other kids have to crawl under.",
+      "love_style": "He shows love by lifting people up, literally: onto his shoulders, or onto dry ground.",
+      "sore_spot": "Adults calling him 'big man'.",
+      "nonverbal_tics": "When he is angry he goes very still, like a heron just before it strikes.",
+      "talents": "He can reach a fourth-floor window from the street, and can rewire a light panel by touch in the dark.",
+      "spirituality": "He leaves a lit night-light on the drain where Nell's ashes were washed away."
+    },
+    "stress_relief": "He lies flat on a dry cable tray, stretched out to his full length for once, and counts the drips until his heart slows down.",
+    "dream_vacation": "A beach up on the Sunlight Levels, where he could lie down full length on the sand."
+  },
+  "backstory": {
+    "world": {
+      "who_rules": "The corporations based on the Sunlight Levels, the upper floors of the city that actually get daylight. The biggest is Halden Bioworks, which owns the clinics, the water supply and the police contracts.",
+      "boundaries": "The Lift Gates, the guarded elevators between the Underdeck and the Sunlight Levels. Nobody from below can go up without a corporate pass.",
+      "hierarchy": "Executives on the Sunlight Levels at the top, then the workers of the middle decks, then the people of the Underdeck, and at the very bottom the children nobody ever registered.",
+      "good_and_bad": "Down here, being good means paying your rent and keeping your kids. Being bad just means getting caught.",
+      "worth_dying_for": "A room with a door that locks.",
+      "worth_living_for": "The hour each day at noon when a shaft of real sunlight reaches the Underdeck through a broken vent.",
+      "best_and_worst": "The best thing that can happen is a kid winning a scholarship to the Sunlight Levels. The worst is a Halden van parked at the noticeboard.",
+      "survival_vs_comfort": "Survival. Comfort is a lit window you only glimpse through the Lift Gates."
+    },
+    "biography": "Pike was born in the Underdeck to Dana Ostrander, a laundry worker who held on to their room one missed payment at a time. When he was seven, a Halden Bioworks van parked by the noticeboard offering a bonus for 'healthy children' to join a height-enhancement study. Dana signed. For two years Pike lived in a clean white ward on the Sunlight Levels, where Dr. Ilse Marrow injected his arms every morning and recorded his pain on a tablet. He grew forty centimetres in a single year, and his shin snapped twice. Nell, a laughing girl from the next deck over, was in the bed beside his. She grew even faster, and one night her heart stopped. Halden paid a fine, ended the trial and sent the surviving children home. Pike came back two metres tall, with a heart that races on the stairs and a mother who cannot bear to look at him. He broke the nose of the next recruiter who came down, gathered the smallest kids on the deck around him, and made himself their wall.",
+    "connection_to_past": "He is the living result of the Reach trial, which everyone in the Underdeck pretends never happened.",
+    "distance_from_peers": "The other children from the trial either moved away or died. He stayed, the only one tall enough to guard the deck.",
+    "daily_life": "He changes light panels in exchange for food, guards the noticeboard, teaches the little ones the climbing routes to the cable trays, and sleeps folded up in the drainage pipe with his crew. He leaves his mother's rent money at her door without saying a word.",
+    "decision_style": "While he thinks, he cracks his long knuckles one by one. Under pressure he stops thinking altogether and swings.",
+    "key_locations": [
+      "The drainage pipe: a dry concrete tunnel where his crew sleeps, lit by the night-lights he rewired.",
+      "The Underdeck noticeboard, plastered with recruitment flyers that he tears down every morning.",
+      "The flooded loading bay where the Halden vans come in: the only place in the Underdeck with a ceiling higher than he is tall."
+    ],
+    "contradictions": [
+      {
+        "with_whom": "Pip, a five-year-old girl in his crew",
+        "behavior": "With Pip he is gentle and silly, playing the superhero she believes he is."
+      },
+      {
+        "with_whom": "Gus, an eight-year-old who sells kids' names to the recruiters",
+        "behavior": "With Gus he becomes the predator he hates: cold, threatening and ready to hurt him."
+      },
+      {
+        "with_whom": "His mother Dana",
+        "behavior": "With her he seems to shrink: he sits on the floor, says nothing, leaves the money and goes."
+      }
+    ]
+  },
+  "traits": {
+    "energy": "Explosive in short bursts, then exhausted",
+    "temperament": "Choleric",
+    "social": "Introvert",
+    "habits": [
+      "Counts the kids every hour",
+      "Ducks under every doorway",
+      "Sits down after every effort"
+    ],
+    "best_trait": "Protector: nobody in the Underdeck shields the small kids the way he does. He can lift three children out of a flood at once.",
+    "worst_trait": "Violent: he hits first and fast, and he is starting to enjoy it.",
+    "other_traits": [
+      "Protective",
+      "Stubborn",
+      "Childlike"
+    ],
+    "reactions": [
+      {
+        "situation": "An adult in a clean coat comes down the stairs",
+        "reaction": "He stands up to his full height between the stranger and the kids."
+      },
+      {
+        "situation": "Someone makes a hiss like an injector",
+        "reaction": "He freezes, then lashes out."
+      },
+      {
+        "situation": "Pip falls asleep on him",
+        "reaction": "He doesn't move for hours, even after his legs go numb."
+      }
+    ],
+    "others_say": [
+      "He's a good kid. He's just a good kid who'll kill somebody one day.",
+      "When Pike's here, nobody gets taken. When he's not, we hide."
+    ]
+  },
+  "destiny": {
+    "ordinary_world": "Guarding the drainage pipe and the noticeboard in the flooded Underdeck.",
+    "void": "Nobody will ever make Marrow pay, and no fight he wins fills the hole Nell's death left.",
+    "threshold": "Marrow's name appears on a new Reach flyer, and Gus sells the names of Pike's crew to her.",
+    "ordeal": "At the van window, his failing heart leaves him strength for only one reach: Marrow or Gus.",
+    "transformation": "He reaches for Gus and lets Marrow go. For the first time, he uses his reach to save someone he hates.",
+    "ending": "Marrow drives away free, the trial carries on in another district, and the woman responsible for Nell's death is never punished. Once he is pulled out, Gus tears up the list of names he sold and joins Pike's crew. Pike gives him Nell's star night-light, and has to live every day beside the boy he hates, knowing he let the doctor go. In the last scene the crew, Gus among them, hold up the night-lights Pike rewired for them, and for once it is Pike who is lit up."
+  },
+  "look": {
+    "shape_language": "Long, thin vertical lines broken by sharp knots at the joints (knees, elbows, knuckles): this is the reach the trial was built to sell. Only one soft, round shape breaks the pattern: his small round child's face, echoed by the round amber star glowing on his chest.",
+    "silhouette": "A 2.35-metre stick figure with a tiny head, stooped forward, arms crossed tightly. Knobbly knock knees, and a hoodie so short it rides up over a strip of child's belly. The silhouette deliberately avoids both the hulking-brute giant and the lanky slacker teenager: filled in solid black, it reads as a stretched child, not a big man.",
+    "perfection": "Everything he wears is outgrown and patched, but kept as clean as he can manage. Nothing is made for a child this tall, so every hem stops short and every seam is strained. It looks like poverty, not neglect: he keeps the little ones' things in better shape than his own.",
+    "body": {
+      "head_heights": 10,
+      "shoulders": 0.75,
+      "hips": 0.75,
+      "legs": 1.18,
+      "arms": 1.15,
+      "shoulder_tilt": -0.15,
+      "head_tilt": 0,
+      "stoop": 0.5,
+      "knees": "knock",
+      "why": "The Reach injections stretched his long bones far faster than the rest of him grew, so a ten-year-old's small head and narrow chest sit on a giant's limbs: an extreme ten heads tall. His knees knock because his bones grew faster than his muscles could hold them straight. His left shin, broken twice and badly healed, is slightly shorter than the right, so his left shoulder sits a little lower. His rounded stoop comes from ducking under every doorway since the trial."
+    },
+    "blocking": {
+      "hair": "#1C1A1A",
+      "skin": "#D9BC9E",
+      "top": "#4A4F55",
+      "bottom": "#5C5246",
+      "footwear_left": "#2A2826",
+      "footwear_right": "#2A2826",
+      "accessories": [
+        {
+          "where": "chest",
+          "color": "#F2B045",
+          "size": "small",
+          "item": "small glowing star-shaped night-light clipped to the hoodie drawstring"
+        }
+      ]
+    },
+    "signature_item": {
+      "item": "A star-shaped night-light, rewired from a dead light panel, glowing amber",
+      "story": "He built it in the ward for Nell, who was scared of the dark between the monitors. It is the only thing of hers he kept, and the first light he ever rewired.",
+      "how_carried": "Clipped to his hoodie drawstring in the middle of his chest and always switched on: the only warm colour anywhere on him. At the end he unclips it and gives it to Gus, and his chest goes dark."
+    },
+    "marks": [
+      {
+        "mark": "Rows of small round injection scars",
+        "location": "The insides of both elbows (usually hidden by his crossed arms)",
+        "origin": "Two years of daily Reach injections from Dr. Marrow."
+      },
+      {
+        "mark": "A scuffed white plastic shin brace, held on with tape",
+        "location": "LEFT shin only",
+        "origin": "His left shin snapped twice during the trial."
+      }
+    ],
+    "movement": {
+      "gait": "Long, careful, stork-like steps. He tests the ground with his right foot to spare the braced left one, and always keeps his head ducked.",
+      "idle_pose": "Stooped, with his arms crossed tightly over his chest to hide the insides of his elbows, standing between the stairs and the kids.",
+      "signature_gesture": "Ducking under a doorway that is actually high enough for him.",
+      "under_stress": "He goes still as a heron and breathes through his teeth, then strikes. Afterwards he sits down, grey in the face, and presses a fist to his breastbone."
+    },
+    "outfit": [
+      {
+        "piece": "A grey cotton hoodie, too short and too tight: the hem rides up above his navel and the sleeves stop halfway down his bony forearms",
+        "why": "Nothing fits a child this tall. The bare strip of soft belly shows the child that the giant body hides."
+      },
+      {
+        "piece": "Faded brown cargo trousers, outgrown, roughly cut off below the knee and patched at the seat",
+        "why": "He outgrew them but refuses to waste them. Cut short, they leave his shin brace on show."
+      },
+      {
+        "piece": "Bare feet wrapped in strips of black tyre rubber, tied on with wire",
+        "why": "No shoes come in his size, so he made his own from Underdeck scrap."
+      },
+      {
+        "piece": "A white hospital wristband printed 'R-07', never cut off, on his LEFT wrist",
+        "why": "It is his proof that the trial happened. He never says what the number means."
+      }
+    ],
+    "palette": [
+      {
+        "name": "Ward White",
+        "hex": "#E8E6E1",
+        "meaning": "The clinic that made him what he is: the colour of the wristband and the brace."
+      },
+      {
+        "name": "Underdeck Grey",
+        "hex": "#4A4F55",
+        "meaning": "His home, and his camouflage."
+      },
+      {
+        "name": "Scavenge Brown",
+        "hex": "#5C5246",
+        "meaning": "Everything he wears used to belong to someone else."
+      },
+      {
+        "name": "Night-light Amber",
+        "hex": "#F2B045",
+        "meaning": "Nell, and the care he gives the little ones: the only warm colour on him."
+      }
+    ],
+    "props": [
+      "Paper boats"
+    ],
+    "story_reads": [
+      "He is a child stretched into a giant.",
+      "Someone did this to him on purpose.",
+      "He protects the small."
+    ],
+    "art_style": "Stylized 3D, painterly textures",
+    "turnaround_notes": "Tiny round child's head on a 2.35 m body (10 heads tall), narrow chest, knock knees, rounded stoop. Hoodie rides up to show a strip of belly; sleeves end mid-forearm. White brace on the LEFT shin only; white 'R-07' wristband on the LEFT wrist only. Amber star night-light at the centre of the chest, glowing. Tyre-rubber foot wraps on both feet. Back view: hood down, patched trouser seat."
+  }
+}

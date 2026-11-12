@@ -29,6 +29,9 @@ const SITE_NAME = {
 // The hero block sits on a fixed bottom row; longer text would push it around, so texts are written to fit, never cut.
 const LIMITS = { blurb: 160, tagline: 40 };
 const tooLong = [];
+const hasLibrary = existsSync(library);
+if (!hasLibrary)
+	console.log(`No character library at ${library}: using the media already in public/characters.`);
 
 for (const { slug, blurb, i18n } of showcase) {
 	for (const [lang, text] of [
@@ -40,6 +43,8 @@ for (const { slug, blurb, i18n } of showcase) {
 				`${slug}: ${lang} blurb is ${text.length} characters (max ${LIMITS.blurb}) — rewrite it shorter in showcase.json`,
 			);
 	}
+	// No local library (CI, a fresh clone): the committed copies in public/ are used as they are.
+	if (!hasLibrary) continue;
 	await mkdir(path.join(out, slug), { recursive: true });
 	for (const f of OPTIONAL) {
 		const src = path.join(library, slug, f);

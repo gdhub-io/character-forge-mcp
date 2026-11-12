@@ -234,13 +234,14 @@ For paid steps, put `FAL_KEY=...` in a `.env` file in the repo (it is gitignored
 
 ### The showcase site
 
-`site/` is the website (Vite, React, Tailwind). It shows characters from your local library:
+`site/` is the website at [characters.gdhub.io](https://characters.gdhub.io) (Vite, React, Tailwind). Every push to `main` that touches `site/` builds it and publishes it on GitHub Pages.
 
 ```bash
 cd site && npm install
-npm run dev        # copies the characters listed in src/showcase.json from ../characters, then starts Vite
-SITE_URL=https://your.domain npm run build   # SITE_URL fills canonical links, the share image, sitemap and llms.txt
+npm run dev        # starts Vite on http://localhost:5173
 ```
+
+The characters it shows are listed in `site/src/showcase.json`; their media live in `site/public/characters/` and are committed. `npm run dev` and `npm run build` refresh them from your local library (`../characters`) when it exists, and use the committed copies when it doesn't. `SITE_URL` (set in the Pages workflow) fills canonical links, the share image, the sitemap and `llms.txt`.
 
 ### Project layout
 

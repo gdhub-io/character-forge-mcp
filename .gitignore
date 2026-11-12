@@ -1,6 +1,8 @@
 node_modules/
 dist/
 characters/
+# The site's showcase media are published with it (GitHub Pages builds from the repo).
+!site/public/characters/
 .env
 *.log
 .DS_Store
