@@ -38,6 +38,6 @@ jobs:
           cache-dependency-path: site/package-lock.json
       - run: npm ci
         working-directory: site
-      # Type-check only: the site's media come from a local character library that is not in the repo.
-      - run: npx tsc -p .
+      # Type-check and build with the media committed in site/public/characters.
+      - run: npm run build
         working-directory: site

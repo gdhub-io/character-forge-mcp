@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "name": "Ysolde Thane",
+    "slug": "ysolde-thane",
+    "medium": "film",
+    "genre": "cyberpunk",
+    "mode": "brief",
+    "brief": "a very, very frightening villain; an adult with a non-standard body shape and geometry",
+    "seed": 344237323,
+    "group": "344229404",
+    "variant": "B",
+    "verdict": {
+      "status": "winner",
+      "score": 85,
+      "summary": "The only true either-way loss: one dose of salts for her body and her secret, or for the child who is the living proof. Her half-stag body is the secret, and the ending makes her more monstrous, not redeemed."
+    },
+    "logline": "Ysolde rules the Antler Court, a kingdom of elf-like folk in a giant forest called the Thornwood, and she is its most feared interrogator. At forty she learned she was not born a princess but grown in the Court's secret vats. Now she kills every technician and burns every record of that program. Then the last proof she must destroy turns out to be Linnet, the orphan girl she is raising as her heir.",
+    "tagline": "She reads every lie. Except her own."
+  },
+  "core": {
+    "wound": "All through her childhood she was told her heavy left side was a birth defect. She was trained to hide it under a cloak, given weekly 'medicine' salts, and taught to read anyone who stared at her before they could speak. At forty, in her dead mother's papers, she found her own growth record. She was not the old Queen's daughter. She was grown in the Court's secret vats, half elf and half engineered stag.",
+    "lie": "Who I am is a fraud; if anyone finds out, I deserve to be destroyed.",
+    "truth": "She is who she chooses to be, not what vat she came from.",
+    "central_paradox": "She can find any secret in the kingdom, yet she spends that gift hiding her own. The Court's finest detective has become its most frightening criminal: she buries every truth that looks like her.",
+    "dramatic_question": "The salts that keep her stag half alive are running out, and Linnet's body is starting to show the stag too. Will Ysolde have her heir killed, as she once had a vat-grown girl killed in the lab, or give up her own body and her secret to keep the child alive?",
+    "spark_links": "She is a ruler because the secret vat program was built to grow one. She is a detective because a child taught to hide her body learns to read every face that might stare at it. Her body is lopsided because the vat grew half of her from a stag. Her voice is a rasp because her stag lungs never matched her elf throat. Her kingdom is a high-tech forest because the Court grows its heirs and its war-beasts in the same labs."
+  },
+  "goals": {
+    "want": "Find and destroy every technician, every record and every surviving child of the Court's secret vat program before anyone learns what she is.",
+    "need": "Accept where she came from and stop destroying everyone who reminds her of it.",
+    "motivation": "One leaked growth record would end her reign. Worse, she believes it would prove she was never a real person.",
+    "arc_goal": "Find a new way to be herself: live openly as what she is, even if it costs her the crown.",
+    "goal_climax": "Linnet has grown fur on her cheek and the bud of an antler, and a rival noble has seen it. Ysolde's purge has killed every salt-maker and burned the stag stock the salts are made from. Only Old Brannoch, the dying vat technician she keeps in her cells, can brew one last supply, enough for one person. Ysolde can keep it, stay hidden and keep her body, and let Linnet sicken and be exposed or quietly killed. Or she can give Linnet every dose and watch her own stag half fail in front of the Court.",
+    "conflicting_goals": "Her body and her secret depend on the salts. So does Linnet, the only child she has ever loved, and there is only enough for one.",
+    "scene_goal_example": "Make a captured vat technician name the last surviving child the program grew, without ever asking him directly."
+  },
+  "identification": {
+    "methods": [
+      {
+        "method": "Superpower",
+        "how": "She can hear a lie in a heartbeat, a twitch or a breath, and she needs only three questions to break anyone."
+      },
+      {
+        "method": "Loves someone",
+        "how": "She is raising Linnet, a nine-year-old orphan, as her heir, and is gentle with her as with no one else."
+      },
+      {
+        "method": "Jeopardy",
+        "how": "If the wrong noble found her growth record, the Court would execute her as a beast."
+      }
+    ],
+    "flaws": [
+      {
+        "category": "psychological",
+        "flaw": "Self-loathing",
+        "how_it_shows": "She avoids mirrors, covers her stag side with a cloak, and punishes anyone who looks at it."
+      },
+      {
+        "category": "physical",
+        "flaw": "A voice wrecked to a rasp",
+        "how_it_shows": "Her stag lungs don't match her elf throat, so every word comes out as a dry whisper. The Court leans in to hear her, terrified of missing a word."
+      }
+    ],
+    "superpower": "Perception. As a child she was trained to watch anyone who might stare at her, and her left ear has a stag's hearing. She can hear a lie in a heartbeat and map a whole conspiracy from one name dropped by accident.",
+    "vulnerability": "Her stag half needs the weekly vat salts she was always told were medicine. Her purge killed the other salt-makers and burned the stag stock they are made from. Old Brannoch, the last vat technician, is dying in her cells and can brew only one last supply, enough for one person.",
+    "sympathy_hook": "Every night she reads Linnet, her young heir, a bedtime story in her ruined whisper, leaning down so the girl can hear every word.",
+    "first_appearance": "A clean white vat lab deep in the roots of the Thornwood forest. Drone guards bring in a nine-year-old girl with a patch of velvet fur on her cheek, a sign she was grown in the vats. A figure steps out of the dark: one side slender, the other a huge hunched beast under a cloak. She kneels to the girl's height, strokes her hair and whispers the opening lines of a bedtime story, the same one she reads to Linnet every night. Then she nods to the guards. The lights go out.",
+    "jeopardy": "A rival noble is hunting for the same growth records, to prove she is a beast."
+  },
+  "psychology": {
+    "states": {
+      "passive": "She rules coldly, purges quietly, and reads to Linnet at night.",
+      "reactive": "Old Brannoch, the vat technician she keeps alive in her cells to make her salts, whispers that one child from the program is still alive, and close to her.",
+      "active": "She searches every record for that last child and finds the answer on Linnet's cheek. Then the salts begin to run out."
+    },
+    "emotional_baseline": "Icy control over a constant terror of being seen.",
+    "inner_monologue": [
+      "Don't look at the left side. Nobody looks at the left side.",
+      "Once upon a time there was a queen who was born. Only born.",
+      "If they find one of us, they find all of us."
+    ],
+    "interprets_experience": "Every lie she uncovers proves to her that everyone is a fraud, and she most of all.",
+    "psychological_issues": "Paranoia, a dread of mirrors and insomnia. She bathes in the dark.",
+    "insecurity": "That her mind was grown to order too, and nothing about her is her own.",
+    "strong_beliefs": "Truth is a weapon. The only safe truth is a buried one.",
+    "strongest_trigger": "The smell of the vat salts.",
+    "childhood": "She was raised as the old Queen's only daughter and trained to rule from infancy. She was praised for being perfect and never allowed to fail.",
+    "visual_device": "Halves. Ysolde is lit and framed so that only her elf half shows. At the climax she turns her failing stag half to the light and never turns it away again."
+  },
+  "description": {
+    "name_meaning": "Ysolde is an old royal name. A thane is a lord who holds land for a king, someone who rules on another's behalf.",
+    "age": "44",
+    "gender": "Woman",
+    "species": "Chimera: an elf-like woman grown together with an engineered stag",
+    "cultural_background": "Raised at the very top of the Antler Court, in the high branches of the Thornwood forest, and educated as royalty.",
+    "physical": {
+      "height_build": "Two metres twenty tall and deeply lopsided. Her right side is a slender elf. Her left side is massive and hunched like a stag: the shoulder rises into a hump, the neck is thick, the long heavy arm reaches her knee, the hip is wide, and the thick leg ends in a cloven hoof.",
+      "face": "A graft seam splits her face just left of the nose. The right half is fine and pale, with a sharp elf eye that never seems to blink. The left half is broad and covered in short brown velvet hide, with a dark, wet animal eye set lower than the other. It fixes on you the way a hunter watches prey. Her resting expression is a faint, cold, patient smile.",
+      "hair": "Silver hair, braided tight over the elf side. The left side of her head has short velvet fur and the flat stump of a sawn-off antler, worn smooth.",
+      "first_impression": "A queen cut in half: one side elegant and pale, the other a hunched beast, and a whisper you have to lean in to hear."
+    },
+    "life_events": [
+      {
+        "age": "6",
+        "event": "Her mother made her watch the execution of a vat-grown servant accused of 'pretending to be noble'. The next day her mother began training her to hide her 'defect' and to read anyone who looked at it.",
+        "effect": "She learned that being seen through means death, and that she must see through others first."
+      },
+      {
+        "age": "30",
+        "event": "She broke a nobles' conspiracy alone, with three questions, and was made Queen-Regent, ruling until the next heir comes of age.",
+        "effect": "She learned that seeing through people is power."
+      },
+      {
+        "age": "40",
+        "event": "She found her own growth record among her dead mother's papers.",
+        "effect": "She learned that she was the fraud, and began the purges."
+      }
+    ],
+    "hobbies": [
+      "Writing down every lie people tell her, in a ledger",
+      "Pressing forest flowers for Linnet, her young heir",
+      "Solving the Court's old unsolved crimes at night"
+    ],
+    "speech": {
+      "manner": "A dry, slow whisper. She asks three questions at a time, never more. She never raises her voice because she can't, so the whole room falls silent to hear her.",
+      "pet_words": [
+        "Lean closer.",
+        "That was a lie. Try again.",
+        "Look at me. All of me."
+      ],
+      "sample_lines": [
+        "Lean closer. I won't say it twice, and you'll want to have heard it.",
+        "That was a lie. Try again. You have two left.",
+        "Everyone is a different person underneath. I just get there first."
+      ]
+    },
+    "sociology": {
+      "status": "Queen-Regent of the Antler Court: she rules until the next heir comes of age.",
+      "education": "Royal: law, history, war and interrogation.",
+      "money": "She controls the Court's treasury and spends it on spies and silence.",
+      "friends_family": "The old Queen, who raised her as a daughter, is dead. Linnet, nine, is the orphan she adopted as her heir. Old Brannoch is the last technician of the vat program; she keeps him alive in a cell because only he can make her salts and he holds the last record.",
+      "place": "The throne at the top of the Thornwood forest, and the interrogation rooms beneath it.",
+      "world_events": "The Court grows more and more of its soldiers and servants in vats, and quietly kills them when they stop being useful."
+    },
+    "biggest_disappointment": "The woman she called mother ordered her grown like livestock, and died without telling her.",
+    "most_valued": "Her secret, and Linnet, the girl she is raising as her heir.",
+    "secret_dream": "To stand in daylight and be looked at, all of her, without anyone flinching.",
+    "missing": "One person who knows exactly what she is and stays."
+  },
+  "fears": {
+    "fears": [
+      {
+        "fear": "That her secret will be exposed",
+        "root": "Under Court law, a growth record would prove she is a beast.",
+        "conscious": true
+      },
+      {
+        "fear": "That there is no real Ysolde at all",
+        "root": "If her body was grown to order, maybe her mind was too.",
+        "conscious": false
+      }
+    ],
+    "mask": "Perfect royal composure, with her stag side always covered and turned away from the light.",
+    "courage_source": "Linnet, her young heir, who has always looked at her left side and never flinched.",
+    "overcoming": "She acts for someone else and forgets her fear. She gives Linnet the salts and lets her own body show, then makes the Court afraid to look."
+  },
+  "uniqueness": {
+    "archetype": "Ruler",
+    "twist": "A ruler who was grown to rule, and who uses her power to wipe out everyone made the way she was.",
+    "quirks": [
+      "Sits so that only her elf side faces the room.",
+      "Reads Linnet the same bedtime story every night, word for word.",
+      "Keeps a ledger of every lie anyone has told her, with the date.",
+      "Never uses mirrors and has them covered in every room she enters.",
+      "Strokes the stump of her sawn-off antler when she is thinking."
+    ],
+    "lifestyle": {
+      "tastes": "Old Court ballads and the scent of pressed flowers.",
+      "shopping": "Never. Everything is brought to her, and inspected.",
+      "food": "Eats alone in the dark, because her stag side needs raw feed.",
+      "vehicle": "A curtained chair carried on poles by engineered stags, with the curtain always drawn on her left.",
+      "love_style": "She protects the people she loves by keeping the truth from them.",
+      "sore_spot": "Being called 'beast' or 'thing'.",
+      "nonverbal_tics": "Strokes her antler stump and turns her left side away.",
+      "talents": "Reads lies from the body and remembers every word anyone has ever said to her.",
+      "spirituality": "Prays to the old royal saints, then burns the written prayers."
+    },
+    "stress_relief": "Solves an old unsolved crime from the archives in a single night.",
+    "dream_vacation": "A forest clearing at noon, with no curtains."
+  },
+  "backstory": {
+    "world": {
+      "who_rules": "The Antler Court, a dynasty of elf-like folk who live in the Thornwood, a giant forest. Their labs breed engineered beasts for labour and war, and their drones patrol the treetops, which are lit by glowing cables.",
+      "boundaries": "The line between those who were born and those who were grown. The vat halls in the forest's roots, where the grown are made, are forbidden to everyone.",
+      "hierarchy": "Born nobles, then born commoners, then grown servants, then beasts.",
+      "good_and_bad": "Being born is good; being made is bad.",
+      "worth_dying_for": "Bloodline.",
+      "worth_living_for": "Power over others.",
+      "best_and_worst": "Best: a pure bloodline. Worst: a growth record with your name on it.",
+      "survival_vs_comfort": "The born live in comfort; the grown just survive."
+    },
+    "biography": "Ysolde was raised as the only daughter of the old Queen of the Antler Court, trained from infancy to rule and praised for never failing. As a child she watched a vat-grown servant executed for 'pretending to be noble', and learned what happens to frauds. Her gift was seeing through people. At thirty she broke a nobles' conspiracy alone, with three whispered questions, and the Court made her Queen-Regent. At forty, going through her dead mother's sealed papers, she found her own growth record. The old Queen could not have children, so she had an heir grown in the beast vats, half elf and half engineered stag. The lopsided body Ysolde had always been told was a birth defect was a recipe. That night she began the purges. She killed every technician, burned every record and hunted every surviving child of the secret program, anyone who might lead back to her. She spared only Old Brannoch, a vat technician, and keeps him in a cell because only he can make her salts. The one person she never questioned was Linnet, the orphan she had already chosen as her heir, because she could not bear what the answers might be.",
+    "connection_to_past": "She is the oldest surviving child grown by the Court's secret vat program.",
+    "distance_from_peers": "The nobles she grew up with fear her more than they ever feared the old Queen.",
+    "daily_life": "She rules from a curtained throne, interrogates prisoners in the room beneath it, eats raw feed alone at night, and reads to Linnet before bed.",
+    "decision_style": "She writes the question in her ledger and waits for the answer to come to her. Under pressure, she burns the page.",
+    "key_locations": [
+      "The curtained throne at the top of the Thornwood forest, with a screen on its left side.",
+      "The interrogation room beneath the throne, lit by a single lamp on the right.",
+      "The abandoned vat hall in the forest's roots, where she was grown."
+    ],
+    "contradictions": [
+      {
+        "with_whom": "Linnet, her nine-year-old heir",
+        "behavior": "With Linnet she is warm and patient, and unafraid to let her left side show."
+      },
+      {
+        "with_whom": "The nobles of the Court",
+        "behavior": "With them she is the perfect cold queen, half hidden."
+      },
+      {
+        "with_whom": "Old Brannoch, the vat technician",
+        "behavior": "She keeps him alive only to make her salts, yet with him she becomes a frightened child asking who she is."
+      }
+    ]
+  },
+  "traits": {
+    "energy": "Low and controlled",
+    "temperament": "Melancholic",
+    "social": "Introvert",
+    "habits": [
+      "Covers mirrors",
+      "Writes lies in a ledger",
+      "Eats alone in the dark"
+    ],
+    "best_trait": "A perceptive detective: no one in the kingdom finds a hidden truth faster.",
+    "worst_trait": "Self-loathing: she believes she is a forgery, and destroys everyone made like her.",
+    "other_traits": [
+      "Cold",
+      "Brilliant",
+      "Lonely"
+    ],
+    "reactions": [
+      {
+        "situation": "Someone stares at her left side",
+        "reaction": "She smiles, and that night has them brought to the interrogation room beneath her throne."
+      },
+      {
+        "situation": "Someone lies to her",
+        "reaction": "She writes it in her ledger, smiling."
+      },
+      {
+        "situation": "Linnet, her young heir, touches her left hand",
+        "reaction": "She goes completely still and lets her."
+      }
+    ],
+    "others_say": [
+      "She's never wrong. That's what makes her questions so frightening.",
+      "Don't look at the left side. Whatever you do, don't look."
+    ]
+  },
+  "destiny": {
+    "ordinary_world": "The curtained throne and the interrogation room beneath it.",
+    "void": "No number of purges makes her feel real.",
+    "threshold": "Old Brannoch, the vat technician in her cells, tells her that one child from the program is still alive, and close to her.",
+    "ordeal": "There is one last supply of salts and two people who need it, Ysolde and Linnet, and a rival noble has seen the antler bud on Linnet's head.",
+    "transformation": "She gives Linnet the salts, and has the rival noble interrogated until he forgets what he saw.",
+    "ending": "Linnet lives and grows into her body. Ysolde's stag half stiffens and fails, and since she can no longer hide it, it is always turned to the light. She writes her own name in the ledger of lies and rules on, more frightening than ever. Anyone who looks too long at the fur on Linnet's cheek is taken to the room beneath the throne, where Ysolde holds up three fingers."
+  },
+  "look": {
+    "shape_language": "She is split down the middle. The elf right side is all thin verticals and sharp points: the braid, the fitted sleeve, the narrow slipper. The stag left side is heavy rounded masses: the hump, the hip, the arm that hangs to her knee. One hard flat cut breaks those curves: the sawn-off antler stump, cut away so she could pass as born.",
+    "silhouette": "In solid black she reads as two figures fused together. On the right, a slim tall woman. On the left, a high rounded stag hump, an arm hanging to the knee, a thick neck and a flat-topped stump on the head. One leg is narrow on a slipper; the other is thick and ends in a hoof. There is no crown and no high-collared cape, so she avoids both the stock evil-queen outline and the hulking-monster template. The horror is that she is both at once.",
+    "perfection": "The elf half is immaculate, with a tight braid, pressed silk and a polished slipper: her pride, and a lifetime of training to be flawless. The stag half is bare and unadorned. She no longer hides it from the people she interrogates. She lets them look, because by then it no longer matters.",
+    "body": {
+      "head_heights": 8.5,
+      "shoulders": 1.5,
+      "hips": 1.15,
+      "legs": 1.05,
+      "arms": 1.15,
+      "shoulder_tilt": 0.5,
+      "head_tilt": -0.3,
+      "stoop": 0.5,
+      "knees": "straight",
+      "why": "Vat-grown half elf, half engineered stag. The stag withers raise her LEFT shoulder into a hump above the right, the left haunch widens the hips, and the left arm hangs to the knee. The thick beast neck pulls her head toward the heavy LEFT side and rounds her back. 2.20 m tall: elongated elf proportions stretched over a beast frame."
+    },
+    "blocking": {
+      "hair": "#D4D6D9",
+      "skin": "#E3D8CE",
+      "top": "#C7C9CC",
+      "bottom": "#16191C",
+      "footwear_left": "#2B2420",
+      "footwear_right": "#C7C9CC",
+      "accessories": [
+        {
+          "where": "left_shoulder",
+          "color": "#6A4A33",
+          "size": "large",
+          "item": "bare fur-covered stag hump and shoulder, living hide (not armour, not a pauldron)"
+        },
+        {
+          "where": "head",
+          "color": "#8A6E52",
+          "size": "small",
+          "item": "short flat sawn-off antler stump on the LEFT temple"
+        },
+        {
+          "where": "back",
+          "color": "#16191C",
+          "size": "large",
+          "item": "heavy black velvet mantle thrown back behind her, clasped at the right shoulder, leaving the left side fully bare"
+        },
+        {
+          "where": "right_hip",
+          "color": "#16191C",
+          "size": "medium",
+          "item": "small black leather ledger hanging on a silver chain"
+        },
+        {
+          "where": "waist",
+          "color": "#A9C4B0",
+          "size": "small",
+          "item": "glass vial of pale green salts on a chain"
+        }
+      ]
+    },
+    "signature_item": {
+      "item": "A small black leather ledger of lies with a silver clasp",
+      "story": "Since childhood, when she was trained to read anyone who stared at her, she has written down every lie anyone has told her, with the date. It is the proof of her gift and the record of a life spent watching for exposure.",
+      "how_carried": "When she sits, she holds it open in her elf hand. When she needs that hand, it hangs at her right hip on a silver chain. A pressed forest flower for Linnet is always tucked between its pages. At the end of her story she writes her own name in it."
+    },
+    "marks": [
+      {
+        "mark": "The stump of a sawn-off antler, flat on top and worn glassy-smooth",
+        "location": "LEFT temple, above the lower stag eye",
+        "origin": "Sawn off in infancy so the vat-grown heir could pass as born. Decades of stroking it while she thinks have polished it smooth."
+      },
+      {
+        "mark": "A graft seam where pale elf skin meets brown velvet hide",
+        "location": "From the hairline just LEFT of the nose, down the throat and under the bodice; the fur side is her LEFT",
+        "origin": "The vat graft that joined her two halves."
+      },
+      {
+        "mark": "The stag hand ends in four thick, black fingers, hard as hoof",
+        "location": "LEFT hand",
+        "origin": "The stag graft made the fingers grow like hooves. She uses them in the interrogation room beneath her throne."
+      }
+    ],
+    "movement": {
+      "gait": "Slow and lopsided: a light step on the right, then the heavy hoof leg swings through with a dull knock. The long left arm hangs still so it never sways into view.",
+      "idle_pose": "She stands tall, head raised to look down at you. Her elf hand holds the open ledger; her stag hand hangs still, its black fingers half curled. A faint, cold smile and an unblinking stare.",
+      "signature_gesture": "Raises three fingers of her elf hand before she asks anything.",
+      "under_stress": "Reaches ACROSS her body with the elf hand to stroke the antler stump (never with the stag hand) and turns her left side away from the light."
+    },
+    "outfit": [
+      {
+        "piece": "Silver-grey silk binding wrapped along the graft seam at the neck and chest",
+        "why": "Part of her mask: the seam must never show at the neckline, not even to her tailors."
+      },
+      {
+        "piece": "A silver silk bodice with one long fitted right sleeve. The left side is let out with black lacing and has no sleeve, so the stag arm and hump are bare.",
+        "why": "It is a gown cut for a born body. No Court tailor could fit her other half, so it is laced open there: royalty that covers only half of her."
+      },
+      {
+        "piece": "A floor-length black velvet skirt, slit high on the LEFT over the heavy hoof leg",
+        "why": "The slit lets the stag leg move. At court she sits so the slit faces the screen beside her throne."
+      },
+      {
+        "piece": "A pointed silver satin slipper on the right foot; the left foot is a bare, dark cloven hoof",
+        "why": "No shoe was ever made for the hoof. The slipper is the perfect born half."
+      },
+      {
+        "piece": "A heavy black velvet cloak clasped at the right shoulder, shown here thrown back behind her",
+        "why": "It is her hiding place. At court she draws it over her left side; alone with Linnet she throws it back. The concept sheet shows her as Linnet sees her."
+      },
+      {
+        "piece": "A glass vial of pale green vat salts on a chain at the waist",
+        "why": "The 'medicine' her stag half depends on, worn like jewellery. It is the dose she will finally give away to Linnet."
+      },
+      {
+        "piece": "A slim silver case of interrogation needles and a coil of fine wire at the left hip",
+        "why": "The tools of the interrogation room beneath her throne, worn openly."
+      }
+    ],
+    "palette": [
+      {
+        "name": "Royal Silver",
+        "hex": "#C7C9CC",
+        "meaning": "The born half she shows: the elf side, the gown and the perfection she was raised into."
+      },
+      {
+        "name": "Vat Black",
+        "hex": "#16191C",
+        "meaning": "The cloak, the ledger, her secret and the interrogation room beneath the throne."
+      },
+      {
+        "name": "Stag Brown",
+        "hex": "#6A4A33",
+        "meaning": "The stag half: the fur, the hump, what she really is."
+      },
+      {
+        "name": "Salt Green",
+        "hex": "#A9C4B0",
+        "meaning": "The vat salts: the dependency that keeps her hidden, and the gift she finally gives Linnet."
+      }
+    ],
+    "props": [
+      "A pressed forest flower tucked in the ledger"
+    ],
+    "story_reads": [
+      "She is two creatures stitched together down the middle.",
+      "She is in total control, and she is already reading you.",
+      "If she smiles at you, you are going to the interrogation room beneath her throne."
+    ],
+    "art_style": "Stylized 3D, painterly textures",
+    "turnaround_notes": "The stag side is her LEFT and must be fully visible in both views. The cloak hangs BEHIND her from the clasp on her right shoulder and covers nothing on the left. LEFT: a high fur-covered stag hump above the right shoulder, a thick neck, a bare fur arm hanging to the knee, a wide hip, the skirt slit showing a thick leg on a dark cloven hoof, and the flat antler stump on the left temple. RIGHT: a slim elf body, a long fitted silver sleeve, a silver slipper, and the ledger on a chain at the right hip. A seam just left of the nose splits the face: pale elf skin on the right; brown velvet hide and a lower dark eye on the left. The head tilts slightly toward the LEFT. 2.20 m tall. Expression: a faint cold smile and an unblinking stare straight at the viewer, head raised to look down. The left stag hand has thick black fingers, hard as hoof. She must read as dangerous and in control, never pitiable."
+  }
+}
