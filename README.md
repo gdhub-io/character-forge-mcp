@@ -1,5 +1,9 @@
 # character-forge-mcp
 
+[![CI](https://github.com/gdhub-io/character-forge-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/gdhub-io/character-forge-mcp/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/character-forge-mcp)](https://www.npmjs.com/package/character-forge-mcp)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 An open-source [MCP](https://modelcontextprotocol.io) server for creating vivid, story-ready characters for film, games, animation, advertising, books and comics.
 
 Connect it to any MCP-capable chat (Claude Code, Claude Desktop, Cursor and others) and ask for a character. You get a **character package**:
@@ -87,32 +91,26 @@ The schema checks that the card is complete: at least 3 identification methods, 
 
 ## Install
 
-```bash
-git clone <repo> character-forge && cd character-forge
-npm install && npm run build
-```
-
-Requires Node.js 20+.
+Requires Node.js 20+. Nothing to clone or build: the server is published on npm.
 
 ### Claude Code (plugin, recommended)
 
-The repo is a Claude Code plugin. It bundles the MCP server, four skills (`forge-character`, `design-look`, `concept-art` and `character-prompts`) and four agents (`character-coherence`, `character-critic`, `character-judge` and `character-designer`). With the plugin, each reviewer runs as a separate agent with fresh context.
+The plugin bundles the MCP server, the skills (`forge-character`, `design-look`, `concept-art`, `character-prompts`, `translate-character`) and the agents (`character-coherence`, `character-critic`, `character-judge`, `character-designer`, `character-editor`). With the plugin, each reviewer runs as a separate agent with fresh context.
 
-```bash
-npm install && npm run build
-claude plugin marketplace add /abs/path/to/character-forge
-claude plugin install character-forge@character-forge
+```
+/plugin marketplace add gdhub-io/character-forge-mcp
+/plugin install character-forge@character-forge
 ```
 
-Once the repo is on GitHub, you can install it with `/plugin install character-forge --marketplace <owner>/<repo>`.
+Claude Code asks for the optional fal.ai key when you install the plugin and keeps it in your system's secure storage. Leave it empty to make characters, cards and prompts only; add it later in `/plugin`.
 
 ### Claude Code (MCP only)
 
 ```bash
-claude mcp add character-forge -e CHARACTER_FORGE_DIR=~/character-forge -e FAL_KEY=... -- node /abs/path/to/character-forge/dist/index.js
+claude mcp add character-forge -e CHARACTER_FORGE_DIR=~/character-forge -e FAL_KEY=... -- npx -y character-forge-mcp
 ```
 
-Inside this repo, Claude Code picks up the server from `.mcp.json`, and characters go to `./characters`. Without the plugin there are no separate reviewer agents. The model plays each role in a separate pass instead, which is weaker but still works.
+Without the plugin there are no separate reviewer agents. The model plays each role in a separate pass instead, which is weaker but still works.
 
 ### Claude Desktop / Cursor / any MCP client
 
@@ -120,8 +118,8 @@ Inside this repo, Claude Code picks up the server from `.mcp.json`, and characte
 {
   "mcpServers": {
     "character-forge": {
-      "command": "node",
-      "args": ["/abs/path/to/character-forge/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "character-forge-mcp"],
       "env": {
         "CHARACTER_FORGE_DIR": "/Users/you/character-forge",
         "FAL_KEY": "..."
@@ -130,6 +128,8 @@ Inside this repo, Claude Code picks up the server from `.mcp.json`, and characte
   }
 }
 ```
+
+Characters are saved to `CHARACTER_FORGE_DIR` (default `~/character-forge`), one folder per character.
 
 ## Use
 
@@ -200,6 +200,8 @@ With no arguments it starts the MCP server on stdio.
 To poke at the server interactively, run `npm run inspect` (MCP Inspector).
 
 ## Development
+
+Want to help? Read [CONTRIBUTING.md](CONTRIBUTING.md): every change goes through a pull request, and releases are automatic.
 
 ```bash
 npm run build

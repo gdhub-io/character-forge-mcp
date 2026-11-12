@@ -1,11 +1,13 @@
 {
   "name": "character-forge",
-  "owner": { "name": "Dzmitry Drynau" },
+  "owner": {
+    "name": "Dzmitry Drynau"
+  },
   "plugins": [
     {
       "name": "character-forge",
       "source": "./",
-      "description": "Strong, coherent characters via a variant tournament: card + T-pose concept."
+      "description": "Characters whose every trait grows from one story, then concept art, scene, video, voice and theme."
     }
   ]
 }

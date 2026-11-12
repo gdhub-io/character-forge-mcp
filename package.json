@@ -1,7 +1,7 @@
 {
   "name": "character-forge-mcp",
   "version": "0.3.0",
-  "description": "MCP server for building vivid, story-ready characters: a full character card (goals, psychology, fears, backstory, traits, arc) plus a T-pose concept sheet. For film, games, ads and books.",
+  "description": "MCP server, CLI and Claude Code plugin for characters with a story that holds together: a full character card from one causal chain, a look derived from the story, an A-pose concept sheet, and on request a scene, a looping video, a voice and a theme. For film, games, ads and books.",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,20 +10,34 @@
     "test": "npm run build && node --test test/*.test.mjs",
     "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
     "lint": "biome check --diagnostic-level=error .",
-    "format": "biome check --write ."
+    "format": "biome check --write .",
+    "prepack": "npm run build"
   },
   "keywords": [
+    "ai",
+    "character",
+    "character-creator",
+    "character-design",
+    "claude",
+    "claude-code",
+    "concept-art",
+    "gamedev",
     "mcp",
     "model-context-protocol",
-    "character",
-    "character-design",
     "screenwriting",
-    "gamedev",
-    "worldbuilding",
-    "concept-art"
+    "storytelling",
+    "worldbuilding"
   ],
   "author": "Dzmitry Drynau",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gdhub-io/character-forge-mcp.git"
+  },
+  "homepage": "https://github.com/gdhub-io/character-forge-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/gdhub-io/character-forge-mcp/issues"
+  },
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -45,5 +59,9 @@
   ],
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

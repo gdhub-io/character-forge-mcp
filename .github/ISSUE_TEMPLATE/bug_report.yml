@@ -1,0 +1,32 @@
+name: Bug report
+description: Something doesn't work as described
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      description: The request you gave the chat, or the tool / CLI command, and its output.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`npx character-forge-mcp --version`, or the plugin version in /plugin"
+  - type: dropdown
+    id: client
+    attributes:
+      label: Where you run it
+      options: [Claude Code (plugin), Claude Code (MCP), Claude Desktop, Cursor, Other MCP client, CLI]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Error messages, if any. Remove API keys first.
+      render: text

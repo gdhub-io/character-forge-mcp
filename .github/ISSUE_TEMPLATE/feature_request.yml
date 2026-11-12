@@ -1,0 +1,16 @@
+name: Idea
+description: Suggest a feature, a new core chain, or a better way to do something
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you want to do
+      description: The goal or the problem, in your own words.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How it could work. Examples help.

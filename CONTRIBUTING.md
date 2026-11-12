@@ -1,0 +1,49 @@
+# Contributing to character-forge-mcp
+
+Thanks for helping. Bug reports, ideas, new core chains and code are all welcome.
+
+## Ways to help
+
+- **Report a bug or suggest an idea**: open an [issue](https://github.com/gdhub-io/character-forge-mcp/issues/new/choose).
+- **Add a core chain**: the wounds in `src/engine.ts` are hand-curated so that every chain (wound → lie → fear → defense / gift → truth) holds by construction. A new, well-built chain is one of the best contributions.
+- **Fix or build something**: comment on an issue first if the change is large, so we agree on the approach before you spend time on it.
+
+## Set up
+
+Requires Node.js 20+ (and `ffmpeg` only if you generate video or audio).
+
+```bash
+git clone https://github.com/gdhub-io/character-forge-mcp.git && cd character-forge-mcp
+npm install
+npm test          # builds, then runs unit tests and an end-to-end MCP client/server test
+npm run lint      # Biome: lint + formatting
+npm run format    # fix what Biome can fix
+```
+
+Inside the repo, Claude Code picks up the local server from `.mcp.json` and writes characters to `./characters` (gitignored). The architecture is described in [CLAUDE.md](CLAUDE.md).
+
+**Tests never call paid APIs.** Keep it that way: anything that would reach fal.ai must be mocked or skipped. Never commit an API key; put `FAL_KEY` in a gitignored `.env`.
+
+## The workflow: intent → develop → refactor → review → pull request
+
+Nobody pushes to `main`. Every change, including the maintainers', goes through a pull request.
+
+1. **Intent.** Say what you want to change and why, in an issue or at the top of your PR. One concern per PR.
+2. **Develop** on a branch: `feat/short-name`, `fix/short-name`, `docs/…`. Add or update tests for behavior you change.
+3. **Refactor.** Before review, simplify what you wrote: no dead code, no duplicated helpers, comments only where the code can't speak for itself.
+4. **Review.** Re-read your diff as a stranger. `npm run lint` and `npm test` must pass.
+5. **Pull request.** Fill in the template. The title must follow [Conventional Commits](https://www.conventionalcommits.org): `feat: …`, `fix: …`, `docs: …`, `refactor: …`, `test: …`, `chore: …`. Add `!` for a breaking change (`feat!: …`).
+
+With [Claude Code](https://claude.com/claude-code), run `/contribute` in the repo: it walks through these steps, including `/simplify` for the refactor and `/code-review` for the review.
+
+## Versions and releases
+
+You don't bump versions or edit `CHANGELOG.md` by hand. PRs are squash-merged, so each PR title becomes one commit on `main`. [Release Please](https://github.com/googleapis/release-please) reads those commits and keeps a release PR open: `feat` raises the minor version, `fix` the patch, `!` the major (while we are on 0.x, a breaking change raises the minor). Merging the release PR tags the version, writes the changelog, creates the GitHub release and publishes the package to npm.
+
+## Content rules
+
+- All product text (cards, prompts, docs, the site) is English.
+- Cards and prompts are written for people who are not developers: plain words, no jargon.
+- Don't add a field to the card without following the checklist in [CLAUDE.md](CLAUDE.md) (schema → render → example → check → method).
+
+By contributing you agree that your contribution is licensed under the [MIT License](LICENSE), and to follow our [Code of Conduct](CODE_OF_CONDUCT.md).

@@ -1,7 +1,7 @@
 {
   "name": "character-forge",
   "version": "0.3.0",
-  "description": "Strong, coherent characters for film, games, ads and books: a variant tournament with independent coherence reviewers, critics and a judge; character card + T-pose concept.",
+  "description": "Characters for film, games, ads and books: a variant tournament writes a card whose every trait grows from one story, then, on request, concept art, a scene, a looping video, a voice and a theme.",
   "author": {
     "name": "Dzmitry Drynau"
   },
@@ -15,9 +15,10 @@
   ],
   "mcpServers": {
     "character-forge": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "${CLAUDE_PLUGIN_ROOT}/dist/index.js"
+        "-y",
+        "character-forge-mcp@latest"
       ],
       "env": {
         "FAL_KEY": "${user_config.fal_key}"
@@ -31,5 +32,7 @@
       "description": "Needed for pictures, video, voice and music. Get one at fal.ai → API keys. Leave empty to create characters and cards only.",
       "sensitive": true
     }
-  }
+  },
+  "homepage": "https://github.com/gdhub-io/character-forge-mcp",
+  "repository": "https://github.com/gdhub-io/character-forge-mcp"
 }

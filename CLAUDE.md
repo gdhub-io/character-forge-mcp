@@ -13,6 +13,7 @@ npm run build                    # tsc → dist/ (tests and MCP clients run dist
 npm test                         # build + node --test test/*.test.mjs
 npm run build && node --test --test-name-pattern="variants" test/forge.test.mjs   # single test
 npm run inspect                  # MCP Inspector against dist/index.js
+npm run lint                     # Biome lint + format check (CI runs it); npm run format fixes
 
 # CLI (same binary; no args = MCP server on stdio)
 CHARACTER_FORGE_DIR=./characters node dist/index.js roll --variants 3 --anchor fisherman
@@ -22,7 +23,7 @@ node dist/index.js prompt marta-vell                  # A-pose image prompt
 node dist/index.js media marta-vell --kind voice      # brief for one generation prompt
 ```
 
-There is no linter config. TypeScript is strict, and the package is ESM (`NodeNext`), so relative imports need a `.js` extension. The end-to-end test in `test/forge.test.mjs` spawns `dist/index.js` over stdio with a real MCP client.
+Biome (`biome.jsonc`) lints and formats: tabs, double quotes, sorted imports. TypeScript is strict, and the package is ESM (`NodeNext`), so relative imports need a `.js` extension. The end-to-end test in `test/forge.test.mjs` spawns `dist/index.js` over stdio with a real MCP client.
 
 ## Architecture
 
@@ -58,4 +59,11 @@ The card's `look` section (shape language, silhouette, perfection, signature ite
 - `src/index.ts` is the CLI and stdio entry. CLI commands reuse store, concept and random helpers. For example, `RollOptionsSchema` drives both the `character_create` input and CLI flag parsing. `character_create` is the single entry for a new character (random, brief, concept image, or both); a user image travels in `meta.concept_image`, and `character_pick` imports it as the winner's concept.
 - `src/methodology.ts` holds `METHOD_GUIDE` and the konspekt's lists. Most lists are not rolled; `referenceLists()` gives them to the model as menus via `character_method`.
 
-**Plugin.** The repo root is a Claude Code plugin (`.claude-plugin/plugin.json` and `marketplace.json`, with `skills/`, `agents/`). The plugin's MCP server runs `${CLAUDE_PLUGIN_ROOT}/dist/index.js`, so the repo must be built. `.claude/skills` and `.claude/agents` are symlinks to the root folders for in-repo development; edit the originals. Don't install the plugin while developing here, or the skill and agents load twice. `.mcp.json` runs the local server with `CHARACTER_FORGE_DIR=./characters`, which is gitignored. Keep the version in `package.json` and `plugin.json` in sync; a test checks it, and the server reads its version from `package.json`.
+**Plugin.** The repo root is a Claude Code plugin (`.claude-plugin/plugin.json` and `marketplace.json`, with `skills/`, `agents/`). The plugin's MCP server runs `npx -y character-forge-mcp@latest` from npm, so installing from GitHub needs no build; inside the repo `.mcp.json` runs the local `dist/` instead. `.claude/skills` and `.claude/agents` are symlinks to the root folders for in-repo development; edit the originals. Don't install the plugin while developing here, or the skill and agents load twice. `.mcp.json` runs the local server with `CHARACTER_FORGE_DIR=./characters`, which is gitignored. The server reads its version from `package.json`; Release Please bumps it together with `plugin.json` (a test checks they match).
+
+## Workflow and releases
+
+- **Nobody pushes to `main`.** Every change goes intent → branch → develop (with tests) → refactor (`simplify`) → review (`code-review`, `npm run lint`, `npm test`) → pull request. The `contribute` skill (`.claude/skills/contribute`) walks through it; CONTRIBUTING.md is the human version.
+- **PR titles and commits follow Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `!` for breaking). PRs are squash-merged, so the title is the commit Release Please reads.
+- **Never bump versions or edit CHANGELOG.md by hand.** Release Please keeps a release PR open; merging it tags the version, writes the changelog, creates the GitHub release and publishes to npm (`.github/workflows/release.yml`).
+- CI (`.github/workflows/ci.yml`) runs lint and tests on Node 20 and 22 and type-checks the site. Tests must never call paid APIs.

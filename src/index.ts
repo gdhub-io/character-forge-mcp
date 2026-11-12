@@ -17,7 +17,7 @@ import { MEDIA_KINDS, type MediaKind, mediaBrief } from "./media.js";
 import { nextToText } from "./next.js";
 import { RollOptionsSchema, rollToText } from "./random.js";
 import { generateIdleVideo, generateScene, type VideoModel } from "./scene.js";
-import { createServer } from "./server.js";
+import { createServer, VERSION } from "./server.js";
 import {
 	listCards,
 	listToText,
@@ -33,6 +33,7 @@ const HELP = `character-forge — MCP server + CLI for building characters
 
 Usage:
   character-forge                      start the MCP server on stdio (what MCP clients run)
+  character-forge --version            print the version
   character-forge roll [--variants N] [--anchor ROLE] [--seed N] [--medium M] [--genre G] [--human] [--json]
   character-forge validate <card.json> check a card against the schema
   character-forge check <card.json>    red flags + coherence interview for a draft card
@@ -280,6 +281,10 @@ async function main() {
 		}
 		case "list":
 			console.log(listToText(await listCards()));
+			return;
+		case "--version":
+		case "-v":
+			console.log(VERSION);
 			return;
 		case "help":
 		case "--help":
