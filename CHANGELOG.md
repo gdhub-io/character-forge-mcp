@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.1...v0.3.2) (2026-11-12)
+
+
+### Features
+
+* return every artifact into the chat; security hardening and simplify ([#26](https://github.com/gdhub-io/character-forge-mcp/issues/26)) ([d4a3f60](https://github.com/gdhub-io/character-forge-mcp/commit/d4a3f604edb4f1dc864231f76d9638ebf236383b))
+
 ## [0.3.1](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.0...v0.3.1) (2026-11-12)
 
 
