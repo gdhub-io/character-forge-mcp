@@ -18,7 +18,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "character-forge-mcp@latest"
+        "@gdhub/character-forge-mcp@latest"
       ],
       "env": {
         "FAL_KEY": "${user_config.fal_key}"

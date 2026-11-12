@@ -14,7 +14,7 @@ The card answers nine questions: what they want (and really need), why we care, 
 ## Install
 
 - Claude Code: `/plugin marketplace add gdhub-io/character-forge-mcp`, then `/plugin install character-forge@character-forge`. Claude Code asks for the optional fal.ai key and keeps it in secure storage.
-- Claude Desktop, Cursor, any MCP client: a server entry with `"command": "npx"`, `"args": ["-y", "character-forge-mcp"]` and `"env": { "FAL_KEY": "…" }`.
+- Claude Desktop, Cursor, any MCP client: a server entry with `"command": "npx"`, `"args": ["-y", "@gdhub/character-forge-mcp"]` and `"env": { "FAL_KEY": "…" }`.
 
 ## What you can ask for
 

@@ -528,7 +528,7 @@ function Terminal() {
 		["# Claude Desktop, Cursor, any MCP client", "comment"],
 		['"character-forge": {', "code"],
 		['  "command": "npx",', "code"],
-		[`  "args": ["-y", "character-forge-mcp"],`, "code"],
+		[`  "args": ["-y", "@gdhub/character-forge-mcp"],`, "code"],
 		['  "env": { "FAL_KEY": "…" }', "code"],
 		["}", "code"],
 		["", "gap"],
