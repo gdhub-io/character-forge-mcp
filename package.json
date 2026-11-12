@@ -1,5 +1,5 @@
 {
-  "name": "character-forge-mcp",
+  "name": "@gdhub/character-forge-mcp",
   "version": "0.3.0",
   "description": "MCP server, CLI and Claude Code plugin for characters with a story that holds together: a full character card from one causal chain, a look derived from the story, an A-pose concept sheet, and on request a scene, a looping video, a voice and a theme. For film, games, ads and books.",
   "main": "dist/index.js",

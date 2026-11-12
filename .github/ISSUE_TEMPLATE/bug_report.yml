@@ -18,7 +18,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: "`npx character-forge-mcp --version`, or the plugin version in /plugin"
+      description: "`npx @gdhub/character-forge-mcp --version`, or the plugin version in /plugin"
   - type: dropdown
     id: client
     attributes:
