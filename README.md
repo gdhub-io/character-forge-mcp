@@ -196,14 +196,14 @@ The provider (fal.ai) and the model for each kind of media live in [`models.json
 The same package is also a command-line tool, for scripts and quick tests. With no arguments it starts the MCP server on stdio.
 
 ```bash
-npx character-forge-mcp roll --variants 3 --anchor fisherman   # roll 3 variants of one concept
-npx character-forge-mcp check card.json                        # red flags + coherence questions
-npx character-forge-mcp save card.json                         # validate and save to the library
-npx character-forge-mcp next marta-vell                        # what can be made next, with prices
-npx character-forge-mcp concept marta-vell                     # concept sheet (needs FAL_KEY)
-npx character-forge-mcp costs marta-vell                       # what it has cost so far
-npx character-forge-mcp list
-npx character-forge-mcp --help                                 # every command
+npx @gdhub/character-forge-mcp roll --variants 3 --anchor fisherman    # roll 3 variants of one concept
+npx @gdhub/character-forge-mcp check card.json                         # red flags + coherence questions
+npx @gdhub/character-forge-mcp save card.json                          # validate and save to the library
+npx @gdhub/character-forge-mcp next marta-vell                         # what can be made next, with prices
+npx @gdhub/character-forge-mcp concept marta-vell                      # concept sheet (needs FAL_KEY)
+npx @gdhub/character-forge-mcp costs marta-vell                        # what it has cost so far
+npx @gdhub/character-forge-mcp list
+npx @gdhub/character-forge-mcp --help                                  # every command
 ```
 
 ## Development
