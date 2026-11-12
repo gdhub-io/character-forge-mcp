@@ -1,0 +1,29 @@
+# Character Forge MCP
+
+> A free, open-source (MIT) MCP server, CLI and Claude Code plugin that creates characters for film, games, ads and books. You ask for a character in your AI chat and get a whole person whose every trait grows from one story, and then, on request, their concept art, their place, a looping video, their voice in any language and a short theme of their own.
+
+Works in chats that run on your computer: Claude Code (as a plugin), Claude Desktop, Cursor and any MCP client. Cards and generation prompts are free. Pictures, video, voice and music are generated on fal.ai with the user's own key (about $1.50 for a whole character). All character text is written in English.
+
+## How a character is made
+
+1. **The card.** The user asks for a character: from nothing (random), a text brief, their own concept image, or an image plus a brief. Three versions of the idea are written; independent reviewers check that every trait traces back to one core (wound → lie → fear → worst trait / best trait → truth), critics argue against each, a judge picks the strongest, a designer derives the look from the story, and an editor makes the text clear to a stranger.
+2. **The media, one paid step at a time, only when asked:** concept sheet (front and back) → the character in their own place → an 8-second living picture of that place → their voice, saying a few lines about that moment, in every language → their theme music (needs only the place).
+
+The card answers nine questions: what they want (and really need), why we care, how they think, who they are, what they fear, what sets them apart, where they come from, their best and worst sides, and how they change.
+
+## Install
+
+- Claude Code: `/plugin marketplace add gdhub-io/character-forge-mcp`, then `/plugin install character-forge@character-forge`. Claude Code asks for the optional fal.ai key and keeps it in secure storage.
+- Claude Desktop, Cursor, any MCP client: a server entry with `"command": "npx"`, `"args": ["-y", "github:gdhub-io/character-forge-mcp"]` and `"env": { "FAL_KEY": "…" }`.
+
+## What you can ask for
+
+- Create a character (`character_create`): from nothing, a brief, a picture, or a picture and a brief. Free.
+- Draw the concept (`character_concept`), put them in their place (`character_scene`), bring the picture to life (`character_video`), give them a voice (`character_voice`), write their music (`character_theme`). Need a fal.ai key.
+- Get a prompt for any generator (`character_prompt`), translate the card (`character_translate`), what's next (`character_next`), what it cost (`character_costs`). Free.
+
+## Links
+
+- [Website](%SITE_URL%/): showcase of characters made with it, and how it works
+- [Source code and README](https://github.com/gdhub-io/character-forge-mcp): full documentation, the method, tools and CLI
+- [License (MIT)](https://github.com/gdhub-io/character-forge-mcp/blob/main/LICENSE)

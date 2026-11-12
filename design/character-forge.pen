@@ -152,18 +152,34 @@
                   "type": "frame",
                   "id": "kqsDR",
                   "name": "Logo",
-                  "gap": 10,
+                  "gap": 12,
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "icon",
-                      "id": "KXSQc",
+                      "type": "frame",
+                      "id": "X7z92J",
                       "name": "Mark",
-                      "width": 20,
-                      "height": 20,
-                      "icon": "anvil",
-                      "library": "lucide",
-                      "fill": "$char-text"
+                      "width": 44,
+                      "height": 44,
+                      "fill": "$char-deep",
+                      "cornerRadius": 10,
+                      "stroke": "$char-line",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "v3YfK",
+                          "name": "CF",
+                          "fill": "$char-text",
+                          "content": "Cf",
+                          "fontFamily": "$font-display",
+                          "fontSize": 26,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.8
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -2166,18 +2182,34 @@
               "type": "frame",
               "id": "NzhMZ",
               "name": "Logo",
-              "gap": 10,
+              "gap": 12,
               "alignItems": "center",
               "children": [
                 {
-                  "type": "icon",
-                  "id": "T9EfZF",
+                  "type": "frame",
+                  "id": "SPOrv",
                   "name": "Mark",
-                  "width": 20,
-                  "height": 20,
-                  "icon": "anvil",
-                  "library": "lucide",
-                  "fill": "$char-text"
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$char-deep",
+                  "cornerRadius": 10,
+                  "stroke": "$char-line",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L5ag1n",
+                      "name": "CF",
+                      "fill": "$char-text",
+                      "content": "Cf",
+                      "fontFamily": "$font-display",
+                      "fontSize": 26,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.8
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -2551,18 +2583,34 @@
                   "type": "frame",
                   "id": "P78NCp",
                   "name": "Logo",
-                  "gap": 10,
+                  "gap": 12,
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "icon",
-                      "id": "gdlyJ",
+                      "type": "frame",
+                      "id": "jv4LV",
                       "name": "Mark",
-                      "width": 20,
-                      "height": 20,
-                      "icon": "anvil",
-                      "library": "lucide",
-                      "fill": "$char-text"
+                      "width": 44,
+                      "height": 44,
+                      "fill": "$char-deep",
+                      "cornerRadius": 10,
+                      "stroke": "$char-line",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "A6tmLC",
+                          "name": "CF",
+                          "fill": "$char-text",
+                          "content": "Cf",
+                          "fontFamily": "$font-display",
+                          "fontSize": 26,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.8
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -3506,18 +3554,34 @@
               "type": "frame",
               "id": "LIJbC",
               "name": "Logo",
-              "gap": 8,
+              "gap": 12,
               "alignItems": "center",
               "children": [
                 {
-                  "type": "icon",
-                  "id": "auoj5",
+                  "type": "frame",
+                  "id": "SMwp7",
                   "name": "Mark",
-                  "width": 18,
-                  "height": 18,
-                  "icon": "hammer",
-                  "library": "lucide",
-                  "fill": "$char-text"
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$char-deep",
+                  "cornerRadius": 10,
+                  "stroke": "$char-line",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wXteo",
+                      "name": "CF",
+                      "fill": "$char-text",
+                      "content": "Cf",
+                      "fontFamily": "$font-display",
+                      "fontSize": 26,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.8
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -3966,18 +4030,34 @@
                   "type": "frame",
                   "id": "IQvpf",
                   "name": "Logo",
-                  "gap": 10,
+                  "gap": 12,
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "icon",
-                      "id": "q7e8e6",
+                      "type": "frame",
+                      "id": "nJ4fW",
                       "name": "Mark",
-                      "width": 20,
-                      "height": 20,
-                      "icon": "anvil",
-                      "library": "lucide",
-                      "fill": "$char-text"
+                      "width": 44,
+                      "height": 44,
+                      "fill": "$char-deep",
+                      "cornerRadius": 10,
+                      "stroke": "$char-line",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xmE8N",
+                          "name": "CF",
+                          "fill": "$char-text",
+                          "content": "Cf",
+                          "fontFamily": "$font-display",
+                          "fontSize": 26,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.8
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -4953,19 +5033,6 @@
                       "fontWeight": "normal"
                     }
                   ]
-                },
-                {
-                  "type": "text",
-                  "id": "b5ItH2",
-                  "name": "Note",
-                  "fill": "$char-dim",
-                  "textGrowth": "fixed-width",
-                  "width": 380,
-                  "content": "Each step only when you ask for it.",
-                  "lineHeight": 1.55,
-                  "fontFamily": "$font-body",
-                  "fontSize": 15,
-                  "fontWeight": "normal"
                 }
               ]
             },
@@ -5418,7 +5485,7 @@
                       "id": "bRu0r",
                       "name": "Price",
                       "fill": "$char-dim",
-                      "content": "≈ $0.10",
+                      "content": "≈ $0.03",
                       "fontFamily": "$font-mono",
                       "fontSize": 11,
                       "fontWeight": "normal"
@@ -5810,7 +5877,7 @@
                               "fill": "$char-text",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "/plugin marketplace add dmitrydrynov/character-forge-mcp",
+                              "content": "/plugin marketplace add gdhub-io/character-forge-mcp",
                               "lineHeight": 1.5,
                               "fontFamily": "$font-mono",
                               "fontSize": 13,
@@ -5938,7 +6005,7 @@
                               "fill": "$char-text",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "  \"args\": [\"-y\", \"github:dmitrydrynov/character-forge-mcp\"],",
+                              "content": "  \"args\": [\"-y\", \"github:gdhub-io/character-forge-mcp\"],",
                               "lineHeight": 1.5,
                               "fontFamily": "$font-mono",
                               "fontSize": 13,
@@ -6391,7 +6458,7 @@
                           "id": "MHEOT",
                           "name": "Cmd",
                           "fill": "$char-accent",
-                          "content": "character_roll",
+                          "content": "character_create",
                           "fontFamily": "$font-mono",
                           "fontSize": 11,
                           "fontWeight": "normal"
@@ -6432,46 +6499,6 @@
                           "opacity": 0.7,
                           "fill": "$char-dim",
                           "content": "character_concept · needs key",
-                          "fontFamily": "$font-mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "qJAbr",
-                      "name": "Use your own picture",
-                      "width": "fill_container",
-                      "fill": "#00000000",
-                      "stroke": "#00000000",
-                      "strokeWidth": {
-                        "left": 2
-                      },
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": [
-                        12,
-                        20
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "KzR3i",
-                          "name": "Label",
-                          "fill": "$char-dim",
-                          "content": "Use your own picture",
-                          "fontFamily": "$font-body",
-                          "fontSize": 15,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "YPQ3s",
-                          "name": "Cmd",
-                          "opacity": 0.7,
-                          "fill": "$char-dim",
-                          "content": "character_concept_import",
                           "fontFamily": "$font-mono",
                           "fontSize": 11,
                           "fontWeight": "normal"
@@ -6818,7 +6845,7 @@
                       "id": "G9ukf",
                       "name": "Cmd",
                       "fill": "$char-accent",
-                      "content": "character_roll",
+                      "content": "character_create",
                       "fontFamily": "$font-mono",
                       "fontSize": 12,
                       "fontWeight": "normal"
@@ -6840,7 +6867,7 @@
                       "fill": "$char-dim",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Describe who you need, or ask for a surprise. Three different versions of your idea are written, compared against each other, and the strongest one becomes your character. You get their full card: what they want, what they fear, where they come from and how they change.",
+                      "content": "Start from nothing, from a few words, from a picture, or from a picture and a few words. Three different versions of your idea are written and compared, and the strongest one becomes your character. If you gave a picture, their story explains everything in it, and it becomes their concept.",
                       "lineHeight": 1.6,
                       "fontFamily": "$font-body",
                       "fontSize": 16,
@@ -6867,24 +6894,39 @@
                         },
                         {
                           "type": "frame",
-                          "id": "Z08yyC",
+                          "id": "WxFqt",
                           "name": "Bubble",
                           "width": "fill_container",
                           "fill": "#FFFFFF0D",
                           "cornerRadius": 10,
+                          "gap": 16,
                           "padding": [
                             12,
                             16
                           ],
+                          "alignItems": "center",
                           "children": [
                             {
                               "type": "text",
-                              "id": "KFoI4",
+                              "id": "xHwJh",
+                              "name": "From",
+                              "fill": "$char-accent",
+                              "textGrowth": "fixed-width",
+                              "width": 110,
+                              "content": "NOTHING",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal",
+                              "letterSpacing": 1.4
+                            },
+                            {
+                              "type": "text",
+                              "id": "kHGdM",
                               "name": "Q",
                               "fill": "$char-text",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "“Make me a random character for a noir film.”",
+                              "content": "“Surprise me: a character for a noir film.”",
                               "fontFamily": "$font-body",
                               "fontSize": 14,
                               "fontWeight": "normal",
@@ -6894,19 +6936,34 @@
                         },
                         {
                           "type": "frame",
-                          "id": "p93Tw",
+                          "id": "n6tRa",
                           "name": "Bubble",
                           "width": "fill_container",
                           "fill": "#FFFFFF0D",
                           "cornerRadius": 10,
+                          "gap": 16,
                           "padding": [
                             12,
                             16
                           ],
+                          "alignItems": "center",
                           "children": [
                             {
                               "type": "text",
-                              "id": "f5LW3",
+                              "id": "Y9bceD",
+                              "name": "From",
+                              "fill": "$char-accent",
+                              "textGrowth": "fixed-width",
+                              "width": 110,
+                              "content": "A FEW WORDS",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal",
+                              "letterSpacing": 1.4
+                            },
+                            {
+                              "type": "text",
+                              "id": "m0jNMq",
                               "name": "Q",
                               "fill": "$char-text",
                               "textGrowth": "fixed-width",
@@ -6921,24 +6978,81 @@
                         },
                         {
                           "type": "frame",
-                          "id": "o1E5G2",
+                          "id": "ZZpre",
                           "name": "Bubble",
                           "width": "fill_container",
                           "fill": "#FFFFFF0D",
                           "cornerRadius": 10,
+                          "gap": 16,
                           "padding": [
                             12,
                             16
                           ],
+                          "alignItems": "center",
                           "children": [
                             {
                               "type": "text",
-                              "id": "kxWu2",
+                              "id": "tEDTw",
+                              "name": "From",
+                              "fill": "$char-accent",
+                              "textGrowth": "fixed-width",
+                              "width": 110,
+                              "content": "A PICTURE",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal",
+                              "letterSpacing": 1.4
+                            },
+                            {
+                              "type": "text",
+                              "id": "ekLpo",
                               "name": "Q",
                               "fill": "$char-text",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "“A very tall, thin villain for my fantasy game.”",
+                              "content": "“Here’s my sketch: hero.png. Make her a character.”",
+                              "fontFamily": "$font-body",
+                              "fontSize": 14,
+                              "fontWeight": "normal",
+                              "fontStyle": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "lDOgd",
+                          "name": "Bubble",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF0D",
+                          "cornerRadius": 10,
+                          "gap": 16,
+                          "padding": [
+                            12,
+                            16
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "IUMTP",
+                              "name": "From",
+                              "fill": "$char-accent",
+                              "textGrowth": "fixed-width",
+                              "width": 110,
+                              "content": "BOTH",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal",
+                              "letterSpacing": 1.4
+                            },
+                            {
+                              "type": "text",
+                              "id": "F7hFi7",
+                              "name": "Q",
+                              "fill": "$char-text",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "“Here’s my sketch: hero.png. She’s a desert pilot who is afraid of the sea.”",
                               "fontFamily": "$font-body",
                               "fontSize": 14,
                               "fontWeight": "normal",
@@ -7095,6 +7209,245 @@
               "fontWeight": "normal"
             }
           ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "LLgrp",
+      "x": 1640,
+      "y": 4750,
+      "name": "OG Image 1200×630",
+      "theme": {
+        "character": "teo"
+      },
+      "clip": true,
+      "width": 1200,
+      "height": 630,
+      "fill": "$char-deep",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "DEn8l",
+          "x": 0,
+          "y": 0,
+          "name": "Scene",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "images/teo-scene.png",
+            "mode": "cover"
+          },
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "type": "rectangle",
+          "id": "Y6lkK",
+          "x": 0,
+          "y": 0,
+          "name": "Shade",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 270,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#160F09FF",
+                "position": 0
+              },
+              {
+                "color": "#160F09FF",
+                "position": 0.36
+              },
+              {
+                "color": "#160F0900",
+                "position": 0.7
+              }
+            ]
+          },
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "type": "frame",
+          "id": "N0BbHN",
+          "x": 72,
+          "y": 72,
+          "name": "Text",
+          "width": 600,
+          "height": 486,
+          "layout": "vertical",
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "frame",
+              "id": "GJ68Z",
+              "name": "Logo",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H6RaCb",
+                  "name": "Mark",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$char-deep",
+                  "cornerRadius": 10,
+                  "stroke": "$char-line",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EYHvA",
+                      "name": "CF",
+                      "fill": "$char-text",
+                      "content": "Cf",
+                      "fontFamily": "$font-display",
+                      "fontSize": 26,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.8
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "JmfsX",
+                  "name": "Wordmark",
+                  "fill": "$char-text",
+                  "content": "CHARACTER FORGE MCP",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1.4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dImYr",
+              "name": "Middle",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "EVasB",
+                  "name": "Title",
+                  "fill": "$char-text",
+                  "content": "A character studio\ninside your AI chat",
+                  "lineHeight": 1.04,
+                  "fontFamily": "$font-display",
+                  "fontSize": 62,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "mFmkU",
+                  "name": "Sub",
+                  "fill": "$char-dim",
+                  "textGrowth": "fixed-width",
+                  "width": 540,
+                  "content": "Characters with a story that holds together — then their picture, place, video, voice and music.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "yuNgG",
+              "name": "Chips",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xUyq3",
+                  "name": "Free · MIT",
+                  "cornerRadius": 100,
+                  "stroke": "$char-line",
+                  "strokeWidth": 1,
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wFN5k",
+                      "name": "L",
+                      "fill": "$char-text",
+                      "content": "Open source · MIT",
+                      "fontFamily": "$font-body",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AeNWt",
+                  "name": "Claude · Cursor · any MCP chat",
+                  "cornerRadius": 100,
+                  "stroke": "$char-line",
+                  "strokeWidth": 1,
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LgSXV",
+                      "name": "L",
+                      "fill": "$char-text",
+                      "content": "Claude · Cursor · any MCP chat",
+                      "fontFamily": "$font-body",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "fwuli",
+      "x": 2920,
+      "y": 4750,
+      "name": "Favicon 512",
+      "width": 512,
+      "height": 512,
+      "fill": "#0C1215",
+      "cornerRadius": 112,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "eDSfM",
+          "name": "CF",
+          "fill": "#ECE7DC",
+          "content": "Cf",
+          "fontFamily": "Fraunces",
+          "fontSize": 300,
+          "fontWeight": "600",
+          "letterSpacing": -12
         }
       ]
     }

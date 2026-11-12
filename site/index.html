@@ -3,14 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Character Forge — characters with a story inside</title>
-    <meta name="description" content="Character Forge builds story-ready characters: a full card from one causal chain, a look derived from the story, concept art, video and a theme." />
+    <title>Character Forge MCP — a character studio inside your AI chat</title>
+    <meta name="description" content="Free, open-source MCP server for Claude, Cursor and any MCP chat. Create characters whose whole story holds together, then their concept art, scene, video, voice and music." />
+    <link rel="canonical" href="%SITE_URL%/" />
+    <meta name="theme-color" content="#0C1215" />
+    <meta name="author" content="Dzmitry Drynau" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Character Forge MCP" />
+    <meta property="og:title" content="Character Forge MCP — a character studio inside your AI chat" />
+    <meta property="og:description" content="Create characters whose whole story holds together, then their concept art, scene, video, voice and music. Free and open source." />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Character Forge MCP: a character studio inside your AI chat. Teo Halloran, a red-haired boy in a yellow jacket, in a cluttered workshop." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Character Forge MCP — a character studio inside your AI chat" />
+    <meta name="twitter:description" content="Create characters whose whole story holds together, then their concept art, scene, video, voice and music." />
+    <meta name="twitter:image" content="%SITE_URL%/og.jpg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Character Forge MCP",
+        "description": "Open-source MCP server, CLI and Claude Code plugin that creates characters for film, games, ads and books: a coherent character card, concept art, scene, looping video, voice and theme music.",
+        "url": "%SITE_URL%/",
+        "image": "%SITE_URL%/og.jpg",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "macOS, Windows, Linux",
+        "license": "https://opensource.org/licenses/MIT",
+        "codeRepository": "https://github.com/gdhub-io/character-forge-mcp",
+        "sameAs": ["https://github.com/gdhub-io/character-forge-mcp"],
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Dzmitry Drynau" }
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- What crawlers and no-JS visitors read; React replaces it on load. -->
+      <main style="max-width: 720px; margin: 64px auto; padding: 0 20px; font-family: system-ui, sans-serif; color: #eeeae1; background: #0c1215">
+        <h1>Character Forge MCP — a character studio inside your AI chat</h1>
+        <p>A free, open-source MCP server for Claude Code, Claude Desktop, Cursor and any chat that speaks MCP. Describe the character you need, give a picture, or ask for a surprise: three versions of the idea compete and the strongest becomes your character, with a card that answers nine questions about them.</p>
+        <p>Then, step by step and only when you ask: a concept sheet, their own place, an 8-second living picture, their voice in any language and a short theme of their own.</p>
+        <p><a href="https://github.com/gdhub-io/character-forge-mcp">Source code and install instructions on GitHub</a> · <a href="/llms.txt">Summary for AI assistants (llms.txt)</a></p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,7 +1,6 @@
 import {
 	IconArrowUpRight,
 	IconBrandGithub,
-	IconHammer,
 	IconMenu2,
 	IconX,
 } from "@tabler/icons-react";
@@ -35,8 +34,13 @@ export function TopNav({
 	}, []);
 	return (
 		<header className="relative flex items-center justify-between">
-			<a href="#/" className="flex items-center gap-2.5 text-fg">
-				<IconHammer size={20} stroke={1.75} />
+			<a href="#/" className="flex items-center gap-2.5 text-fg sm:gap-3">
+				<span
+					aria-hidden
+					className="grid size-9 place-items-center rounded-[8px] border border-line bg-deep font-display text-[21px] leading-none font-semibold tracking-[-0.03em] sm:size-11 sm:rounded-[10px] sm:text-[26px]"
+				>
+					Cf
+				</span>
 				<span className="font-mono text-[11px] font-bold tracking-[0.14em] sm:text-xs">
 					CHARACTER FORGE MCP
 				</span>

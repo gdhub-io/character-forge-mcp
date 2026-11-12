@@ -216,7 +216,7 @@ export function HowItWorks({ c, focus }: { c: Character; focus?: string }) {
 				<div className="mt-8 flex flex-wrap gap-3">
 					{[
 						[IconMessages, "Claude Code, Claude Desktop, Cursor…"],
-						[IconScale, "Free · MIT"],
+						[IconScale, "Open source · MIT"],
 						[IconDeviceGamepad2, "Film, games, ads, books"],
 					].map(([Icon, label]) => {
 						const I = Icon as typeof IconMessages;
