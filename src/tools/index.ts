@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerMethod } from "./method.js";
-import { registerRoll } from "./roll.js";
+import { registerCreate } from "./create.js";
 import { registerCheck } from "./check.js";
 import { registerRole } from "./role.js";
 import { registerSave } from "./save.js";
@@ -12,10 +12,12 @@ import { registerVoice } from "./voice.js";
 import { registerTheme } from "./theme.js";
 import { registerPick } from "./pick.js";
 import { registerTranslate } from "./translate.js";
+import { registerCosts } from "./costs.js";
+import { registerNext } from "./next.js";
 
 export function registerTools(server: McpServer) {
   registerMethod(server);
-  registerRoll(server);
+  registerCreate(server);
   registerCheck(server);
   registerRole(server);
   registerSave(server);
@@ -27,4 +29,6 @@ export function registerTools(server: McpServer) {
   registerTheme(server);
   registerPick(server);
   registerTranslate(server);
+  registerCosts(server);
+  registerNext(server);
 }

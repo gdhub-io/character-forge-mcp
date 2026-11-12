@@ -14,10 +14,11 @@ Requires the `character-forge` MCP server (tools named `character_*`).
 - Decide the mode:
   - **Random**: the user gave little or nothing. Anchor = the role they named, if any.
   - **Brief**: the user described what matters. Every variant must keep ALL of it. Anchor = the role from the brief; fix medium/genre/setting from the brief.
+  - **Concept, or concept + brief**: the user gave their own concept image (path or URL), with or without a description. `character_create` tells you what to do with it: look at it first, every variant must look exactly like it and explain what it shows, and the winner keeps it as its concept.
   - **Quick**: only if the user explicitly asks for one fast character — `variants: 1`, skip steps 3–7, but still run `character_check` and the designer.
 
-## 1. Roll
-`character_roll` with `variants: 3` (+ `anchor`, `medium`, `genre`, `setting` when known).
+## 1. Create
+`character_create` with whatever the user gave: `brief` (their words, verbatim) and/or `concept` (their image), plus `anchor`, `medium`, `genre`, `setting` when known. It rolls 3 variants by default and starts its answer with the MODE and how to treat the brief and the image: follow it.
 All variants share the anchor and world but have different cores — "all fishermen, but different fishermen".
 
 ## 2. Write
@@ -45,13 +46,13 @@ Variants are saved as drafts (`_drafts/` in the library). Write `meta.verdict` (
 
 ## 8. Look & concept — winner only
 Spawn the `character-designer` agent with the winner's card.json path. Merge its `look` (and any `description.physical` changes), re-save with overwrite.
-Call `character_concept` for the WINNER only.
+Call `character_concept` for the WINNER only. If the user gave their own image, give the designer the image path too (it must describe exactly what the image shows) and don't generate: `character_pick` has already made the image the concept.
 
 ## 8b. Edit — winner only
 Spawn the `character-editor` agent with the winner's card.json path. It returns the card rewritten for a reader who knows nothing of the world (plain narration in a voice tuned to the character, no facts changed). Validate with `character_check`, re-save with overwrite.
 
 ## 8c. Languages — only if the user asked for more than English
-Run the `translate-character` skill for each extra language (the card is free; the voice is paid and needs a yes). When the voice is made later, pass `text_ru` to `character_voice` so both languages are recorded at once.
+Run the `translate-character` skill for each extra language (the card is free; the voice is paid and needs a yes). When the voice is made later, pass `translations: [{ lang: "ru", text }]` to `character_voice` so every language is recorded in one call, each performed fresh from the description.
 
 ## 9. Report to the user (in their language)
 - Winner: name, logline, why it won (2–3 sentences), signature item, path to card.md (and concept.png).

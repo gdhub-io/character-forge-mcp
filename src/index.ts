@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
+import { costsToText, readCosts } from "./costs.js";
+import { nextToText } from "./next.js";
 import { parseArgs } from "node:util";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createServer } from "./server.js";
 import { RollOptionsSchema, rollToText } from "./random.js";
 import { listCards, listToText, loadCard, loadCardFile, saveCard, saveTranslation, writeCard } from "./store.js";
-import { buildTposePrompt, DEFAULT_VIEWS, generateConcept, VIEWS, type Views } from "./concept.js";
+import { buildTposePrompt, DEFAULT_VIEWS, generateConcept, importConcept, VIEWS, type Views } from "./concept.js";
 import { checkCard, checkToText } from "./check.js";
 import { generateIdleVideo, generateScene, type VideoModel } from "./scene.js";
 import { MEDIA_KINDS, mediaBrief, type MediaKind } from "./media.js";
 import { designVoice, speakLine } from "./voice.js";
+import { config, usableKey } from "./config.js";
 
 const HELP = `character-forge — MCP server + CLI for building characters
 
@@ -38,16 +41,22 @@ Usage:
                                        design the character's own voice (ElevenLabs for adults, Qwen + pitch for minors)
   character-forge say <id> --text T --name N
                                        speak one line in that voice → assets/voice/lines/N.mp3
+  character-forge concept-import <id> <image>   use an existing concept image (path or URL) as concept.png
+  character-forge next <id>            what can be made next for the character, with prices
+  character-forge costs <id>           what the character has cost so far (estimates from models.json pricing)
   character-forge list                 list saved characters
 
 Env:
   CHARACTER_FORGE_DIR             library folder (default ~/character-forge)
-  FAL_KEY                         fal.ai key for concepts (fal-ai/z-image/turbo/controlnet)
+  FAL_KEY                         fal.ai key for all media (the variable name is set in models.json)
+  CHARACTER_FORGE_MODELS          a models.json to use instead of the package's (provider + model per media kind)
   (a .env file in the working directory is loaded too)
-  CHARACTER_FORGE_IMAGE_MODEL     override the fal endpoint
 `;
 
-// A .env in the working directory (gitignored) can hold FAL_KEY etc.; real env vars win.
+// A .env in the working directory (gitignored) can hold FAL_KEY etc.; real env vars win. An empty or unexpanded
+// key from the plugin config must not block the .env one, so drop it first.
+const keyEnv = config().providers.fal.apiKeyEnv;
+if (!usableKey(process.env[keyEnv])) delete process.env[keyEnv];
 try {
   process.loadEnvFile();
 } catch {
@@ -127,6 +136,19 @@ async function main() {
     case "save": {
       const saved = await saveCard(await loadCardFile(arg("card.json path")), { overwrite: values.overwrite });
       console.log(`Saved as "${saved.slug}"\n  ${saved.files.markdown}\n  ${saved.files.json}`);
+      return;
+    }
+    case "concept-import": {
+      const r = await importConcept(arg("id"), positionals[1] ?? fail("Missing image path or URL."));
+      console.log(`Concept imported\n  ${r.file}\n  ${r.card}`);
+      return;
+    }
+    case "next": {
+      console.log(nextToText(arg("id")));
+      return;
+    }
+    case "costs": {
+      console.log(costsToText(arg("id"), await readCosts(arg("id"))));
       return;
     }
     case "translate": {

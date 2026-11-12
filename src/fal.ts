@@ -1,15 +1,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-/**
- * fal.ai queue client for pose-controlled image generation (default: fal-ai/z-image/turbo/controlnet,
- * ~$0.0065 per megapixel). Auth: FAL_KEY. Raw HTTP, no SDK.
- */
+import { apiKey, config } from "./config.js";
 
-export const FAL_DEFAULT_MODEL = "fal-ai/z-image/turbo/controlnet";
-export const FAL_IMG2IMG_MODEL = "fal-ai/z-image/turbo/image-to-image";
-/** GPT Image editor: follows the block-in as a reference and keeps both views consistent. Token-priced (low ≈ $0.02/sheet). */
-export const FAL_GPT_EDIT_MODEL = "openai/gpt-image-2.6/flare/edit";
+/** fal.ai queue client (raw HTTP, no SDK). The key, URLs and models come from models.json (see config.ts). */
 
 export interface FalControlInput {
   prompt: string;
@@ -36,15 +30,19 @@ export interface FalResult {
 }
 
 const POLL_MS = 1500;
+
+function requireKey(): string {
+  const key = apiKey();
+  if (!key) throw new Error(`${config().providers.fal.apiKeyEnv} is not set`);
+  return key;
+}
 const TIMEOUT_MS = 180_000;
 
 export async function falControlGenerate(input: FalControlInput): Promise<FalResult> {
-  const key = process.env.FAL_KEY;
-  if (!key) throw new Error("FAL_KEY is not set");
   const img2img = input.preprocess === "img2img";
   const gpt = input.preprocess === "gpt";
-  const model = gpt ? FAL_GPT_EDIT_MODEL : img2img ? FAL_IMG2IMG_MODEL : (process.env.CHARACTER_FORGE_IMAGE_MODEL ?? FAL_DEFAULT_MODEL);
-  const headers = { Authorization: `Key ${key}`, "Content-Type": "application/json" };
+  const m = config().models.concept;
+  const model = gpt ? m.model : img2img ? m.img2img : m.controlnet;
   const common = {
     prompt: input.prompt,
     image_url: input.imageUrl,
@@ -63,7 +61,7 @@ export async function falControlGenerate(input: FalControlInput): Promise<FalRes
         prompt: input.prompt,
         image_urls: [input.imageUrl],
         image_size: "auto",
-        quality: process.env.CHARACTER_FORGE_GPT_QUALITY ?? "low", // the endpoint defaults to high (~10x the cost)
+        quality: m.quality, // the endpoint defaults to high (~10x the cost)
         reasoning_effort: "low",
         output_format: "png",
         enable_safety_checker: true,
@@ -88,10 +86,8 @@ export async function falQueue(model: string, body: Record<string, unknown>, kin
 
 /** Submits to fal's queue, waits, returns the raw result JSON. Always polls the URLs fal returns (hand-built ones answer 405). */
 export async function falQueueJson<T>(model: string, body: Record<string, unknown>, timeoutMs = TIMEOUT_MS): Promise<T> {
-  const key = process.env.FAL_KEY;
-  if (!key) throw new Error("FAL_KEY is not set");
-  const headers = { Authorization: `Key ${key}`, "Content-Type": "application/json" };
-  const submit = await fetch(`https://queue.fal.run/${model}`, { method: "POST", headers, body: JSON.stringify(body) });
+  const headers = { Authorization: `Key ${requireKey()}`, "Content-Type": "application/json" };
+  const submit = await fetch(`${config().providers.fal.queueUrl}/${model}`, { method: "POST", headers, body: JSON.stringify(body) });
   const queued = (await submit.json()) as { status_url?: string; response_url?: string; detail?: unknown };
   if (!submit.ok || !queued.status_url || !queued.response_url) throw new Error(`fal submit ${submit.status}: ${JSON.stringify(queued.detail ?? queued)}`);
   const deadline = Date.now() + timeoutMs;
@@ -110,6 +106,8 @@ export async function falQueueJson<T>(model: string, body: Record<string, unknow
   return out;
 }
 
+export const isUrl = (s: string) => /^https?:/.test(s);
+
 export async function falDownload(url: string): Promise<Buffer> {
   const dl = await fetch(url);
   if (!dl.ok) throw new Error(`fal download ${dl.status}: ${url}`);
@@ -122,11 +120,9 @@ export async function falDownload(url: string): Promise<Buffer> {
  * Files are readable by anyone with the link (fal's default ACL).
  */
 export async function falUpload(bytes: Buffer, contentType: string, fileName: string): Promise<string> {
-  const key = process.env.FAL_KEY;
-  if (!key) throw new Error("FAL_KEY is not set");
-  const init = await fetch("https://rest.fal.ai/storage/upload/initiate?storage_type=fal-cdn-v3", {
+  const init = await fetch(config().providers.fal.uploadUrl, {
     method: "POST",
-    headers: { Authorization: `Key ${key}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Key ${requireKey()}`, "Content-Type": "application/json" },
     body: JSON.stringify({ file_name: fileName, content_type: contentType }),
   });
   const json = (await init.json()) as { upload_url?: string; file_url?: string; detail?: unknown };
@@ -138,7 +134,7 @@ export async function falUpload(bytes: Buffer, contentType: string, fileName: st
 
 /** URLs pass through; a local file is uploaded to fal storage. */
 export async function toImageUrl(ref: string): Promise<string> {
-  if (/^https?:/.test(ref)) return ref;
+  if (isUrl(ref)) return ref;
   const ext = path.extname(ref).slice(1).toLowerCase();
   const mime = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : ext === "webp" ? "image/webp" : "image/png";
   return falUpload(await readFile(ref), mime, path.basename(ref));

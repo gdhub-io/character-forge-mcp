@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { generateTheme } from "../theme.js";
+import { nextHint } from "../next.js";
 import { reply } from "./util.js";
 
 export function registerTheme(server: McpServer) {
@@ -17,7 +18,7 @@ export function registerTheme(server: McpServer) {
     },
     async ({ id, seed }) => {
       const r = await generateTheme(id, { seed });
-      return reply(`Theme saved: ${r.file} (${r.seconds}s)`, { ...r });
+      return reply(`Theme saved: ${r.file} (${r.seconds}s)${nextHint(id)}`, { ...r });
     },
   );
 }

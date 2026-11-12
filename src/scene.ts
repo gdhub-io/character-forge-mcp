@@ -1,6 +1,8 @@
+import { recordCost } from "./costs.js";
 import { readFile } from "node:fs/promises";
 import { ffmpeg, run, transform } from "./ffmpeg.js";
 import type { CharacterCard } from "./schema.js";
+import { config } from "./config.js";
 import { DEFAULT_ART_STYLE, pronoun } from "./concept.js";
 import { falQueue, falUpload } from "./fal.js";
 import { assetFile, loadCard, saveAsset } from "./store.js";
@@ -11,18 +13,13 @@ import { assetFile, loadCard, saveAsset } from "./store.js";
  * idle clip built from that same still (Kling or Veo).
  */
 
-export const SCENE_MODEL = "openai/gpt-image-2.6/flare/edit";
 /**
- * Video models: Kling O1 Standard is the default (≈$0.084/s, first+last frame, no audio). Seedance was dropped: its
- * partner moderation rejects any realistic face it didn't generate itself, which is every scene we make.
+ * Video families (endpoints in models.json): Kling O1 Standard (≈$0.084/s, first+last frame, no audio) and Veo 3.1
+ * Fast (720p, $0.15/s with sound, $0.10 without; 4, 6 or 8 s). Seedance was dropped: its partner moderation rejects
+ * any realistic face it didn't generate itself, which is every scene we make.
  */
-export const VIDEO_MODELS = {
-  kling: "fal-ai/kling-video/o1/standard/image-to-video",
-  /** Veo 3.1 Fast, 720p, native sound: $0.15/s with audio, $0.10 without; 4, 6 or 8 s. Loops via first + last frame. */
-  veo: "fal-ai/veo3.1/fast/first-last-frame-to-video",
-} as const;
-const VEO_START_ONLY = "fal-ai/veo3.1/fast/image-to-video";
-export type VideoModel = keyof typeof VIDEO_MODELS;
+export const VIDEO_FAMILIES = ["kling", "veo"] as const;
+export type VideoModel = (typeof VIDEO_FAMILIES)[number];
 
 
 /** Everything the scene needs comes from the card: place, idle pose, habit, look, worn items and their sides. */
@@ -96,15 +93,17 @@ export async function generateScene(id: string, opts: { prompt?: string; notes?:
   });
   const prompt = withNotes(opts.prompt ?? defaultScenePrompt(card), opts.notes);
   const ref = await falUpload(concept, "image/png", "concept.png");
-  const out = await falQueue(SCENE_MODEL, {
+  const sceneModel = config().models.scene;
+  const out = await falQueue(sceneModel.model, {
     prompt,
     image_urls: [ref],
     image_size: { width: 1536, height: 864 }, // 16:9, for full-screen backgrounds
-    quality: opts.quality ?? "medium", // the first and last frame of the video: worth a bit more than "low"
+    quality: opts.quality ?? sceneModel.quality, // the first and last frame of the video: worth a bit more than "low"
     reasoning_effort: "low",
     output_format: "png",
   });
   const file = await saveAsset(id, "scene.png", out.bytes, prompt);
+  await recordCost(id, { kind: "scene", model: sceneModel.model, detail: `scene still, ${opts.quality ?? sceneModel.quality}`, usd: config().pricing.scene.image });
   return { file, prompt };
 }
 
@@ -132,7 +131,8 @@ export async function generateIdleVideo(
     throw new Error(`No scene.png for "${id}" yet: generate the scene first.`);
   });
   const url = await falUpload(scene, "image/png", "scene.png");
-  const model = opts.model ?? "kling";
+  const video = config().models.video;
+  const model = opts.model ?? video.default;
   // Veo matches the first and last frame but not the motion through them, so its seam jerks; it gets both.
   const loop = opts.loop ?? (model === "kling" ? "frame" : "crossfade");
   const asked = opts.seconds ?? 8;
@@ -147,11 +147,14 @@ export async function generateIdleVideo(
     model === "kling"
       ? { prompt, start_image_url: url, ...end, duration: String(seconds) }
       : { prompt, ...(loop === "off" ? { image_url: url } : { first_frame_url: url, last_frame_url: url }), duration: `${seconds}s`, aspect_ratio: "16:9", resolution: "720p", generate_audio: audio };
-  const endpoint = model === "veo" && loop === "off" ? VEO_START_ONLY : VIDEO_MODELS[model];
+  const endpoint = model === "veo" && loop === "off" ? video.veoStartOnly : video[model];
   const out = await falQueue(endpoint, body, "video", 10 * 60_000); // video renders take minutes
   const looped = loop === "crossfade" ? await crossfadeLoop(out.bytes, CROSSFADE_S) : out.bytes;
   const bytes = audio ? await normalizeAudio(looped) : looped;
   const file = await saveAsset(id, "idle.mp4", bytes, prompt);
+  const price = config().pricing.video;
+  const perSecond = model === "veo" ? (audio ? price.veo.second : price.veo.secondSilent) : price.kling.second;
+  await recordCost(id, { kind: "video", model: endpoint, detail: `${seconds} s${audio ? ", with sound" : ""}`, usd: perSecond * seconds });
   return { file, prompt, seconds };
 }
 

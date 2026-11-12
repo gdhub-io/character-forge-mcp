@@ -1,8 +1,9 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { MEDIA_KINDS, mediaBrief, saveMedia } from "../media.js";
-import { loadCard } from "../store.js";
-import { reply, text } from "./util.js";
+import { readFile } from "node:fs/promises";
+import { loadCard, promptFile } from "../store.js";
+import { reply } from "./util.js";
 
 const KIND = z
   .enum(MEDIA_KINDS)
@@ -18,7 +19,18 @@ export function registerMedia(server: McpServer) {
       inputSchema: { id: z.string().describe("Character id."), kind: KIND },
       annotations: { readOnlyHint: true },
     },
-    async ({ id, kind }) => ({ content: [text(mediaBrief(await loadCard(id), kind))] }),
+    async ({ id, kind }) => {
+      const brief = mediaBrief(await loadCard(id), kind);
+      if (kind !== "voice") return reply(brief);
+      // The monologue plays over the scene and idle video: give the writer what those actually show.
+      const shown = await Promise.all(
+        [["SCENE (what the still shows)", "scene.txt"], ["IDLE VIDEO (the motion in it)", "idle.txt"]].map(async ([label, f]) => {
+          const t = await readFile(promptFile(id, f), "utf8").catch(() => "");
+          return t ? `${label}:\n${t.trim()}` : "";
+        }),
+      );
+      return reply([brief, ...shown.filter(Boolean)].join("\n\n"));
+    },
   );
 
   server.registerTool(

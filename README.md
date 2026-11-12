@@ -22,11 +22,15 @@ flowchart TD
     D --> E["Editor: plain, clear text<br/>in a voice that fits the character"]
     E --> C["Concept: A-pose model sheet"]
     C --> S["Location: the character in their own place"]
-    S --> VID["Looping idle video"] & VO["Voice"] & M["Theme music"]
-    VID & VO & M --> P["Character package<br/>card · concept · scene · video · voice · theme"]
+    S --> VID["Looping idle video"]
+    VID --> VO["Voice<br/>says what the video shows · every language"]
+    S --> M["Theme music"]
+    VO & M --> P["Character package<br/>card · concept · scene · video · voice · theme"]
 ```
 
-The winner gets its concept as part of the tournament. Everything after it is generated **only on request**, one step at a time, and every step is built from the card: the location from the character's key places and idle pose, the voice from their history and speech, the theme from their wound and dramatic question. Video, voice and music don't depend on each other and can be made in any order.
+The winner gets its concept as part of the tournament. Everything after it is generated **only on request**, one step at a time, and every step is built from the card: the location from the character's key places and idle pose, the voice from their history and speech, the theme from their wound and dramatic question. The video comes after the location, and the voice after the video, because the voice is their inner monologue, the thoughts in their head in the moment the video shows; the music only needs the location.
+
+**Already have a concept?** Give a brief and the image. What the picture shows (build, face, outfit, items, palette) becomes part of the brief, every variant's story explains it, the designer describes exactly that look, and the image becomes the winner's concept instead of a new one being generated. It's the same `character_create` call, with `concept` set.
 
 ### The variant tournament
 
@@ -142,7 +146,7 @@ Clients that support MCP prompts also list `random_character` and `character_fro
 | Tool | What it does |
 |---|---|
 | `character_method` | Returns the method, the card rules and the tournament protocol |
-| `character_roll` | Rolls a coherent core plus sparks; with `variants: 3` and `anchor`, rolls competing variants of one concept |
+| `character_create` | Starts a character from nothing, a brief, a concept image, or both: rolls 3 competing variants of one concept (coherent cores plus sparks) and says how to use the brief and the image |
 | `character_check` | Coherence check: red flags (generic filler, repeats, want = need) plus questions built from the card's own content |
 | `character_role` | Instructions and rubric for a role: `coherence`, `critic`, `judge`, `author`, `designer` |
 | `character_save` | Validates the full card and saves JSON + Markdown; returns the `id` |

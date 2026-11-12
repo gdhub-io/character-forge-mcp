@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, existsSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, existsSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -116,18 +116,21 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
     const { tools } = await client.listTools();
     assert.deepEqual(
       tools.map((t) => t.name).sort(),
-      ["character_check", "character_concept", "character_get", "character_list", "character_method", "character_pick", "character_prompt", "character_prompt_save", "character_role", "character_roll", "character_save", "character_scene", "character_theme", "character_translate", "character_video", "character_voice", "character_voice_line", "character_voice_translation"],
+      ["character_check", "character_concept", "character_costs", "character_create", "character_get", "character_list", "character_method", "character_next", "character_pick", "character_prompt", "character_prompt_save", "character_role", "character_save", "character_scene", "character_theme", "character_translate", "character_video", "character_voice", "character_voice_line", "character_voice_translation"],
     );
     const { prompts } = await client.listPrompts();
     assert.equal(prompts.length, 2);
 
-    const rolled = await client.callTool({ name: "character_roll", arguments: { seed: 1337 } });
+    const rolled = await client.callTool({ name: "character_create", arguments: { seed: 1337, variants: 1 } });
     assert.equal(rolled.structuredContent.seed, 1337);
 
     assert.ok(rolled.structuredContent.engine.lie);
 
-    const set = await client.callTool({ name: "character_roll", arguments: { variants: 3, anchor: "fisherman", seed: 9 } });
+    const set = await client.callTool({ name: "character_create", arguments: { anchor: "fisherman", seed: 9, brief: "an old fisherman who fears the sea" } });
     assert.equal(set.structuredContent.variants.length, 3);
+    assert.equal(set.structuredContent.mode, "brief");
+    const fromImage = await client.callTool({ name: "character_create", arguments: { seed: 9, concept: path.join(root, "examples", "missing.png") } });
+    assert.equal(fromImage.isError, true);
 
     const role = await client.callTool({ name: "character_role", arguments: { role: "critic" } });
     assert.match(role.content[0].text, /PROSECUTOR/);
@@ -281,5 +284,72 @@ test("a translation keeps the original's structure and fixed values", async () =
   const shorter = structuredClone(ru);
   shorter.uniqueness.quirks.push("Лишняя причуда.");
   await assert.rejects(() => saveTranslation(slug, "ru", shorter), /length/);
+  });
+});
+
+test("models.json is read on every call and missing keys fall back to defaults", async () => {
+  const { config } = await import(path.join(root, "dist/config.js"));
+  assert.equal(config().provider, "fal");
+  assert.ok(config().models.video.kling.includes("kling"));
+  const dir = mkdtempSync(path.join(os.tmpdir(), "cf-models-"));
+  const file = path.join(dir, "models.json");
+  const prev = process.env.CHARACTER_FORGE_MODELS;
+  process.env.CHARACTER_FORGE_MODELS = file;
+  try {
+    writeFileSync(file, JSON.stringify({ models: { video: { default: "veo" } } }));
+    assert.equal(config().models.video.default, "veo");
+    assert.ok(config().models.video.veo.includes("veo"), "other keys keep their defaults");
+    writeFileSync(file, JSON.stringify({ models: { music: { model: "x/other-music" } } }));
+    assert.equal(config().models.music.model, "x/other-music", "re-read without a restart");
+  } finally {
+    if (prev === undefined) delete process.env.CHARACTER_FORGE_MODELS;
+    else process.env.CHARACTER_FORGE_MODELS = prev;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the cost ledger adds up per character and only counts successful calls", async () => {
+  await withLibrary(async () => {
+    const { saveCard } = await import(path.join(root, "dist/store.js"));
+    const { recordCost, readCosts } = await import(path.join(root, "dist/costs.js"));
+    const { slug } = await saveCard(example);
+    await recordCost(slug, { kind: "video", model: "m", detail: "8 s", usd: 0.672 });
+    await recordCost(slug, { kind: "music", model: "m", detail: "30 s", usd: 0.6 });
+    const l = await readCosts(slug);
+    assert.equal(l.entries.length, 2);
+    assert.equal(l.totalUsd, 1.272);
+    assert.equal(l.byKind.video, 0.672);
+  });
+});
+
+test("a character started from the user's picture gets it as the winner's concept", async () => {
+  await withLibrary(async (dir) => {
+    const { saveCard } = await import(path.join(root, "dist/store.js"));
+    const { keepWinner } = await import(path.join(root, "dist/concept.js"));
+    const img = path.join(dir, "mine.png");
+    writeFileSync(img, mannequinPng("front", AVERAGE_BODY, "flat").png);
+    const variant = (v) => ({ ...example, meta: { ...example.meta, name: `${example.meta.name} ${v}`, slug: undefined, group: "g1", variant: v, concept_image: img } });
+    const { slug } = await saveCard(variant("A"));
+    await saveCard(variant("B"));
+    const r = await keepWinner(slug);
+    assert.equal(r.deleted.length, 1);
+    assert.ok(existsSync(r.concept) && r.concept.endsWith(path.join("assets", "concept.png")));
+    assert.ok(readFileSync(path.join(dir, slug, "card.md"), "utf8").includes("concept.png"));
+  });
+});
+
+test("next steps follow the pipeline: concept, then location, then video and music, then voice", async () => {
+  await withLibrary(async (dir) => {
+    const { saveCard, saveAsset } = await import(path.join(root, "dist/store.js"));
+    const { nextSteps } = await import(path.join(root, "dist/next.js"));
+    const { slug } = await saveCard(example);
+    const steps = () => nextSteps(slug).next.map((n) => n.tool.split(" ")[0]);
+    assert.ok(steps().includes("character_concept"));
+    await saveAsset(slug, "concept.png", Buffer.from("x"));
+    assert.deepEqual(steps().filter((t) => t !== "translate-character"), ["character_scene"]);
+    await saveAsset(slug, "scene.png", Buffer.from("x"));
+    assert.ok(steps().includes("character_video") && steps().includes("character_prompt") && !steps().includes("character_voice_translation"));
+    await saveAsset(slug, "idle.mp4", Buffer.from("x"));
+    assert.ok(nextSteps(slug).next.some((n) => n.step.startsWith("Voice")));
   });
 });

@@ -64,7 +64,17 @@ export function LoopVideo({ src, poster, focus, volume }: { src?: string; poster
     return () => window.clearInterval(t);
   }, [src]);
 
-  const common = { className: "absolute inset-0 size-full object-cover", style: { objectPosition: focus }, src, poster, muted: true, playsInline: true, preload: "auto" } as const;
+  // Scenes put the character in the right third for the desktop layout. On a phone the frame is the centre of the
+  // right half (75%), so the character stands in the middle of the screen; on wider screens the character's focus.
+  const common = {
+    className: "absolute inset-0 size-full object-cover object-[75%_50%] sm:object-[var(--focus)]",
+    style: { "--focus": focus } as React.CSSProperties,
+    src,
+    poster,
+    muted: true,
+    playsInline: true,
+    preload: "auto",
+  } as const;
   return (
     <>
       <video ref={a} {...common} autoPlay style={{ ...common.style, opacity: front === 0 ? 1 : 0 }} />

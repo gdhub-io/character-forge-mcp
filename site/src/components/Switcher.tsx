@@ -10,8 +10,8 @@ export function Switcher(props: { list: Character[]; lang: Lang; index: number; 
   const many = list.length > 1;
   const step = (d: number) => onSelect((index + d + list.length) % list.length);
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex gap-2">
+    <div className="flex items-center gap-2.5 sm:gap-4">
+      <div className="hidden gap-2 sm:flex">
         <button aria-label={t.prev} disabled={!many} onClick={() => step(-1)} className="grid size-11 place-items-center rounded-full border border-line text-fg disabled:opacity-35">
           <IconArrowLeft size={16} stroke={1.75} />
         </button>
@@ -19,20 +19,20 @@ export function Switcher(props: { list: Character[]; lang: Lang; index: number; 
           <IconArrowRight size={16} stroke={1.75} />
         </button>
       </div>
-      <div className="flex items-end gap-1 pr-3 pl-1">
-        <span className="font-display text-[28px] leading-none text-fg">{pad(index + 1)}</span>
+      <div className="order-last ml-auto flex items-end gap-1 sm:order-none sm:ml-0 sm:pr-3 sm:pl-1">
+        <span className="font-display text-[22px] leading-none text-fg sm:text-[28px]">{pad(index + 1)}</span>
         <span className="kicker text-dim">/ {pad(list.length)}</span>
       </div>
       {list.map((c, i) =>
         i === index ? (
-          <div key={c.slug} className="relative flex w-[220px] items-center gap-3 rounded border border-line bg-white/8 p-2.5 backdrop-blur-xl">
+          <div key={c.slug} className="relative flex items-center gap-3 rounded border-2 border-accent p-0.5 backdrop-blur-xl sm:w-[220px] sm:border sm:border-line sm:bg-white/8 sm:p-2.5">
             {many && (
-              <span className="absolute top-0 left-2.5 h-0.5 w-[200px] bg-line">
+              <span className="absolute -top-2 left-0 h-0.5 w-full bg-line sm:top-0 sm:left-2.5 sm:w-[200px]">
                 <span className="block h-full bg-accent" style={{ width: `${progress * 100}%` }} />
               </span>
             )}
-            <span className="size-13 shrink-0 rounded-[3px] bg-no-repeat" style={avatarStyle(c)} />
-            <span className="flex min-w-0 flex-col gap-1">
+            <span className="size-10 shrink-0 rounded-[3px] bg-no-repeat sm:size-13" style={avatarStyle(c)} />
+            <span className="hidden min-w-0 flex-col gap-1 sm:flex">
               <span className="truncate text-sm font-semibold text-fg">{inLang(c, lang).card.meta.name}</span>
               <span className="kicker truncate text-[9px] text-dim">
                 {inLang(c, lang).kicker}
@@ -40,8 +40,8 @@ export function Switcher(props: { list: Character[]; lang: Lang; index: number; 
             </span>
           </div>
         ) : (
-          <button key={c.slug} aria-label={inLang(c, lang).card.meta.name} onClick={() => onSelect(i)} className="rounded p-1.5 opacity-70 transition-opacity hover:opacity-100">
-            <span className="block size-13 rounded-[3px] bg-no-repeat" style={avatarStyle(c)} />
+          <button key={c.slug} aria-label={inLang(c, lang).card.meta.name} onClick={() => onSelect(i)} className="rounded p-0.5 opacity-70 transition-opacity hover:opacity-100 sm:p-1.5">
+            <span className="block size-9 rounded-[3px] bg-no-repeat sm:size-13" style={avatarStyle(c)} />
           </button>
         ),
       )}

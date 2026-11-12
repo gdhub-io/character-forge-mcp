@@ -88,5 +88,65 @@
         "blurb": "Испытание в клинике вытянуло десятилетнего Пайка до 2,35 м и убило его подругу Нелл. Теперь он охраняет детей Андердека, а доктор возвращается."
       }
     }
+  },
+  {
+    "slug": "ysolde-thane",
+    "kicker": "Queen-Regent",
+    "blurb": "Ysolde reads every lie in the Antler Court and erases everyone grown in its secret vats, as she was. The last proof she must destroy is the girl she raised.",
+    "focus": "70% 50%",
+    "avatar": {
+      "x": 0.215,
+      "y": 0.0195,
+      "w": 0.111
+    },
+    "theme": {
+      "accent": "#A9C4B0",
+      "accentInk": "#0E1412",
+      "deep": "#101315",
+      "shade": "#0E1113F2",
+      "text": "#E6E4DF"
+    },
+    "acoustics": {
+      "reverbSeconds": 1.2,
+      "wet": 0.25,
+      "lowpassHz": 9000,
+      "musicDuck": 0.3
+    },
+    "i18n": {
+      "ru": {
+        "kicker": "Королева-регент",
+        "blurb": "Изольда видит любую ложь при дворе и стирает всех, кого вырастили в тайных чанах, как её саму. Последнее доказательство — девочка, которую она растила."
+      }
+    }
+  },
+  {
+    "slug": "fanya",
+    "kicker": "Madam Banker",
+    "blurb": "Fanya runs the shelf's carrot economy as Madam Banker, an office she believes is real. Everyone knows it began as a birthday joke. Nobody has told her.",
+    "focus": "70% 50%",
+    "avatar": {
+      "x": 0.105,
+      "y": 0.04,
+      "w": 0.17
+    },
+    "theme": {
+      "accent": "#D23A62",
+      "accentInk": "#FFF3F4",
+      "deep": "#171113",
+      "shade": "#151012F0",
+      "text": "#F4ECE8"
+    },
+    "acoustics": {
+      "reverbSeconds": 0.35,
+      "wet": 0.12,
+      "lowpassHz": 10000,
+      "musicDuck": 0.3
+    },
+    "i18n": {
+      "ru": {
+        "kicker": "Мадам Банкир",
+        "blurb": "Фаня ведёт морковную экономику полки как мадам банкир и уверена, что должность настоящая. Все знают, что это была шутка. Ей никто не сказал."
+      }
+    }
   }
 ]

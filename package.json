@@ -20,7 +20,7 @@
     "worldbuilding",
     "concept-art"
   ],
-  "author": "",
+  "author": "Dzmitry Drynau",
   "license": "MIT",
   "type": "module",
   "dependencies": {
@@ -36,6 +36,7 @@
   },
   "files": [
     "dist",
+    "models.json",
     "README.md",
     "LICENSE"
   ],

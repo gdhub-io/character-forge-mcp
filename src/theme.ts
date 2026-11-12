@@ -1,4 +1,6 @@
+import { recordCost } from "./costs.js";
 import { readFile } from "node:fs/promises";
+import { config } from "./config.js";
 import { durationOf, run, transform } from "./ffmpeg.js";
 import { falQueue } from "./fal.js";
 import { promptFile, saveAsset } from "./store.js";
@@ -7,7 +9,6 @@ import { promptFile, saveAsset } from "./store.js";
  * The character's instrumental theme, generated from the composition plan saved by character_prompt_save
  * (prompts/theme.md, section "Composition plan"). ElevenLabs Music v2.5: $0.60 per started output minute.
  */
-export const THEME_MODEL = "elevenlabs/music/v2.5";
 
 interface Chunk {
   duration_ms: number;
@@ -37,7 +38,7 @@ export interface ThemeResult {
 export async function generateTheme(id: string, opts: { seed?: number } = {}): Promise<ThemeResult> {
   const plan = await loadCompositionPlan(id);
   const out = await falQueue(
-    THEME_MODEL,
+    config().models.music.model,
     { composition_plan: plan, output_format: "mp3_48000_192", ...(opts.seed !== undefined ? { seed: opts.seed } : {}) },
     "audio",
     5 * 60_000,
@@ -47,6 +48,8 @@ export async function generateTheme(id: string, opts: { seed?: number } = {}): P
   await saveAsset(id, "theme-raw.mp3", out.bytes);
   const trimmed = await trimSilence(out.bytes);
   const file = await saveAsset(id, "theme.mp3", trimmed.bytes);
+  const planned = plan.chunks.reduce((s, c) => s + c.duration_ms, 0) / 1000;
+  await recordCost(id, { kind: "music", model: config().models.music.model, detail: `${Math.round(planned)} s theme`, usd: Math.ceil(planned / 60) * config().pricing.music.startedMinute });
   return { file, seconds: Math.round(trimmed.seconds * 10) / 10 };
 }
 

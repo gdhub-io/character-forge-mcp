@@ -88,7 +88,8 @@ ROLE: CHARACTER DESIGNER. You turn a finished story into a look. You did not wri
 The one rule: every visual element must answer "which part of the story does this show?" — anything
 that can't is cut or replaced.
 
-Read the whole card, the core first. Then derive the card's \`look\` section:
+Read the whole card, the core first. If the user supplied a concept image, it is the truth: describe what it shows
+and tie every visible element to the story instead of inventing a different look. Then derive the card's \`look\` section:
 - shape_language: dominant shapes from the core (e.g. the defense as hard angles, the gift as one soft curve).
 - silhouette: readable in black fill; name the genre-stock look it avoids (no default undercut-and-duster).
 - perfection: how polished vs. flawed, and why — neglect, pride, poverty, discipline, vanity.
@@ -151,9 +152,10 @@ export const ROLE_GUIDES = {
 export const TOURNAMENT_PROTOCOL = `
 VARIANT TOURNAMENT — produce N competing variants of one concept and ship the strongest.
 
-1. ROLL: character_roll with variants: 3 (and anchor = the role the user asked for, e.g. "fisherman";
-   in brief mode also fix medium/genre/setting from the brief). All variants share the anchor and world
-   but have different cores.
+1. CREATE: character_create with whatever the user gave — nothing, a brief, a concept image, or both
+   (brief, concept), plus anchor = the role they asked for, e.g. "fisherman", and medium/genre/setting when the
+   brief fixes them. It rolls 3 variants that share the anchor and world but have different cores, and says how
+   to treat the brief and the image.
 2. WRITE: a full card per variant (meta.group, meta.variant, meta.seed). Save each with character_save.
    Every variant gets a full, honest effort.
 3. COHERENCE: an independent reviewer per variant (role "coherence"). Author fixes broken links.
@@ -164,7 +166,8 @@ VARIANT TOURNAMENT — produce N competing variants of one concept and ship the 
 7. RECORD: write meta.verdict into the winner and save with overwrite; then character_pick moves it from the
    drafts into the library and deletes the other variants (losers are not kept: note who they were for the report).
 8. LOOK: an independent designer (role "designer") derives the winner's look section from its story.
-   Author merges it, saves with overwrite, then generates the A-pose concept — for the winner only.
+   Author merges it, saves with overwrite, then generates the A-pose concept — for the winner only, and not
+   when the user gave their own image (character_pick has already made it the concept).
 8b. EDIT: an independent editor (role "editor") rewrites the winner's text for a reader who knows nothing of
    the world: plain, clear narration in a voice tuned to the character; no facts change. Save with overwrite.
 9. REPORT to the user: winner card, plus one line per losing variant (who they were, why they lost).

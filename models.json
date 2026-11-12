@@ -1,0 +1,67 @@
+{
+  "provider": "fal",
+  "providers": {
+    "fal": {
+      "apiKeyEnv": "FAL_KEY",
+      "queueUrl": "https://queue.fal.run",
+      "uploadUrl": "https://rest.fal.ai/storage/upload/initiate?storage_type=fal-cdn-v3"
+    }
+  },
+  "models": {
+    "concept": {
+      "model": "openai/gpt-image-2.6/flare/edit",
+      "quality": "low",
+      "img2img": "fal-ai/z-image/turbo/image-to-image",
+      "controlnet": "fal-ai/z-image/turbo/controlnet"
+    },
+    "scene": {
+      "model": "openai/gpt-image-2.6/flare/edit",
+      "quality": "medium"
+    },
+    "video": {
+      "default": "kling",
+      "kling": "fal-ai/kling-video/o1/standard/image-to-video",
+      "veo": "fal-ai/veo3.1/fast/first-last-frame-to-video",
+      "veoStartOnly": "fal-ai/veo3.1/fast/image-to-video"
+    },
+    "music": {
+      "model": "elevenlabs/music/v2.5"
+    },
+    "voice": {
+      "adultDesign": "fal-ai/elevenlabs/text-to-voice/design/eleven-v3",
+      "adultSpeech": "fal-ai/elevenlabs/tts/eleven-v3",
+      "childDesign": "fal-ai/qwen-3-tts/voice-design/1.7b",
+      "childClone": "fal-ai/qwen-3-tts/clone-voice/1.7b",
+      "childSpeech": "fal-ai/qwen-3-tts/text-to-speech/1.7b"
+    }
+  },
+  "pricing": {
+    "_note": "USD estimates from the fal.ai model pages, used for the per-character cost ledger (costs.json). Update them when fal changes prices.",
+    "concept": {
+      "image": 0.02
+    },
+    "scene": {
+      "image": 0.05
+    },
+    "video": {
+      "kling": {
+        "second": 0.084
+      },
+      "veo": {
+        "second": 0.15,
+        "secondSilent": 0.1
+      }
+    },
+    "music": {
+      "startedMinute": 0.6
+    },
+    "voice": {
+      "adult": {
+        "per1000Chars": 0.1
+      },
+      "child": {
+        "per1000Chars": 0.09
+      }
+    }
+  }
+}

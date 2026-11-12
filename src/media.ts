@@ -120,16 +120,27 @@ The voice comes from WHO THEY ARE, not only age and pitch: what happened to them
 1) "Voice description", 300-900 characters: their history in one line → how they speak (pace, breath, pauses, habits,
    what they swallow or push) → age and gender stated plainly (for a child: "a real N-year-old boy/girl, unbroken
    voice", plus what makes it boyish or girlish), timbre and texture → recording (close mic, room). Never "cute".
-2) "Sample script", 100-1000 characters, about 15-20 s: a small monologue in their NATURAL speaking voice (not a
-   whisper, not shouting) that lets us hear the core: the wound showing through, the mask, a glimpse of the truth.
-   It is played over the scene and idle video, so it happens IN THAT MOMENT (see "THE MOMENT VISITORS SEE"): the
-   same place, the same pose, the same mood. Someone who looks still, watchful and sad on screen speaks low and
-   tired, not bright; whoever they talk to (themselves, someone off-screen) must fit what the picture shows. Their pet words, their world. It is what visitors hear, and
-   the reference any later line is cloned from. Eleven v3 tags like [sighs], [short pause] are allowed (adults);
-   for under-18s write delivery into punctuation instead.
-3) "Acoustics": where we hear them (the scene or key location) and how it colours the voice: room size, surfaces
-   (wood, stone, metal, open air), distance from the listener, noise floor (wind, machines, crowd). One line each for
-   reverb (none / small warm / big hall / slap echo), tone (muffled, bright, telephone) and level against the music.
+2) "Sample script", 100-1000 characters, about 15-20 s: their INNER MONOLOGUE, what goes through their head right
+   now. On screen they don't speak (the scene and idle video show no talking), so we hear their thoughts: said to
+   themselves, never to the visitor or to anyone in the room (no greetings, no "sit down", no questions to us;
+   thinking of someone absent is fine). Thoughts, not narration: no describing the place or the evening as a book
+   would, and not a retelling of their backstory: they think about their own business right now (what they are
+   doing, worried about, planning, the people around them). It is the visitor's FIRST meeting with the character:
+   they have not read the card and know nothing about them, so every name and world term must make sense on first
+   hearing from the thought itself; no riddles that need the card. Leave out past events that need explaining; the
+   core shows in HOW they think about the present: the mask, the old hurt showing through, a glimpse of the truth.
+   Old problems are old: they have lived with their body, scar or loss for years and are used to it, so they don't
+   dwell on it head-on ("everyone is staring at my hand"); it shows sideways, as a habit, a shrug, a practical
+   adjustment, a dry joke, or not at all. In their natural voice (not a whisper, not shouting), only
+   quieter and closer, as thoughts are. It happens IN THE MOMENT the scene and idle video show (see "THE MOMENT
+   VISITORS SEE"): the same place, the same pose, the same mood. Someone who looks still, watchful and sad on screen
+   thinks low and tired, not bright. Their pet words, their world. It is what visitors hear, and the reference any
+   later line is cloned from. Eleven v3 tags like [sighs], [short pause] are allowed (adults); for under-18s write
+   delivery into punctuation instead. Translations keep the same thoughts, written natively.
+   The "Voice description" says it is their inner voice, thinking to themselves.
+3) "Acoustics": an inner voice has no room: very close and dry, as if inside the listener's head. Name the place
+   only for the music and the mood. One line each for reverb (none, or the faintest touch), tone and level against
+   the music.
 4) "Delivery notes": 3 bullets (stability vs. expressiveness, pace, what to avoid).`,
 
   video: `VIDEO — a 5-10 second clip for Seedance (also works for Kling, Veo, Runway). It shows ACTION that reveals the

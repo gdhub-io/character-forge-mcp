@@ -3,13 +3,14 @@ import type { Character } from "./characters";
 
 /** The site speaks English (the original) and Russian (translations made with the translate-character skill). */
 export type Lang = "en" | "ru";
-export const LANGS: Lang[] = ["en", "ru"];
+/** Languages the visitor can switch to. Russian is hidden until the translations are polished; add "ru" back to show the switch. */
+export const LANGS: Lang[] = ["en"];
 
 const UI = {
   en: {
-    nav: ["Characters", "How it works", "The method", "Open source"],
-    star: "Star",
-    forge: "Forge your own",
+    nav: { characters: "Characters", how: "How it works" },
+    github: "GitHub",
+    install: "Install",
     openCard: (his: string) => `Open ${his} card`,
     hearVoice: (his: string) => `Hear ${his} voice`,
     stop: "Stop",
@@ -20,13 +21,12 @@ const UI = {
     prev: "Previous character",
     next: "Next character",
     disclaimer: "Fictional characters made with AI. Any resemblance to real people is coincidental; details may be inaccurate.",
-    genre: {} as Record<string, string>,
     medium: { advertising: "Ad", game: "Game", film: "Film", book: "Book", animation: "Animation", comics: "Comics", tabletop: "Tabletop" } as Record<string, string>,
   },
   ru: {
-    nav: ["Персонажи", "Как это работает", "Метод", "Открытый код"],
-    star: "Звезда",
-    forge: "Создать своего",
+    nav: { characters: "Персонажи", how: "Как это работает" },
+    github: "GitHub",
+    install: "Установить",
     openCard: () => "Открыть карточку",
     hearVoice: () => "Услышать голос",
     stop: "Стоп",
@@ -37,7 +37,6 @@ const UI = {
     prev: "Предыдущий персонаж",
     next: "Следующий персонаж",
     disclaimer: "Персонажи вымышлены и созданы с помощью ИИ. Любое сходство с реальными людьми случайно; детали могут быть неточны.",
-    genre: { comedy: "комедия", "post-apocalyptic": "постапокалипсис", "sci-fi": "фантастика", cyberpunk: "киберпанк", mystery: "детектив", fantasy: "фэнтези", drama: "драма", horror: "хоррор", thriller: "триллер", adventure: "приключения", romance: "романтика", western: "вестерн", noir: "нуар" } as Record<string, string>,
     medium: { advertising: "Реклама", game: "Игра", film: "Кино", book: "Книга", animation: "Анимация", comics: "Комикс", tabletop: "Настолка" } as Record<string, string>,
   },
 };

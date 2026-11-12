@@ -52,7 +52,11 @@ async function exists(url: string): Promise<string | undefined> {
 export function useCharacters(): Character[] | null {
   const [list, setList] = useState<Character[] | null>(null);
   useEffect(() => {
-    Promise.all(
+    // Re-checked whenever the visitor comes back to the tab, so newly generated scenes, videos and voices show up
+    // without a reload; the state only changes when something actually changed.
+    let last = "";
+    const load = () =>
+      Promise.all(
       showcase.map(async (s) => {
         const dir = base(s.slug);
         const card = (await (await fetch(`${dir}/card.json`, { cache: "no-store" })).json()) as Card;
@@ -63,7 +67,19 @@ export function useCharacters(): Character[] | null {
         ]);
         return { ...s, card, cardRu: cardRu as Card | undefined, files: { concept: (concept as string | undefined) ?? `${dir}/concept.png`, scene: scene as string | undefined, video: video as string | undefined, theme: theme as string | undefined, voice: voice as string | undefined, voiceRu: voiceRu as string | undefined } };
       }),
-    ).then(setList);
+      ).then((next) => {
+        const key = JSON.stringify(next);
+        if (key !== last) {
+          last = key;
+          setList(next);
+        }
+      });
+    void load();
+    const onVisible = () => document.visibilityState === "visible" && void load();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
   return list;
 }

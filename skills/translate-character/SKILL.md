@@ -16,10 +16,10 @@ English is always the source. A translation is an extra layer next to it: `card.
 
 ## 2. Voice — paid, ask first
 Only if the character already has a voice (`assets/voice/voice.json`).
-1. Read `prompts/voice.md` ("Sample script"). Translate the monologue for the same moment the scene shows: same place, same mood, same length and pauses, in the character's own way of speaking.
+1. Read `prompts/voice.md` ("Sample script") and `prompts/scene.txt` / `prompts/idle.txt`. Write the monologue natively in the target language for the moment the video shows (same place, pose, beat and mood), in the character's own way of speaking. Not a word-for-word copy: it must sound like a person talking, and a stranger must understand it.
 2. Tell the user the price (about the same as the original line: ElevenLabs ≈ $0.10 per 1000 characters, Qwen for minors ≈ $0.03) and wait for a yes.
-3. `character_voice_translation` with `id`, `lang` and the translated monologue → `assets/voice/reference.<lang>.mp3`, the same voice.
-   - New voices: `character_voice` takes `text_ru` and records both languages in one call.
+3. Translate the voice description too, by meaning, not word for word (who they are, how they talk, age, timbre, mood). `character_voice_translation` with `id`, `lang`, the monologue and the `description` generates a new voice in that language from that prompt → `assets/voice/reference.<lang>.mp3`.
+   - New voices: `character_voice` takes `translations: [{ lang, text }]` and records every language in one call. Each language is performed fresh from the voice description, not copied from the English take.
 
 ## 3. Website — if the character is on the site
 Add the translated `kicker` and `blurb` under `i18n.<lang>` in `site/src/showcase.json` (blurb ≤ 160 characters, written to fit, never cut), then `npm run sync` in `site/`.

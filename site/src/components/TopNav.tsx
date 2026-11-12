@@ -1,38 +1,68 @@
-import { IconArrowUpRight, IconBrandGithub, IconHammer } from "@tabler/icons-react";
-
+import { IconArrowUpRight, IconBrandGithub, IconHammer, IconMenu2, IconX } from "@tabler/icons-react";
+import { useState } from "react";
 import { LANGS, ui, type Lang } from "../i18n";
 
-export function TopNav({ lang, onLang }: { lang: Lang; onLang: (l: Lang) => void }) {
+export const REPO = "gdhub-io/character-forge-mcp";
+export const GITHUB_URL = `https://github.com/${REPO}`;
+
+/** The site's pages, addressed by hash so it works on any static host. */
+export type Page = "characters" | "how";
+const HREF: Record<Page, string> = { characters: "#/", how: "#how-it-works" };
+const PAGES: Page[] = ["characters", "how"];
+
+export function TopNav({ page, lang = "en", onLang }: { page: Page; lang?: Lang; onLang?: (l: Lang) => void }) {
   const t = ui(lang);
+  const [menu, setMenu] = useState(false);
   return (
-    <header className="flex items-center justify-between">
-      <a href="/" className="flex items-center gap-2.5 text-fg">
+    <header className="relative flex items-center justify-between">
+      <a href="#/" className="flex items-center gap-2.5 text-fg">
         <IconHammer size={20} stroke={1.75} />
-        <span className="font-mono text-xs font-bold tracking-[0.14em]">CHARACTER FORGE</span>
+        <span className="font-mono text-[11px] font-bold tracking-[0.14em] sm:text-xs">CHARACTER FORGE MCP</span>
       </a>
       <nav className="hidden items-center gap-9 md:flex">
-        {t.nav.map((l, i) => (
-          <a key={l} href="#" className="flex flex-col items-center gap-1.5 text-sm">
-            <span className={i === 0 ? "font-semibold text-fg" : "text-dim transition-colors hover:text-fg"}>{l}</span>
-            <span className={`h-0.5 w-4 ${i === 0 ? "bg-accent" : "bg-transparent"}`} />
+        {PAGES.map((p) => (
+          <a key={p} href={HREF[p]} aria-current={p === page ? "page" : undefined} className="flex flex-col items-center gap-1.5 text-sm">
+            <span className={p === page ? "font-semibold text-fg" : "text-dim transition-colors hover:text-fg"}>{t.nav[p]}</span>
+            <span className={`h-0.5 w-4 ${p === page ? "bg-accent" : "bg-transparent"}`} />
           </a>
         ))}
       </nav>
-      <div className="flex items-center gap-3">
-        <div role="group" aria-label="Language" className="flex rounded-full border border-line p-0.5 text-[12px] font-semibold">
-          {LANGS.map((l) => (
-            <button key={l} onClick={() => onLang(l)} aria-pressed={l === lang} className={`rounded-full px-2.5 py-1.5 uppercase ${l === lang ? "bg-fg text-deep" : "text-dim hover:text-fg"}`}>
-              {l}
-            </button>
-          ))}
-        </div>
-        <a href="#" className="hidden items-center gap-2 rounded-full border border-line px-3.5 py-2.5 text-[13px] text-fg sm:flex">
-          <IconBrandGithub size={16} stroke={1.75} /> {t.star}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {onLang && LANGS.length > 1 && (
+          <div role="group" aria-label="Language" className="flex rounded-full border border-line p-0.5 text-[12px] font-semibold">
+            {LANGS.map((l) => (
+              <button key={l} onClick={() => onLang(l)} aria-pressed={l === lang} className={`rounded-full px-2.5 py-1.5 uppercase ${l === lang ? "bg-fg text-deep" : "text-dim hover:text-fg"}`}>
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
+        <a href={GITHUB_URL} className="hidden items-center gap-2 rounded-full border border-line px-3.5 py-2.5 text-[13px] text-fg sm:flex">
+          <IconBrandGithub size={16} stroke={1.75} /> {t.github}
         </a>
-        <a href="#" className="flex items-center gap-2 rounded-full bg-accent px-4.5 py-2.5 text-[13px] font-semibold text-accent-ink">
-          {t.forge} <IconArrowUpRight size={14} stroke={2} />
+        <a href="#install" className="hidden items-center gap-2 rounded-full bg-accent px-4.5 py-2.5 text-[13px] font-semibold text-accent-ink sm:flex">
+          {t.install} <IconArrowUpRight size={14} stroke={2} />
         </a>
+        {/* Phones: links and the call to action live in a menu. */}
+        <button aria-label="Menu" aria-expanded={menu} onClick={() => setMenu(!menu)} className="grid size-9 place-items-center rounded-full border border-line bg-white/5 text-fg md:hidden">
+          {menu ? <IconX size={16} stroke={1.75} /> : <IconMenu2 size={16} stroke={1.75} />}
+        </button>
       </div>
+      {menu && (
+        <div className="absolute top-12 right-0 z-30 flex w-56 flex-col gap-1 rounded-lg border border-line bg-glass p-2 backdrop-blur-xl md:hidden">
+          {PAGES.map((p) => (
+            <a key={p} href={HREF[p]} onClick={() => setMenu(false)} className={`rounded px-3 py-2.5 text-sm hover:bg-white/7 ${p === page ? "font-semibold text-fg" : "text-dim"}`}>
+              {t.nav[p]}
+            </a>
+          ))}
+          <a href={GITHUB_URL} className="rounded px-3 py-2.5 text-sm text-dim hover:bg-white/7">
+            {t.github}
+          </a>
+          <a href="#install" onClick={() => setMenu(false)} className="mt-1 flex items-center justify-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink">
+            {t.install} <IconArrowUpRight size={14} stroke={2} />
+          </a>
+        </div>
+      )}
     </header>
   );
 }

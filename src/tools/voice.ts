@@ -1,7 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { designVoice, speakLine, speakReference, VOICE_LANGUAGES } from "../voice.js";
+import { designVoice, OTHER_VOICE_LANGUAGES, speakLine, speakReference } from "../voice.js";
+import { nextHint } from "../next.js";
 import { reply } from "./util.js";
+
+/** Languages other than the English original. */
 
 export function registerVoice(server: McpServer) {
   server.registerTool(
@@ -9,18 +12,27 @@ export function registerVoice(server: McpServer) {
     {
       title: "Design the character's voice (on request, paid)",
       description:
-        "ONLY on request; confirm the cost first. Creates the character's own voice from a description and a reference script (write both with character_prompt kind 'voice'). Adults: ElevenLabs Voice Design, a saved voice and its reference take (≈$0.10 per 1000 characters of the script). Under 18: Qwen 3 Voice Design, deepened by pitch_semitones and cloned into a speaker embedding (≈$0.03). Saves assets/voice/.",
+        "ONLY on request; confirm the cost first. Creates the character's own voice from a description and an English reference script (write both with character_prompt kind 'voice'), plus any other languages listed in translations, each performed from the same description. Adults: ElevenLabs Voice Design, a saved voice and its reference take (≈$0.10 per 1000 characters of the script). Under 18: Qwen 3 Voice Design, deepened by pitch_semitones and cloned into a speaker embedding (≈$0.03). Saves assets/voice/.",
       inputSchema: {
         id: z.string(),
         description: z.string().min(20).max(1000).describe("Who they are and how they sound: history, how they talk and to whom, then age, gender, timbre, pace, recording."),
-        text: z.string().min(100).max(1000).describe("Reference script in their natural speaking voice (not a whisper). Eleven v3 tags like [sighs] are allowed; they are dropped for minors."),
+        text: z.string().min(100).max(1000).describe("Reference script: their inner monologue in the moment the scene shows, thoughts to themselves, never addressed to the listener; natural voice, not a whisper. Eleven v3 tags like [sighs] are allowed; they are dropped for minors."),
         pitch_semitones: z.number().min(-6).max(6).optional().describe("Minors only: deepen (negative) or lighten the designed voice. Default -2."),
-        text_ru: z.string().min(50).max(1000).optional().describe("The same monologue translated into Russian, spoken in the same voice → voice/reference.ru.mp3 (the site's Russian version). Write it whenever the site shows the character, so both languages are made at once."),
+        translations: z
+          .array(
+            z.object({
+              lang: z.enum(OTHER_VOICE_LANGUAGES),
+              text: z.string().min(20).max(1000).describe("The same monologue, written natively in that language for the same moment."),
+              description: z.string().min(20).max(1000).optional().describe("The voice description in that language, translated by meaning. Defaults to the English one."),
+            }),
+          )
+          .optional()
+          .describe("Other languages to record in the same call, each performed fresh from the description (not a copy of the English take) → voice/reference.<lang>.mp3."),
       },
     },
-    async ({ id, description, text: script, pitch_semitones, text_ru }) => {
-      const r = await designVoice(id, { description, text: script, pitchSemitones: pitch_semitones, translations: text_ru ? { ru: text_ru } : undefined });
-      return reply(`Voice designed (${r.engine}):\n${r.files.join("\n")}`, { ...r });
+    async ({ id, description, text: script, pitch_semitones, translations }) => {
+      const r = await designVoice(id, { description, text: script, pitchSemitones: pitch_semitones, translations });
+      return reply(`Voice designed (${r.engine}):\n${r.files.join("\n")}${nextHint(id)}`, { ...r });
     },
   );
 
@@ -28,15 +40,16 @@ export function registerVoice(server: McpServer) {
     "character_voice_translation",
     {
       title: "The voice monologue in another language (paid)",
-      description: "ONLY on request, after character_voice: speaks the reference monologue, translated, in the same voice → voice/reference.<lang>.mp3, which the site plays in that language. Same price as a line.",
+      description: "ONLY on request, after character_voice: a new voice in another language, generated from the voice prompt translated by meaning (description + monologue), so the delivery follows the card → voice/reference.<lang>.mp3, which the site plays in that language. Same price as a line.",
       inputSchema: {
         id: z.string(),
-        lang: z.enum(Object.keys(VOICE_LANGUAGES).filter((l) => l !== "en") as [string, ...string[]]),
+        lang: z.enum(OTHER_VOICE_LANGUAGES),
         text: z.string().min(20).max(1000).describe("The reference monologue translated, keeping its meaning, rhythm, pauses and the character's voice."),
+        description: z.string().min(20).max(1000).optional().describe("The voice description in that language, translated by meaning. Defaults to the English one."),
       },
     },
-    async ({ id, lang, text: line }) => {
-      const file = await speakReference(id, line, lang as keyof typeof VOICE_LANGUAGES);
+    async ({ id, lang, text: line, description }) => {
+      const file = await speakReference(id, line, lang, description);
       return reply(`Saved: ${file}`, { file });
     },
   );

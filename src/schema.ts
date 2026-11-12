@@ -15,7 +15,8 @@ const MetaSchema = z.object({
   genre: text("Genre / tone."),
   mode: z.enum(["random", "brief"]).describe("'random' if built from a rolled seed, 'brief' if from a user description."),
   brief: z.string().optional().describe("The user's original brief, verbatim, when mode = 'brief'."),
-  seed: z.number().int().optional().describe("Seed returned by character_roll, when one was used."),
+  concept_image: z.string().optional().describe("Path or URL of the user's own concept image, when they gave one (character_create returns it). character_pick imports it as the winner's concept."),
+  seed: z.number().int().optional().describe("Seed returned by character_create, when one was used."),
   group: z.string().optional().describe("Variant-set id shared by competing variants of one concept."),
   variant: z.string().optional().describe("Variant letter within the group (A, B, C...)."),
   verdict: z

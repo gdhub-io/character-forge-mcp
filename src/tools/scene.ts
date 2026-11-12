@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { generateIdleVideo, generateScene } from "../scene.js";
+import { generateIdleVideo, generateScene, VIDEO_FAMILIES } from "../scene.js";
+import { nextHint } from "../next.js";
 import { reply } from "./util.js";
 
 // Corrections for one take, in plain words, on top of the default prompt: no code change and no restart.
@@ -25,7 +26,7 @@ export function registerScene(server: McpServer) {
     },
     async ({ id, prompt, notes, quality }) => {
       const r = await generateScene(id, { prompt, notes, quality });
-      return reply(`Scene saved: ${r.file}`, { ...r });
+      return reply(`Scene saved: ${r.file}${nextHint(id)}`, { ...r });
     },
   );
 
@@ -42,12 +43,12 @@ export function registerScene(server: McpServer) {
         seconds: z.number().int().min(4).max(30).optional().describe("Default 8: room for one characteristic gesture and a return to the first-frame pose."),
         loop: z.enum(["frame", "crossfade", "off"]).optional().describe("frame (Kling default): last frame = first frame, but the background tends to freeze and the motion can jerk at the seam. crossfade (Veo default; Veo also keeps the first = last frame): the last second is blended into the first, picture and sound, so the seam never jerks. off: plain clip."),
         audio: z.boolean().optional().describe("Veo only: default true ($0.15/s; $0.10/s without). Kling has no sound."),
-        model: z.enum(["kling", "veo"]).optional().describe("kling (default, Kling O1 Standard ≈$0.084/s, no sound) · veo (Veo 3.1 Fast 720p, native sound $0.15/s or silent $0.10/s, 4/6/8 s)."),
+        model: z.enum(VIDEO_FAMILIES).optional().describe("Default from models.json. kling (Kling O1 Standard ≈$0.084/s, no sound) · veo (Veo 3.1 Fast 720p, native sound $0.15/s or silent $0.10/s, 4/6/8 s)."),
       },
     },
     async ({ id, prompt, notes, seconds, loop, audio, model }) => {
       const r = await generateIdleVideo(id, { prompt, notes, seconds, loop, audio, model });
-      return reply(`Video saved: ${r.file} (${r.seconds}s)`, { ...r });
+      return reply(`Video saved: ${r.file} (${r.seconds}s)${nextHint(id)}`, { ...r });
     },
   );
 }

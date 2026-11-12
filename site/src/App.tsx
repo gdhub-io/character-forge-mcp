@@ -5,16 +5,37 @@ import { themeVars, useCharacters, type Character } from "./characters";
 import { CardDrawer } from "./components/CardDrawer";
 import { AMBIENT_VOLUME, LoopVideo } from "./components/LoopVideo";
 import { Switcher } from "./components/Switcher";
+import { GUIDE_SECTIONS, HowItWorks } from "./components/HowItWorks";
 import { TopNav } from "./components/TopNav";
 import { useThemeMusic } from "./useThemeMusic";
-import { inLang, ui, type Lang } from "./i18n";
+import { inLang, LANGS, ui, type Lang } from "./i18n";
 import { useVoice } from "./useVoice";
 
 const AUTO_ADVANCE_MS = 30_000;
 
+/** Hash routes: "#how-it-works" (and its section anchors, e.g. "#install") is the guide; anything else the cast. */
+function useRoute() {
+  const read = () => window.location.hash.replace(/^#\/?/, "");
+  const [hash, setHash] = useState(read);
+  useEffect(() => {
+    const on = () => setHash(read());
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
+  return hash;
+}
+
 export default function App() {
   const list = useCharacters();
+  const hash = useRoute();
   if (!list) return <div className="h-full bg-black" />;
+  const section = GUIDE_SECTIONS.find((s) => s === hash);
+  if (hash === "how-it-works" || section) {
+    // The guide's pictures are Teo's; its colours stay Marta's, like the design.
+    const teo = list.find((c) => c.slug === "teo-halloran") ?? list[0];
+    const marta = list.find((c) => c.slug === "marta-vell") ?? list[0];
+    return <HowItWorks c={{ ...teo, theme: marta.theme }} focus={section} />;
+  }
   return <Showcase list={list} />;
 }
 
@@ -25,7 +46,7 @@ function Showcase({ list }: { list: Character[] }) {
   const [progress, setProgress] = useState(0);
   const c = list[index];
   // The visitor's language, remembered between visits; English is the original.
-  const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("lang") === "ru" ? "ru" : "en"));
+  const [lang, setLang] = useState<Lang>(() => LANGS.find((l) => l === localStorage.getItem("lang")) ?? "en");
   useEffect(() => localStorage.setItem("lang", lang), [lang]);
   const view = inLang(c, lang);
   const t = ui(lang);
@@ -76,54 +97,57 @@ function Showcase({ list }: { list: Character[] }) {
         <Backdrop key={list[i].slug} c={list[i]} sound={music.audible && i === index} entering={n === layers.length - 1 && layers.length > 1} onEntered={() => setLayers([i])} />
       ))}
       {layers.length > 1 && <div key={`seam-${c.slug}`} className="forge-seam" />}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-shade)_0%,var(--color-shade)_18%,transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[180px] bg-gradient-to-t from-black/55 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(to_right,var(--color-shade)_0%,var(--color-shade)_18%,transparent_50%)] sm:block" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[180px] bg-gradient-to-t from-black/55 to-transparent sm:block" />
+      {/* Phones: the text sits over the lower half of the scene, so the shade rises from the bottom instead of the left. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-deep via-deep/85 to-transparent sm:hidden" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[110px] bg-gradient-to-b from-black/40 to-transparent" />
 
       <CardDrawer c={c} lang={lang} open={open} active={active} onActive={setActive} onClose={() => setOpen(false)} />
 
-      <div className="pointer-events-none relative z-20 flex h-full flex-col justify-between px-6 pt-7 pb-8 sm:pr-10 sm:pl-12">
+      <div className="pointer-events-none relative z-20 flex h-full flex-col justify-between px-5 pt-4 pb-3 sm:pt-7 sm:pr-10 sm:pb-8 sm:pl-12">
         <div className="pointer-events-auto">
-          <TopNav lang={lang} onLang={setLang} />
+          <TopNav page="characters" lang={lang} onLang={setLang} />
         </div>
 
-        <section key={c.slug} className={`rise-in mt-auto mb-12 flex min-h-0 max-w-[660px] shrink flex-col justify-end gap-5.5 transition-opacity duration-300 ${open ? "opacity-0" : "pointer-events-auto"}`}>
-          <div className="kicker flex items-center gap-3.5 text-dim">
+        <section key={c.slug} className={`rise-in mt-auto mb-5 flex min-h-0 max-w-[660px] shrink flex-col justify-end gap-3 sm:mb-12 sm:gap-5.5 transition-opacity duration-300 ${open ? "opacity-0" : "pointer-events-auto"}`}>
+          <div className="kicker flex items-center gap-2.5 text-[9px] text-dim sm:gap-3.5 sm:text-[11px]">
             <span className="font-bold text-accent">{String(index + 1).padStart(2, "0")}</span>
-            <span className="h-px w-7 bg-dim" />
-            {t.medium[meta.medium] ?? meta.medium} · {t.genre[meta.genre] ?? meta.genre} · {view.kicker}
+            <span className="h-px w-4 bg-dim sm:w-7" />
+            {view.kicker}
           </div>
-          <h1 className="font-display text-[clamp(56px,min(10vw,14vh),140px)] leading-[0.86] font-medium tracking-[-0.035em] text-fg">
+          <h1 className="font-display text-[clamp(52px,min(16vw,9vh),68px)] sm:text-[clamp(56px,min(10vw,14vh),140px)] leading-[0.86] font-medium tracking-[-0.035em] text-fg">
             {first}
             <br />
             {rest.join(" ")}
           </h1>
-          <p className="max-w-[540px] font-display text-[clamp(22px,2.4vw,32px)] leading-tight text-accent italic">{meta.tagline}</p>
-          <p className="max-w-[540px] text-[17px] leading-relaxed text-dim">{view.blurb}</p>
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <p className="max-w-[540px] font-display text-[20px] leading-tight text-accent italic sm:text-[clamp(22px,2.4vw,32px)]">{meta.tagline}</p>
+          <p className="max-w-[540px] text-[14px] leading-relaxed text-dim sm:text-[17px]">{view.blurb}</p>
+          <div className="flex items-center gap-2 pt-1 sm:flex-wrap sm:gap-3">
             <button
               onClick={() => {
                 setActive(0);
                 setOpen(true);
               }}
-              className="flex items-center gap-2.5 rounded-full bg-fg px-5.5 py-3.5 text-sm font-semibold text-deep"
+              className="flex flex-1 items-center justify-center gap-2.5 rounded-full bg-fg px-5.5 py-3.5 text-sm font-semibold text-deep sm:flex-none"
             >
               {t.openCard(his)} <IconArrowRight size={16} stroke={2} />
             </button>
             {view.voice && (
-            <button onClick={voice.toggle} className="flex items-center gap-2.5 rounded-full border border-line bg-white/5 px-5.5 py-3.5 text-sm font-medium text-fg backdrop-blur-md">
+            <button onClick={voice.toggle} aria-label={voice.speaking ? t.stop : t.hearVoice(his)} className="flex size-[46px] shrink-0 items-center justify-center gap-2.5 rounded-full border border-line bg-white/5 text-sm font-medium text-fg backdrop-blur-md sm:size-auto sm:px-5.5 sm:py-3.5">
               {voice.speaking ? <IconPlayerStopFilled size={14} /> : <IconWaveSine size={16} stroke={1.75} />}
-              {voice.speaking ? t.stop : t.hearVoice(his)}
+              <span className="hidden sm:inline">{voice.speaking ? t.stop : t.hearVoice(his)}</span>
             </button>
             )}
-            <button data-music-toggle aria-label={music.on ? t.soundOff : t.soundOn} onClick={music.toggle} className="grid size-[46px] place-items-center rounded-full border border-line bg-white/5 text-fg backdrop-blur-md">
+            <button data-music-toggle aria-label={music.on ? t.soundOff : t.soundOn} onClick={music.toggle} className="grid size-[46px] shrink-0 place-items-center rounded-full border border-line bg-white/5 text-fg backdrop-blur-md">
               {music.on ? <IconVolume size={16} stroke={1.75} /> : <IconVolumeOff size={16} stroke={1.75} />}
             </button>
           </div>
         </section>
 
-        <footer className={`flex shrink-0 items-end border-t border-line pt-6 transition-opacity duration-300 ${open ? "opacity-0" : "pointer-events-auto"}`}>
+        <footer className={`flex shrink-0 flex-col gap-2 border-t border-line pt-3.5 transition-opacity duration-300 sm:pt-6 ${open ? "opacity-0" : "pointer-events-auto"}`}>
           <Switcher list={list} lang={lang} index={index} progress={progress} onSelect={select} />
+          <p className="text-center text-[9px] text-dim/70 sm:text-[11px]">{t.disclaimer}</p>
         </footer>
       </div>
     </main>

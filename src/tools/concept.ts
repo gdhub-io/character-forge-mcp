@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { generateConcept, VIEWS } from "../concept.js";
+import { nextHint } from "../next.js";
 import { reply, text } from "./util.js";
 
 export function registerConcept(server: McpServer) {
@@ -35,11 +36,12 @@ export function registerConcept(server: McpServer) {
       }
       const { image } = r;
       const content: CallToolResult["content"] = [
-        text(`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${r.card}`),
+        text(`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${r.card}${nextHint(id)}`),
       ];
       // Shown inline so the user sees the concept in chat; skipped for very large files.
       if (image.bytes.length < 4_000_000) content.push({ type: "image", data: image.bytes.toString("base64"), mimeType: image.mimeType });
       return { content, structuredContent: { message: content[0].type === "text" ? content[0].text : "", prompt: r.prompt, generated: true, file: r.file, provider: image.provider, model: image.model, seed: image.seed } };
     },
   );
+
 }

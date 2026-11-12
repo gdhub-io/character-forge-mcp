@@ -20,6 +20,9 @@ export function outputDir(): string {
 export const DRAFTS_DIR = "_drafts";
 
 /** A character's folder: in the library, or among the tournament drafts if that's where it is. */
+/** A tournament variant that hasn't been picked yet. */
+export const isDraft = (slug: string) => characterDir(slug).startsWith(path.join(outputDir(), DRAFTS_DIR));
+
 export function characterDir(slug: string): string {
   if (!SlugSchema.safeParse(slug).success) throw new Error(`Invalid character id: ${slug}`);
   const main = path.join(outputDir(), slug);
