@@ -11,7 +11,7 @@ export function registerConcept(server: McpServer) {
 		{
 			title: "Generate T-pose concept sheet",
 			description:
-				"Builds an A-pose model-sheet prompt from a saved card's look and, with FAL_KEY set, generates it on fal.ai: a mannequin built from look.body (the character's own proportions) is drawn and repainted image-to-image into the character, so the pose and front/back layout hold → concept.png (the card is re-rendered with it). pose_image puts the character in the pose of any picture → concept-pose.png. Without FAL_KEY (or with dry_run) returns the prompt only. Costs ≈ $0.01 per sheet.",
+				"Builds an A-pose model-sheet prompt from a saved card's look and, with FAL_KEY set, generates it on fal.ai: a faceless figure built from look.body (the character's own proportions) is drawn front and back and given to GPT Image as the pose reference, with the full look → concept.png (the card is re-rendered with it). pose_image puts the character in the pose of any picture → concept-pose.png. Without FAL_KEY (or with dry_run) returns the prompt only. Costs ≈ $0.02 per sheet.",
 			inputSchema: {
 				id: z.string().describe("Character id returned by character_save."),
 				style: z
@@ -47,7 +47,7 @@ export function registerConcept(server: McpServer) {
 					.enum(["img2img", "gpt", "gpt2", "pose", "depth", "canny"])
 					.optional()
 					.describe(
-						"How our mannequin steers the image. img2img (default, Z-Image ≈ $0.01): it is the starting canvas. gpt: GPT Image 2.6 edit uses it as a reference (low quality ≈ $0.02). pose/depth/canny: ControlNet conditions (weak on this endpoint).",
+						"How the figure steers the image. gpt (default, GPT Image edit ≈ $0.02): the figure is a pose reference. img2img (Z-Image ≈ $0.01): it is the starting canvas; greys colours. pose/depth/canny: ControlNet conditions (weak on this endpoint). Kept for experiments; leave unset.",
 					),
 				figure: z
 					.enum([
