@@ -1,7 +1,7 @@
 # character-forge-mcp
 
 [![CI](https://github.com/gdhub-io/character-forge-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/gdhub-io/character-forge-mcp/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/character-forge-mcp)](https://www.npmjs.com/package/character-forge-mcp)
+[![npm](https://img.shields.io/npm/v/@gdhub/character-forge-mcp)](https://www.npmjs.com/package/@gdhub/character-forge-mcp)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 An open-source [MCP](https://modelcontextprotocol.io) server for creating vivid, story-ready characters for film, games, animation, advertising, books and comics.
@@ -111,7 +111,7 @@ Claude Code asks for the optional fal.ai key when you install the plugin and kee
 ### Claude Code (MCP only)
 
 ```bash
-claude mcp add character-forge -e CHARACTER_FORGE_DIR=~/character-forge -e FAL_KEY=... -- npx -y character-forge-mcp
+claude mcp add character-forge -e CHARACTER_FORGE_DIR=~/character-forge -e FAL_KEY=... -- npx -y @gdhub/character-forge-mcp
 ```
 
 Without the plugin there are no separate reviewer agents. The model plays each role in a separate pass instead, which is weaker but still works.
@@ -123,7 +123,7 @@ Without the plugin there are no separate reviewer agents. The model plays each r
   "mcpServers": {
     "character-forge": {
       "command": "npx",
-      "args": ["-y", "character-forge-mcp"],
+      "args": ["-y", "@gdhub/character-forge-mcp"],
       "env": {
         "CHARACTER_FORGE_DIR": "/Users/you/character-forge",
         "FAL_KEY": "..."
