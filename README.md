@@ -1,10 +1,12 @@
 # character-forge-mcp
 
+[![Character Forge MCP: a character studio inside your AI chat](https://raw.githubusercontent.com/gdhub-io/character-forge-mcp/main/site/public/og.jpg)](https://characters.gdhub.io)
+
 [![CI](https://github.com/gdhub-io/character-forge-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/gdhub-io/character-forge-mcp/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@gdhub/character-forge-mcp)](https://www.npmjs.com/package/@gdhub/character-forge-mcp)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-An open-source [MCP](https://modelcontextprotocol.io) server for creating vivid, story-ready characters for film, games, animation, advertising, books and comics.
+**[characters.gdhub.io](https://characters.gdhub.io)** · An open-source [MCP](https://modelcontextprotocol.io) server for creating vivid, story-ready characters for film, games, animation, advertising, books and comics.
 
 Connect it to any MCP-capable chat (Claude Code, Claude Desktop, Cursor and others) and ask for a character: at random, from a description, from your own picture, or from a picture and a description. You get a **character package**:
 
