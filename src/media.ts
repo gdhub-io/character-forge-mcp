@@ -8,103 +8,118 @@ import { savePrompt } from "./store.js";
  * character_prompt_save stores it. Nothing here calls those generators.
  */
 
-export const MEDIA_KINDS = ["concept", "illustration", "voice", "video", "song", "theme"] as const;
+export const MEDIA_KINDS = [
+	"concept",
+	"illustration",
+	"voice",
+	"video",
+	"song",
+	"theme",
+] as const;
 export type MediaKind = (typeof MEDIA_KINDS)[number];
 
 const join = (items: string[]) => items.join("; ");
 
 /** Look essentials every visual prompt must repeat so the character stays consistent across images and video. */
 function visualAnchors(c: CharacterCard): string {
-  const d = c.description;
-  const lk = c.look;
-  return [
-    `${d.age}, ${d.gender}, ${d.species}. ${d.physical.height_build} ${d.physical.face} ${d.physical.hair}`,
-    `Marks: ${join(lk.marks.map((m) => `${m.mark} (${m.location})`))}`,
-    `Signature item: ${lk.signature_item.item} — ${lk.signature_item.how_carried}`,
-    `Outfit: ${join(lk.outfit.map((o) => o.piece))}`,
-    `Palette: ${lk.palette.map((p) => `${p.name} ${p.hex}`).join(", ")}`,
-    `Silhouette: ${lk.silhouette}`,
-    `Art style: ${lk.art_style}`,
-  ].join("\n");
+	const d = c.description;
+	const lk = c.look;
+	return [
+		`${d.age}, ${d.gender}, ${d.species}. ${d.physical.height_build} ${d.physical.face} ${d.physical.hair}`,
+		`Marks: ${join(lk.marks.map((m) => `${m.mark} (${m.location})`))}`,
+		`Signature item: ${lk.signature_item.item} — ${lk.signature_item.how_carried}`,
+		`Outfit: ${join(lk.outfit.map((o) => o.piece))}`,
+		`Palette: ${lk.palette.map((p) => `${p.name} ${p.hex}`).join(", ")}`,
+		`Silhouette: ${lk.silhouette}`,
+		`Art style: ${lk.art_style}`,
+	].join("\n");
 }
 
 function material(c: CharacterCard, kind: MediaKind): string {
-  const { core, goals: g, description: d, backstory: b, destiny: ds, look: lk, psychology: p } = c;
-  switch (kind) {
-    case "concept":
-      return buildTposePrompt(c);
-    case "illustration":
-      return [
-        visualAnchors(c),
-        `Core paradox: ${core.central_paradox}`,
-        `Candidate moments: FIRST APPEARANCE — ${c.identification.first_appearance} | THRESHOLD — ${ds.threshold} | CLIMAX — ${g.goal_climax}`,
-        `Locations: ${join(b.key_locations)}`,
-        `World: ${b.world.who_rules} ${b.world.boundaries}`,
-        `Secondary characters: ${join(b.contradictions.map((x) => x.with_whom))}`,
-        `Inner state device: ${p.visual_device}`,
-        `Medium / genre: ${c.meta.medium} · ${c.meta.genre}`,
-      ].join("\n");
-    case "voice":
-      return [
-        `${d.age}, ${d.gender}. Cultural background: ${d.cultural_background}`,
-        `Body: ${d.physical.height_build} Marks: ${join(lk.marks.map((m) => m.mark))}`,
-        `Speech manner: ${d.speech.manner}`,
-        `Pet words: ${join(d.speech.pet_words)}`,
-        `Sample lines: ${join(d.speech.sample_lines)}`,
-        `Inner monologue: ${join(p.inner_monologue)}`,
-        `Emotional baseline: ${p.emotional_baseline} · Energy: ${c.traits.energy} · Temperament: ${c.traits.temperament}`,
-        `Strongest trigger: ${p.strongest_trigger}`,
-        `Where we hear them: ${join(b.key_locations)}; world: ${d.sociology.place}`,
-        `THE MOMENT VISITORS SEE while the voice plays (scene and idle video): ${b.key_locations[0]} — ${lk.movement.idle_pose}`,
-        `Core paradox: ${core.central_paradox}`,
-      ].join("\n");
-    case "video":
-      return [
-        visualAnchors(c),
-        `Movement — gait: ${lk.movement.gait}; idle: ${lk.movement.idle_pose}; gesture: ${lk.movement.signature_gesture}; under stress: ${lk.movement.under_stress}`,
-        `Candidate actions: FIRST APPEARANCE — ${c.identification.first_appearance} | SCENE GOAL — ${g.scene_goal_example} | ORDEAL — ${ds.ordeal}`,
-        `Characteristic reactions: ${join(c.traits.reactions.map((r) => `${r.situation} → ${r.reaction}`))}`,
-        `Locations: ${join(b.key_locations)}`,
-      ].join("\n");
-    case "song":
-      return [
-        `Name: ${c.meta.name} — ${c.meta.tagline}`,
-        `Wound: ${core.wound}`,
-        `Lie: "${core.lie}" · Truth: "${core.truth}"`,
-        `Arc: ${ds.ordinary_world} → ${ds.threshold} → ${ds.ordeal} → ${ds.transformation} → ${ds.ending}`,
-        `Signature item: ${lk.signature_item.item} (${lk.signature_item.story})`,
-        `Pet words: ${join(d.speech.pet_words)}`,
-        `World & culture: ${c.meta.genre}; ${d.cultural_background}; ${d.sociology.place}`,
-        `Tastes: ${c.uniqueness.lifestyle.tastes}`,
-      ].join("\n");
-    case "theme":
-      return [
-        `Name: ${c.meta.name} — ${c.meta.tagline} · ${c.meta.medium}, ${c.meta.genre}`,
-        `Wound: ${core.wound}`,
-        `Formative events: ${join(d.life_events.map((e) => `age ${e.age}: ${e.event}`))}`,
-        `Strongest trigger: ${p.strongest_trigger}`,
-        `Lie: "${core.lie}" · Truth: "${core.truth}"`,
-        `Central paradox: ${core.central_paradox}`,
-        `Best trait: ${c.traits.best_trait} · Worst trait: ${c.traits.worst_trait}`,
-        `Mask: ${c.fears.mask}`,
-        `Dramatic question: ${core.dramatic_question}`,
-        `States — passive: ${p.states.passive} | active: ${p.states.active}`,
-        `Emotional baseline: ${p.emotional_baseline} · Energy: ${c.traits.energy} · Temperament: ${c.traits.temperament} · Social: ${c.traits.social}`,
-        `Gait: ${lk.movement.gait} · Speech: ${d.speech.manner}`,
-        `World & culture: ${d.cultural_background}; ${d.sociology.place}`,
-        `Signature item: ${lk.signature_item.item}`,
-        `Palette: ${join(lk.palette.map((x) => `${x.name} — ${x.meaning}`))}`,
-        `Tastes: ${c.uniqueness.lifestyle.tastes}`,
-      ].join("\n");
-  }
+	const {
+		core,
+		goals: g,
+		description: d,
+		backstory: b,
+		destiny: ds,
+		look: lk,
+		psychology: p,
+	} = c;
+	switch (kind) {
+		case "concept":
+			return buildTposePrompt(c);
+		case "illustration":
+			return [
+				visualAnchors(c),
+				`Core paradox: ${core.central_paradox}`,
+				`Candidate moments: FIRST APPEARANCE — ${c.identification.first_appearance} | THRESHOLD — ${ds.threshold} | CLIMAX — ${g.goal_climax}`,
+				`Locations: ${join(b.key_locations)}`,
+				`World: ${b.world.who_rules} ${b.world.boundaries}`,
+				`Secondary characters: ${join(b.contradictions.map((x) => x.with_whom))}`,
+				`Inner state device: ${p.visual_device}`,
+				`Medium / genre: ${c.meta.medium} · ${c.meta.genre}`,
+			].join("\n");
+		case "voice":
+			return [
+				`${d.age}, ${d.gender}. Cultural background: ${d.cultural_background}`,
+				`Body: ${d.physical.height_build} Marks: ${join(lk.marks.map((m) => m.mark))}`,
+				`Speech manner: ${d.speech.manner}`,
+				`Pet words: ${join(d.speech.pet_words)}`,
+				`Sample lines: ${join(d.speech.sample_lines)}`,
+				`Inner monologue: ${join(p.inner_monologue)}`,
+				`Emotional baseline: ${p.emotional_baseline} · Energy: ${c.traits.energy} · Temperament: ${c.traits.temperament}`,
+				`Strongest trigger: ${p.strongest_trigger}`,
+				`Where we hear them: ${join(b.key_locations)}; world: ${d.sociology.place}`,
+				`THE MOMENT VISITORS SEE while the voice plays (scene and idle video): ${b.key_locations[0]} — ${lk.movement.idle_pose}`,
+				`Core paradox: ${core.central_paradox}`,
+			].join("\n");
+		case "video":
+			return [
+				visualAnchors(c),
+				`Movement — gait: ${lk.movement.gait}; idle: ${lk.movement.idle_pose}; gesture: ${lk.movement.signature_gesture}; under stress: ${lk.movement.under_stress}`,
+				`Candidate actions: FIRST APPEARANCE — ${c.identification.first_appearance} | SCENE GOAL — ${g.scene_goal_example} | ORDEAL — ${ds.ordeal}`,
+				`Characteristic reactions: ${join(c.traits.reactions.map((r) => `${r.situation} → ${r.reaction}`))}`,
+				`Locations: ${join(b.key_locations)}`,
+			].join("\n");
+		case "song":
+			return [
+				`Name: ${c.meta.name} — ${c.meta.tagline}`,
+				`Wound: ${core.wound}`,
+				`Lie: "${core.lie}" · Truth: "${core.truth}"`,
+				`Arc: ${ds.ordinary_world} → ${ds.threshold} → ${ds.ordeal} → ${ds.transformation} → ${ds.ending}`,
+				`Signature item: ${lk.signature_item.item} (${lk.signature_item.story})`,
+				`Pet words: ${join(d.speech.pet_words)}`,
+				`World & culture: ${c.meta.genre}; ${d.cultural_background}; ${d.sociology.place}`,
+				`Tastes: ${c.uniqueness.lifestyle.tastes}`,
+			].join("\n");
+		case "theme":
+			return [
+				`Name: ${c.meta.name} — ${c.meta.tagline} · ${c.meta.medium}, ${c.meta.genre}`,
+				`Wound: ${core.wound}`,
+				`Formative events: ${join(d.life_events.map((e) => `age ${e.age}: ${e.event}`))}`,
+				`Strongest trigger: ${p.strongest_trigger}`,
+				`Lie: "${core.lie}" · Truth: "${core.truth}"`,
+				`Central paradox: ${core.central_paradox}`,
+				`Best trait: ${c.traits.best_trait} · Worst trait: ${c.traits.worst_trait}`,
+				`Mask: ${c.fears.mask}`,
+				`Dramatic question: ${core.dramatic_question}`,
+				`States — passive: ${p.states.passive} | active: ${p.states.active}`,
+				`Emotional baseline: ${p.emotional_baseline} · Energy: ${c.traits.energy} · Temperament: ${c.traits.temperament} · Social: ${c.traits.social}`,
+				`Gait: ${lk.movement.gait} · Speech: ${d.speech.manner}`,
+				`World & culture: ${d.cultural_background}; ${d.sociology.place}`,
+				`Signature item: ${lk.signature_item.item}`,
+				`Palette: ${join(lk.palette.map((x) => `${x.name} — ${x.meaning}`))}`,
+				`Tastes: ${c.uniqueness.lifestyle.tastes}`,
+			].join("\n");
+	}
 }
 
 const GUIDES: Record<MediaKind, string> = {
-  concept: `CONCEPT (A-pose model sheet) — the ready-made prompt below is built from the look section.
+	concept: `CONCEPT (A-pose model sheet) — the ready-made prompt below is built from the look section.
 Use it as is, or tighten wording for the target model; do not drop marks, sides, palette or the signature item.
 Sections to save: "Prompt", "Negative" (text, labels, watermark, extra limbs, props held, busy background), "Settings" (aspect ratio 3:2 for front-back, 2:3 for front).`,
 
-  illustration: `ILLUSTRATION — one key-art image that REVEALS the character: a specific moment from their story, in a
+	illustration: `ILLUSTRATION — one key-art image that REVEALS the character: a specific moment from their story, in a
 specific location, with an event happening. Model-agnostic (gpt-image, Gemini image, Flux, Midjourney).
 Pick ONE moment that shows the core paradox (often the first appearance, the threshold or the climax choice).
 Write natural-language sentences, 80-150 words, in this order: subject (with the visual anchors), action that
@@ -113,7 +128,7 @@ lens), lighting & time of day, mood, art style (match look.art_style).
 The character must be recognisable: repeat marks with sides, the signature item, outfit and palette.
 Sections to save: "Moment" (one line: which story beat and why), "Prompt", "Negative", "Settings" (aspect ratio).`,
 
-  voice: `VOICE — the character's own voice (character_voice): a short monologue in it, played as their voice, and the
+	voice: `VOICE — the character's own voice (character_voice): a short monologue in it, played as their voice, and the
 acoustics of where we hear it. No celebrity or actor names.
 The voice comes from WHO THEY ARE, not only age and pitch: what happened to them, how they talk and to whom
 (who gets their real voice, who gets the mask), what their body and work did to the sound.
@@ -143,7 +158,7 @@ The voice comes from WHO THEY ARE, not only age and pitch: what happened to them
    the music.
 4) "Delivery notes": 3 bullets (stability vs. expressiveness, pace, what to avoid).`,
 
-  video: `VIDEO — a 5-10 second clip for Seedance (also works for Kling, Veo, Runway). It shows ACTION that reveals the
+	video: `VIDEO — a 5-10 second clip for Seedance (also works for Kling, Veo, Runway). It shows ACTION that reveals the
 character, like the illustration but in motion.
 One clear action beat with a beginning and an end. Structure: subject (visual anchors) + action (use look.movement
 and their reactions) + scene + camera movement + lighting + style + mood. Name the camera move explicitly (static,
@@ -153,7 +168,7 @@ Sections to save: "Action" (one line: what happens and what it reveals), "Prompt
 morphing hands or face, extra limbs, flicker), "Settings" (duration, aspect ratio, resolution, and image-to-video: use
 the illustration or concept as the first frame if available).`,
 
-  song: `SONG — for Suno. A song about the character that tells their arc. No artist names anywhere.
+	song: `SONG — for Suno. A song about the character that tells their arc. No artist names anywhere.
 Sections to save:
 - "Title".
 - "Style", at most 200 characters: comma-separated tags for genre, subgenre or era, 2-4 instruments, vocal type and
@@ -168,7 +183,7 @@ Sections to save:
   First person or a ballad about them: choose. Concrete images from the card; no filler rhymes.
 - "Exclude styles" (optional).`,
 
-  theme: `THEME — the character's instrumental leitmotif, about 30 s, for a looping background (e.g. behind an idle video).
+	theme: `THEME — the character's instrumental leitmotif, about 30 s, for a looping background (e.g. behind an idle video).
 It is a portrait of who they are INSIDE, not a soundtrack of their location: the picture already shows the place.
 Written for ElevenLabs Music (composition plan); a one-paragraph fallback works for Lyria, Stable Audio or Suno.
 Derive every choice from the card:
@@ -195,23 +210,33 @@ Sections to save:
 };
 
 export function mediaBrief(c: CharacterCard, kind: MediaKind): string {
-  return [
-    `${kind.toUpperCase()} PROMPT for "${c.meta.name}". Write it in English following the rules, using only the card's facts`,
-    `(don't invent a different look or story). Then call character_prompt_save with kind "${kind}" and the named sections.`,
-    "",
-    GUIDES[kind],
-    "",
-    `CARD MATERIAL:\n${material(c, kind)}`,
-  ].join("\n");
+	return [
+		`${kind.toUpperCase()} PROMPT for "${c.meta.name}". Write it in English following the rules, using only the card's facts`,
+		`(don't invent a different look or story). Then call character_prompt_save with kind "${kind}" and the named sections.`,
+		"",
+		GUIDES[kind],
+		"",
+		`CARD MATERIAL:\n${material(c, kind)}`,
+	].join("\n");
 }
 
 export interface MediaItem {
-  kind: MediaKind;
-  sections: { label: string; text: string }[];
+	kind: MediaKind;
+	sections: { label: string; text: string }[];
 }
 
 /** Writes prompts/<kind>.md and returns its path. */
-export async function saveMedia(slug: string, name: string, item: MediaItem): Promise<string> {
-  const body = item.sections.map((s) => `## ${s.label}\n\n${s.text.trim()}`).join("\n\n");
-  return savePrompt(slug, `${item.kind}.md`, `# ${name} — ${item.kind} prompt\n\n${body}\n`);
+export async function saveMedia(
+	slug: string,
+	name: string,
+	item: MediaItem,
+): Promise<string> {
+	const body = item.sections
+		.map((s) => `## ${s.label}\n\n${s.text.trim()}`)
+		.join("\n\n");
+	return savePrompt(
+		slug,
+		`${item.kind}.md`,
+		`# ${name} — ${item.kind} prompt\n\n${body}\n`,
+	);
 }

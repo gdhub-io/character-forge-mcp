@@ -1,0 +1,67 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
+	"vcs": {
+		"enabled": false,
+		"clientKind": "git",
+		"useIgnoreFile": false
+	},
+	"files": {
+		"ignoreUnknown": false,
+		// The scanner watches every folder it is not told to skip; build output and the character library
+		// (images, video, sound) would keep the editor's Biome busy.
+		"experimentalScannerIgnores": [
+			".git",
+			"dist",
+			"characters",
+			"site/dist",
+			"site/public"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"includes": [
+			"src/**/*.ts",
+			"test/**/*.mjs",
+			"site/src/**/*.ts",
+			"site/src/**/*.tsx",
+			"site/scripts/**/*.mjs"
+		]
+	},
+	"linter": {
+		"enabled": true,
+		"includes": [
+			"src/**/*.ts",
+			"test/**/*.mjs",
+			"site/src/**/*.ts",
+			"site/src/**/*.tsx",
+			"site/scripts/**/*.mjs"
+		],
+		"rules": {
+			"recommended": true,
+			"suspicious": {
+				"noDoubleEquals": "warn"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "warn"
+			},
+			"a11y": {
+				"useKeyWithClickEvents": "off",
+				"useSemanticElements": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
+}

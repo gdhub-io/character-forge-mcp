@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { registerTools } from "./tools/index.js";
 import { registerPrompts } from "./prompts/index.js";
+import { registerTools } from "./tools/index.js";
 
-export const VERSION: string = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+export const VERSION: string = JSON.parse(
+	readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+).version;
 
 // Short on purpose: the full method and tournament protocol live in character_method (tournament.ts).
 const INSTRUCTIONS = `
@@ -22,8 +24,11 @@ user asks what's next, call character_next and offer what it lists, with prices.
 `.trim();
 
 export function createServer(): McpServer {
-  const server = new McpServer({ name: "character-forge", version: VERSION }, { instructions: INSTRUCTIONS });
-  registerTools(server);
-  registerPrompts(server);
-  return server;
+	const server = new McpServer(
+		{ name: "character-forge", version: VERSION },
+		{ instructions: INSTRUCTIONS },
+	);
+	registerTools(server);
+	registerPrompts(server);
+	return server;
 }

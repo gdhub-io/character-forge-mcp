@@ -4,16 +4,46 @@
  */
 
 export const RUBRIC = [
-  { key: "coherence", weight: 20, q: "Does every section trace back to the core (wound → lie → fear → defense/gift → truth)? No orphan traits." },
-  { key: "conflict", weight: 20, q: "Is the want-vs-need engine strong? Does the climax force an impossible, character-defining choice?" },
-  { key: "specificity", weight: 15, q: "Concrete, filmable, surprising details instead of generic ones? Could they be swapped into another story? (they shouldn't)" },
-  { key: "playability", weight: 15, q: "How many great scenes does this character generate on their own? Are they active?" },
-  { key: "fit", weight: 10, q: "Fits the brief / anchor / medium? For games: gameplay hooks; ads: instant read; film: arc; books: inner life." },
-  { key: "visual", weight: 10, q: "Readable silhouette and look that tells the core story without words?" },
-  { key: "voice", weight: 10, q: "Is their speech recognisable with the name removed?" },
+	{
+		key: "coherence",
+		weight: 20,
+		q: "Does every section trace back to the core (wound → lie → fear → defense/gift → truth)? No orphan traits.",
+	},
+	{
+		key: "conflict",
+		weight: 20,
+		q: "Is the want-vs-need engine strong? Does the climax force an impossible, character-defining choice?",
+	},
+	{
+		key: "specificity",
+		weight: 15,
+		q: "Concrete, filmable, surprising details instead of generic ones? Could they be swapped into another story? (they shouldn't)",
+	},
+	{
+		key: "playability",
+		weight: 15,
+		q: "How many great scenes does this character generate on their own? Are they active?",
+	},
+	{
+		key: "fit",
+		weight: 10,
+		q: "Fits the brief / anchor / medium? For games: gameplay hooks; ads: instant read; film: arc; books: inner life.",
+	},
+	{
+		key: "visual",
+		weight: 10,
+		q: "Readable silhouette and look that tells the core story without words?",
+	},
+	{
+		key: "voice",
+		weight: 10,
+		q: "Is their speech recognisable with the name removed?",
+	},
 ] as const;
 
-export const RUBRIC_TEXT = RUBRIC.map((r) => `- ${r.key} (${r.weight} pts): ${r.q}`).join("\n");
+export const RUBRIC_TEXT = RUBRIC.map(
+	(r) => `- ${r.key} (${r.weight} pts): ${r.q}`,
+).join("\n");
 
 const COHERENCE_GUIDE = `
 ROLE: COHERENCE REVIEWER. You did not write this character and you owe the author nothing.
@@ -141,12 +171,12 @@ Output: the complete revised card JSON, then up to 10 lines "field: what was unc
 `.trim();
 
 export const ROLE_GUIDES = {
-  coherence: COHERENCE_GUIDE,
-  critic: CRITIC_GUIDE,
-  judge: JUDGE_GUIDE,
-  author: AUTHOR_DEFENSE_GUIDE,
-  designer: DESIGNER_GUIDE,
-  editor: EDITOR_GUIDE,
+	coherence: COHERENCE_GUIDE,
+	critic: CRITIC_GUIDE,
+	judge: JUDGE_GUIDE,
+	author: AUTHOR_DEFENSE_GUIDE,
+	designer: DESIGNER_GUIDE,
+	editor: EDITOR_GUIDE,
 } as const;
 
 export const TOURNAMENT_PROTOCOL = `
