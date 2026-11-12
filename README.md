@@ -6,11 +6,14 @@
 
 An open-source [MCP](https://modelcontextprotocol.io) server for creating vivid, story-ready characters for film, games, animation, advertising, books and comics.
 
-Connect it to any MCP-capable chat (Claude Code, Claude Desktop, Cursor and others) and ask for a character. You get a **character package**:
+Connect it to any MCP-capable chat (Claude Code, Claude Desktop, Cursor and others) and ask for a character: at random, from a description, from your own picture, or from a picture and a description. You get a **character package**:
 
 - **Character card**: goals, audience identification, psychological profile, description, fears, archetype and quirks, backstory and world, traits, and the character arc. It is saved as `card.json` and a readable `card.md`.
 - **Look derived from the story**: shape language, silhouette, how perfect or flawed they are, a signature item (their attribute), marks with origins, movement, outfit and palette with meanings. An independent designer derives it from the finished story and cuts anything that doesn't show a part of it.
-- **A-pose concept sheet**: a front/back model sheet in a production A-pose, ready to hand to a 3D or animation artist. It is saved as `assets/concept.png`, and the card is re-rendered to include it.
+- **A-pose concept sheet**: a front/back model sheet, ready to hand to a 3D or animation artist (`assets/concept.png`).
+- **On request, one step at a time**: the character in their own place (`scene.png`), an 8-second looping video of that place (`idle.mp4`), their voice saying a few lines about that moment in every language you need, a short theme of their own (`theme.mp3`), and the card translated into other languages.
+
+Cards and prompts are free. Pictures, video, voice and music are generated on [fal.ai](https://fal.ai) with your own key, about $1.50 for a whole character.
 
 **Random does not mean a pile of random traits.** Every character grows from one *core*: a **wound** teaches them a **lie**. The lie breeds a **fear**, which they protect with a **defense** (their worst trait). The same wound forged a **gift** (their best trait). Their arc is learning the **truth**. Each roll picks one curated, coherent core, then adds surprising *sparks* (occupation, world, archetype, visible mark) that the model has to make serve the core. You can't predict who you will get, but every part of the card hangs together.
 
@@ -18,10 +21,10 @@ Connect it to any MCP-capable chat (Claude Code, Claude Desktop, Cursor and othe
 
 ```mermaid
 flowchart TD
-    REQ["Request<br/>random, or a brief: 'a very tall, thin character'"] --> V["3 variants of one concept<br/>same role and world, different cores"]
+    REQ["Request<br/>random, a brief, your own picture, or both"] --> V["3 variants of one concept<br/>same role and world, different cores"]
     V --> R["Independent review<br/>coherence check + critic per variant"]
     R --> F["Author fixes or defends, once"]
-    F --> J["Judge picks one winner<br/>the others stay in the library with a verdict"]
+    F --> J["Judge picks one winner<br/>the other two are deleted"]
     J --> D["Designer: the look, derived from the story"]
     D --> E["Editor: plain, clear text<br/>in a voice that fits the character"]
     E --> C["Concept: A-pose model sheet"]
@@ -49,7 +52,7 @@ By default every request produces **3 variants of the same concept**. If you ask
 6. **Designer** (an independent agent) derives the winner's look from its story.
 7. **Editor** (an independent agent) rewrites the winner's text so a stranger understands every field on the first read.
 
-Only the winner gets an A-pose concept. The losers stay in the library with their verdict.
+Only the winner is kept and gets an A-pose concept. The variants are written as drafts; when the judge has picked, `character_pick` moves the winner into the library and deletes the other two.
 
 ### Generation prompts (on request)
 
@@ -64,12 +67,13 @@ Ask for a prompt and you get exactly that one, written from the card:
 
 Prompts are saved to `<character>/prompts/<kind>.md`. Writing a prompt never calls a generator; the concept, scene, video, voice and theme tools do, each only when asked.
 
-There are two modes:
+A character can start from:
 
-- **Random**: optionally fix the role ("a fisherman"), medium or genre. Everything else is rolled.
-- **From a brief**: you describe what matters ("a 60-year-old ex-boxer for a coffee ad, warm but stubborn"). Every variant keeps all of it and invents the rest.
+- **Nothing**: optionally fix the role ("a fisherman"), medium or genre. Everything else is rolled.
+- **A brief**: you describe what matters ("a 60-year-old ex-boxer for a coffee ad, warm but stubborn"). Every variant keeps all of it and invents the rest.
+- **Your own picture**, with or without a brief: every variant looks exactly like it, and its story explains what it shows.
 
-Characters are always written in English.
+Characters are always written in English; the card can then be translated.
 
 ## The method
 
@@ -129,7 +133,15 @@ Without the plugin there are no separate reviewer agents. The model plays each r
 }
 ```
 
-Characters are saved to `CHARACTER_FORGE_DIR` (default `~/character-forge`), one folder per character.
+Characters are saved to `CHARACTER_FORGE_DIR` (default `~/character-forge`), one folder per character. After connecting, restart the client (or `/mcp` → reconnect in Claude Code) and ask: *"Make me a random character for a noir film."*
+
+| Environment variable | What it does |
+|---|---|
+| `FAL_KEY` | fal.ai key for pictures, video, voice and music. Optional: without it you get cards and ready prompts only |
+| `CHARACTER_FORGE_DIR` | Where characters are saved (default `~/character-forge`) |
+| `CHARACTER_FORGE_MODELS` | Path to your own `models.json`, to switch models or prices (see [Models and prices](#models-and-prices)) |
+
+Video and audio steps also need [`ffmpeg`](https://ffmpeg.org) on your `PATH` (it joins the video into a loop and levels the sound).
 
 ## Use
 
@@ -143,91 +155,108 @@ Clients that support MCP prompts also list `random_character` and `character_fro
 
 ### Tools
 
-| Tool | What it does |
-|---|---|
-| `character_method` | Returns the method, the card rules and the tournament protocol |
-| `character_create` | Starts a character from nothing, a brief, a concept image, or both: rolls 3 competing variants of one concept (coherent cores plus sparks) and says how to use the brief and the image |
-| `character_check` | Coherence check: red flags (generic filler, repeats, want = need) plus questions built from the card's own content |
-| `character_role` | Instructions and rubric for a role: `coherence`, `critic`, `judge`, `author`, `designer` |
-| `character_save` | Validates the full card and saves JSON + Markdown; returns the `id` |
-| `character_concept` | Builds the A-pose prompt and generates `concept.png` (`views`, `strength`, `figure`, `mode`, `pose_image`, `seed`, `dry_run`) |
-| `character_prompt` | On request: the rules and card material for one generation prompt (`concept`, `illustration`, `voice`, `video`, `song`, `theme`) |
-| `character_prompt_save` | Saves a written prompt as `prompts/<kind>.md` |
-| `character_list` | Lists saved characters, with variant group and verdict (`group` filter) |
-| `character_get` | Returns a card as markdown or JSON (edit it, then save again with `overwrite`) |
+You talk to the chat; it calls these tools. Paid ones run only when you ask for that step.
 
-## Concept sheets (A-pose)
+| Tool | What it does | Cost |
+|---|---|---|
+| `character_create` | Starts a character from nothing, a brief, a concept image, or both: rolls 3 competing variants of one concept (coherent cores plus sparks) and says how to use the brief and the image | free |
+| `character_method` | The method, the card rules and the tournament protocol | free |
+| `character_role` | Instructions and rubric for a role: `coherence`, `critic`, `judge`, `author`, `designer`, `editor` | free |
+| `character_check` | Coherence check: red flags (generic filler, repeats, want = need) plus questions built from the card's own content | free |
+| `character_save` | Validates the full card and saves JSON + Markdown; returns the `id` | free |
+| `character_pick` | Keeps the tournament winner and deletes the other variants; a picture the user gave becomes its concept | free |
+| `character_concept` | The A-pose concept sheet | ≈ $0.02 |
+| `character_scene` | The character in their own place, in their idle pose | ≈ $0.05 |
+| `character_video` | An 8-second looping video of the scene | ≈ $0.67 |
+| `character_voice` | Designs their voice and records a short monologue about the moment the video shows, in every language asked for | ≈ $0.03 a language |
+| `character_voice_translation` / `character_voice_line` | The monologue in one more language / any single line in that voice | ≈ $0.03 |
+| `character_theme` | A short theme of their own | ≈ $0.60 |
+| `character_prompt` / `character_prompt_save` | Rules and card material for one generation prompt (`concept`, `illustration`, `voice`, `video`, `song`, `theme`) to use in any generator; saved as `prompts/<kind>.md` | free |
+| `character_translate` | Saves the card in another language (checked against the original) | free |
+| `character_next` | What can be made next for a character, with prices | free |
+| `character_costs` | What a character has cost so far | free |
+| `character_list` / `character_get` | List saved characters / return a card as Markdown or JSON | free |
 
-Concepts are generated on [fal.ai](https://fal.ai), about $0.01 per sheet. Set `FAL_KEY` in the environment, or in a gitignored `.env` in the working directory.
+## Media
 
-How the pose is held: character-forge draws a faceless figure in an A-pose, front and back, the way a concept artist blocks in an idea. The figure is built from the card's `look.body` (the character's own proportions and asymmetries) and painted in the zone colours from `look.blocking` (hair, skin, top, bottom, left and right footwear). It then repaints that block-in into the character with `fal-ai/z-image/turbo/image-to-image`, so both the pose and the colours carry through.
+Every media step is built from the card and saved in the character's folder: generated files in `assets/`, the prompt behind each one in `prompts/`, and what it cost in `costs.json`.
 
-- `strength` (default 0.85) sets how much of the mannequin is repainted. Z-Image runs 8 steps, so strength works in steps of 1/8:
-  - 0.75 keeps the pose but greys the colours;
-  - 0.85 keeps the pose and gets most of the colours;
-  - 0.9 or more frees the colours but loses the pose.
-- `figure` picks the drawing:
-  - `blocking-lit` (default when the card has `look.blocking`): zone colours with volume;
-  - `blocking`: flat 2D colour patches;
-  - `shaded`: a grey 3D mannequin (default without `blocking`; greys the colours);
-  - `flat` or `mask`.
-- `mode` can switch to ControlNet conditions (`pose`, `depth`, `canny` via `fal-ai/z-image/turbo/controlnet`). In our tests they barely held the pose.
-- `pose_image` (CLI: `--pose`) puts the character in the pose of any picture. The result is saved as `concept-pose.png`.
-- `seed` reproduces a result.
-- `style`: every concept uses one house style (stylized 3D), so the whole library reads as one project. To see the same character in another look, pass `style`, either `card` (the designer's suggestion in `look.art_style`) or any style text. The result is saved as `concept-<style>.png` next to the main sheet.
-- `mode: "gpt"` sends the block-in to `openai/gpt-image-2.6/flare/edit` as a reference, at low quality (about $0.02 per sheet). It is the most consistent between front and back: sides, accessories and mismatched boots all stay put.
+- **Concept sheet** (`character_concept`): character-forge draws a faceless A-pose figure from the card's `look.body` (the character's own proportions and asymmetries, front and back) and gives it to GPT Image as the pose reference, with the full description of the look. Options: `style` (`card` for the designer's suggestion, or any style text; saved as `concept-<style>.png`), `pose_image` (put the character in the pose of any picture → `concept-pose.png`), `seed`, `dry_run` (prompt only). `mode` switches to the older pipelines (Z-Image image-to-image or ControlNet), kept for experiments. Without `FAL_KEY` you get a ready prompt.
+- **Location** (`character_scene`): the concept placed in a key location from the card, in the character's idle pose. It is the first frame of the video.
+- **Idle video** (`character_video`): 8 seconds by default. Kling (silent) or Veo (optional sound); the end is crossfaded into the start so it loops without a seam.
+- **Voice** (`character_voice`): a voice designed from the card (ElevenLabs for adults, Qwen for children), saying a few lines about the moment the video shows. Every language is a fresh performance from a translated script, not a dub.
+- **Theme** (`character_theme`): about 30 seconds of instrumental music from the wound, the paradox and the dramatic question. Needs only the location.
 
-The `concept-art` skill wraps all this and checks each result against the card's look. Without `FAL_KEY`, `character_concept` returns a ready-made prompt.
+### Models and prices
+
+The provider (fal.ai) and the model for each kind of media live in [`models.json`](models.json), together with the prices used for the cost ledger. It is read on every call, so switching a model needs no rebuild or restart. To use your own, point `CHARACTER_FORGE_MODELS` at a copy.
 
 ## CLI
 
-The same binary is also a CLI for testing and scripting:
+The same package is also a command-line tool, for scripts and quick tests. With no arguments it starts the MCP server on stdio.
 
 ```bash
-node dist/index.js roll --seed 42 --medium film
-node dist/index.js roll --variants 3 --anchor fisherman
-node dist/index.js validate examples/marta-vell.json
-node dist/index.js check examples/marta-vell.json
-node dist/index.js save examples/marta-vell.json
-node dist/index.js prompt marta-vell --views front-side-back
-node dist/index.js media marta-vell --kind song      # brief for one generation prompt
-node dist/index.js concept marta-vell --style "anime cel-shaded"
-node dist/index.js list
+npx character-forge-mcp roll --variants 3 --anchor fisherman   # roll 3 variants of one concept
+npx character-forge-mcp check card.json                        # red flags + coherence questions
+npx character-forge-mcp save card.json                         # validate and save to the library
+npx character-forge-mcp next marta-vell                        # what can be made next, with prices
+npx character-forge-mcp concept marta-vell                     # concept sheet (needs FAL_KEY)
+npx character-forge-mcp costs marta-vell                       # what it has cost so far
+npx character-forge-mcp list
+npx character-forge-mcp --help                                 # every command
 ```
-
-With no arguments it starts the MCP server on stdio.
-
-To poke at the server interactively, run `npm run inspect` (MCP Inspector).
 
 ## Development
 
 Want to help? Read [CONTRIBUTING.md](CONTRIBUTING.md): every change goes through a pull request, and releases are automatic.
 
+### Set up
+
 ```bash
-npm run build
-npm test          # unit tests + an end-to-end MCP client/server test
+git clone https://github.com/gdhub-io/character-forge-mcp.git && cd character-forge-mcp
+npm install
+npm test           # builds dist/, then unit tests + an end-to-end MCP client/server test
+npm run lint       # Biome; npm run format fixes what it can
 ```
 
-The project layout:
+For paid steps, put `FAL_KEY=...` in a `.env` file in the repo (it is gitignored). Tests never call paid APIs.
 
-- `src/methodology.ts`: the method as data (arc goals, flaws, fears, archetypes, trait lists…)
+### Run your local build
+
+- **Claude Code in this repo** picks up the local server from [`.mcp.json`](.mcp.json) (`node dist/index.js`) and saves characters to `./characters` (gitignored). The skills and agents in `skills/` and `agents/` are linked into `.claude/`, so they load too. Run `npm run build` after every change, then `/mcp` → reconnect. Don't install the plugin while working here, or everything loads twice.
+- **Any other client**: point it at your build instead of npm:
+
+  ```bash
+  claude mcp add character-forge-dev -e CHARACTER_FORGE_DIR=~/character-forge -- node /abs/path/to/character-forge-mcp/dist/index.js
+  ```
+
+- **MCP Inspector**: `npm run inspect` opens the server in a browser to call tools by hand.
+
+### The showcase site
+
+`site/` is the website (Vite, React, Tailwind). It shows characters from your local library:
+
+```bash
+cd site && npm install
+npm run dev        # copies the characters listed in src/showcase.json from ../characters, then starts Vite
+SITE_URL=https://your.domain npm run build   # SITE_URL fills canonical links, the share image, sitemap and llms.txt
+```
+
+### Project layout
+
 - `src/engine.ts`: curated core chains (wound → lie → fear → defense/gift → truth), occupations, visible marks. PRs that extend these are welcome.
+- `src/methodology.ts`: the method as data (arc goals, flaws, fears, archetypes, trait lists…)
 - `src/random.ts`: seeded rolls and variant sets
-- `src/check.ts`: coherence red flags and questions
-- `src/tournament.ts`: rubric and role instructions (coherence, critic, judge, author, designer)
-- `src/media.ts`: rules and card material for generation prompts (illustration, voice, video, song, theme)
-- `src/schema.ts`: the card schema (zod)
-- `src/render.ts`: Markdown card rendering
-- `src/concept.ts`: the A-pose prompt and the concept pipeline
+- `src/schema.ts`: the card schema (zod); `src/render.ts`: Markdown card rendering; `src/check.ts`: coherence red flags and questions
+- `src/tournament.ts`: rubric and role instructions (coherence, critic, judge, author, designer, editor)
+- `src/media.ts`: rules and card material for generation prompts
+- `src/concept.ts`, `src/pose.ts`: the concept pipeline and the A-pose figure; `src/scene.ts`: location and video; `src/voice.ts`; `src/theme.ts`
+- `src/fal.ts`, `src/ffmpeg.ts`, `src/config.ts` (models.json), `src/costs.ts` (the ledger), `src/next.ts` (next steps)
 - `src/store.ts`: the character library on disk
-- `src/tools/`: one file per MCP tool
-- `src/prompts/`: MCP prompts
-- `src/server.ts`: server wiring
-- `src/index.ts`: CLI and stdio entry point
-- `skills/` and `agents/`: the Claude Code skill and reviewer agents
-- `.claude-plugin/`: the plugin manifest
-
-`examples/marta-vell.json` is a complete reference card.
+- `src/tools/`: one file per MCP tool; `src/prompts/`: MCP prompts; `src/server.ts`; `src/index.ts`: CLI and stdio entry
+- `skills/` and `agents/`: the plugin's skills and reviewer agents; `.claude-plugin/`: the plugin manifest
+- `site/`: the showcase website; `design/`: its Pencil design
+- `examples/`: complete reference cards; `docs/character-anatomy.md`: diagrams of the method
 
 ## Generated media
 
