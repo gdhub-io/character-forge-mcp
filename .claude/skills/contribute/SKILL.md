@@ -1,21 +1,16 @@
 ---
 name: contribute
-description: Take a change to character-forge-mcp from intent to pull request — clarify the intent, branch, develop with tests, refactor (/simplify), review (/code-review), open a PR with a Conventional Commits title. Use when asked to implement, fix or change something in this repo, or to "make a PR".
+description: Take a change to character-forge-mcp from intent to pull request — an issue for the intent, a branch linked to it, develop with tests, refactor (/simplify), review (/code-review), and a PR that closes the issue on merge. Use when asked to implement, fix or change something in this repo, or to "make a PR".
 ---
 
-# Contribute: intent → develop → refactor → review → pull request
+# Contribute: issue → branch → develop → refactor → review → pull request
 
-Nobody pushes to `main`; it is protected. Every change goes through a pull request that is squash-merged, so the PR title becomes the commit Release Please reads for the next version. Follow the steps in order and tell the user, briefly, where you are.
+Nobody pushes to `main`; it is protected. Every change answers an issue, and its pull request closes that issue when it is squash-merged (the PR title becomes the commit Release Please reads). Follow the steps in order and tell the user, briefly, where you are. Creating issues, pushing and opening PRs are outward-facing: ask the user before the first one in a task.
 
-## 1. Intent
-- Restate in one or two sentences what changes and why. If an issue exists, read it (`gh issue view N`) and link it.
-- One concern per PR. If the request mixes several, propose splitting it.
-- If the goal or the approach is unclear, ask before writing code.
+## 1–2. Intent and branch
+Run the `intent` skill: it finds or opens the issue, writes the intent into it (want, why, constraints, done when, how to check, out of scope), and opens a branch linked to the issue with `gh issue develop N`. A typo or one-file fix gets a short issue instead of a full intent, but always an issue.
 
-## 2. Branch
-- Start from an up-to-date `main`: `git switch main && git pull --ff-only`.
-- Branch name by type: `feat/…`, `fix/…`, `docs/…`, `refactor/…`, `test/…`, `chore/…` (short, kebab-case).
-- If the working tree has unrelated changes, stop and ask what to do with them.
+If the working tree has unrelated changes, stop and ask what to do with them.
 
 ## 3. Develop
 - Follow CLAUDE.md (architecture, the card-field checklist, English-only product text, `.js` import extensions).
@@ -31,11 +26,12 @@ Nobody pushes to `main`; it is protected. Every change goes through a pull reque
 - Run the `code-review` skill on the branch and fix confirmed findings.
 - Re-read the full diff (`git diff main...HEAD`) as a stranger: no debug leftovers, no keys, nothing from `characters/`.
 
-## 6. Pull request
-- Ask the user before pushing and opening the PR (it is outward-facing).
+## 6. Pull request that closes the issue
 - `git push -u origin <branch>`, then `gh pr create` with:
   - **Title** in Conventional Commits: `feat: …`, `fix: …`, `docs: …`; `!` for breaking (`feat!: …`). Imperative, under 70 characters.
-  - **Body** from `.github/pull_request_template.md`: what and why (with `Closes #N`), how it was checked, the checklist.
+  - **Body** from `.github/pull_request_template.md`, starting with `Closes #N`. The "Linked issue" check fails without it, and on merge GitHub closes the issue. "How to verify" comes from the intent's "How to check it".
+- Comment on the issue what was decided along the way and what was deliberately not done.
 - Report the PR link. Then wait for CI; if it fails, read the logs (`gh pr checks`, `gh run view --log-failed`) and fix on the same branch.
+- If the work turns out to need more, open follow-up issues instead of growing the PR.
 
 Merging is the maintainer's call: don't merge unless asked.

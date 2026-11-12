@@ -24,17 +24,18 @@ Inside the repo, Claude Code picks up the local server from `.mcp.json` and writ
 
 **Tests never call paid APIs.** Keep it that way: anything that would reach fal.ai must be mocked or skipped. Never commit an API key; put `FAL_KEY` in a gitignored `.env`.
 
-## The workflow: intent → develop → refactor → review → pull request
+## The workflow: issue → branch → develop → refactor → review → pull request
 
-Nobody pushes to `main`. Every change, including the maintainers', goes through a pull request.
+Nobody pushes to `main`. Every change, including the maintainers', answers an issue and goes through a pull request that closes it.
 
-1. **Intent.** Say what you want to change and why, in an issue or at the top of your PR. One concern per PR.
-2. **Develop** on a branch: `feat/short-name`, `fix/short-name`, `docs/…`. Add or update tests for behavior you change.
-3. **Refactor.** Before review, simplify what you wrote: no dead code, no duplicated helpers, comments only where the code can't speak for itself.
-4. **Review.** Re-read your diff as a stranger. `npm run lint` and `npm test` must pass.
-5. **Pull request.** Fill in the template. The title must follow [Conventional Commits](https://www.conventionalcommits.org): `feat: …`, `fix: …`, `docs: …`, `refactor: …`, `test: …`, `chore: …`. Add `!` for a breaking change (`feat!: …`).
+1. **Issue with the intent.** Find the issue for what you want to change, or [open one](https://github.com/gdhub-io/character-forge-mcp/issues/new/choose). For anything bigger than a small fix, it states the intent: what you want and why, what must not change, when it is done, how to check it, and what is out of scope. One concern per issue.
+2. **Branch** from the issue: the "Create a branch" link in the issue's Development panel, or `gh issue develop <number> --checkout`. Name it `<type>/<number>-short-name`, e.g. `fix/14-voice-cut-off`.
+3. **Develop.** Add or update tests for behavior you change.
+4. **Refactor.** Before review, simplify what you wrote: no dead code, no duplicated helpers, comments only where the code can't speak for itself.
+5. **Review.** Re-read your diff as a stranger. `npm run lint` and `npm test` must pass.
+6. **Pull request.** Fill in the template and start the description with `Closes #<number>`: a check requires it, and merging closes the issue. The title must follow [Conventional Commits](https://www.conventionalcommits.org): `feat: …`, `fix: …`, `docs: …`, `refactor: …`, `test: …`, `chore: …`. Add `!` for a breaking change (`feat!: …`).
 
-With [Claude Code](https://claude.com/claude-code), run `/contribute` in the repo: it walks through these steps, including `/simplify` for the refactor and `/code-review` for the review.
+With [Claude Code](https://claude.com/claude-code), run `/contribute` in the repo: `/intent` writes the intent into the issue and branches from it, then and walks through the rest, including `/simplify` for the refactor and `/code-review` for the review.
 
 ## Versions and releases
 

@@ -1,16 +1,32 @@
-name: Idea
+name: Idea or change
 description: Suggest a feature, a new core chain, or a better way to do something
 labels: [enhancement]
 body:
   - type: textarea
-    id: problem
+    id: want
     attributes:
-      label: What you want to do
-      description: The goal or the problem, in your own words.
+      label: Want
+      description: What changes for the person using character-forge, in your own words.
     validations:
       required: true
   - type: textarea
-    id: idea
+    id: why
     attributes:
-      label: Your idea
-      description: How it could work. Examples help.
+      label: Why now
+      description: The pain this removes, concretely.
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Checkable statements, each true or false by using the tool, the CLI or the site.
+      placeholder: "- [ ] …"
+  - type: textarea
+    id: check
+    attributes:
+      label: How to check it
+      description: What to ask in the chat, which command to run, or which page to open to see it working.
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope
+      description: What this deliberately does not change.
