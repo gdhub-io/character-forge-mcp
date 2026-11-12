@@ -26,6 +26,8 @@ export interface Character {
 	/** card.ru.json, when the character has been translated. */
 	cardRu?: Card;
 	blurb: string;
+	/** A rights notice for a character that is not open source (shown under the disclaimer). */
+	rights?: string;
 	focus: string;
 	avatar: { x: number; y: number; w: number };
 	theme: Theme;

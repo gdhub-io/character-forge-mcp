@@ -219,6 +219,7 @@ function Showcase({ list }: { list: Character[] }) {
 					/>
 					<p className="text-center text-[9px] text-dim/70 sm:text-[11px]">
 						{t.disclaimer}
+						{c.rights && <span className="block">{c.rights}</span>}
 					</p>
 				</footer>
 			</div>
