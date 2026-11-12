@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -43,7 +43,7 @@ function seo(): Plugin {
 		generateBundle() {
 			for (const [fileName, make] of Object.entries(files)) this.emitFile({ type: "asset", fileName, source: make() });
 		},
-		// GitHub Pages serves files, so every page needs its own index.html; 404.html loads the app for anything else.
+		// GitHub Pages serves files, so every page needs its own HTML file; 404.html loads the app for anything else.
 		writeBundle({ dir = "dist" }) {
 			const home = readFileSync(path.join(dir, "index.html"), "utf8");
 			const homeTitle = home.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
@@ -54,8 +54,8 @@ function seo(): Plugin {
 					.replaceAll(homeDescription, page.description)
 					.replaceAll(`content="${SITE_URL}/"`, `content="${SITE_URL}${page.path}"`)
 					.replace(`href="${SITE_URL}/"`, `href="${SITE_URL}${page.path}"`);
-				mkdirSync(path.join(dir, page.path), { recursive: true });
-				writeFileSync(path.join(dir, page.path, "index.html"), html);
+				// "how-it-works.html", not a folder: GitHub Pages serves it at "/how-it-works" with no redirect to a "/".
+				writeFileSync(path.join(dir, `${page.path.slice(1)}.html`), html);
 			}
 			writeFileSync(path.join(dir, "404.html"), home);
 		},
