@@ -24,6 +24,46 @@ Inside the repo, Claude Code picks up the local server from `.mcp.json` and writ
 
 **Tests never call paid APIs.** Keep it that way: anything that would reach fal.ai must be mocked or skipped. Never commit an API key; put `FAL_KEY` in a gitignored `.env`.
 
+## Run your local build
+
+- **Claude Code in this repo** picks up the local server from [`.mcp.json`](.mcp.json) (`node dist/index.js`) and saves characters to `./characters` (gitignored). The skills and agents in `skills/` and `agents/` are linked into `.claude/`, so they load too. Run `npm run build` after every change, then `/mcp` → reconnect. Don't install the plugin while working here, or everything loads twice.
+- **Any other client**: point it at your build instead of npm:
+
+  ```bash
+  claude mcp add character-forge-dev -e CHARACTER_FORGE_DIR=~/character-forge -- node /abs/path/to/character-forge-mcp/dist/index.js
+  ```
+
+- **MCP Inspector**: `npm run inspect` opens the server in a browser to call tools by hand.
+
+## The showcase site
+
+`site/` is the website at [characters.gdhub.io](https://characters.gdhub.io) (Vite, React, Tailwind). Every push to `main` that touches `site/` builds it and publishes it on GitHub Pages.
+
+```bash
+cd site && npm install
+npm run dev        # starts Vite on http://localhost:5173
+```
+
+The characters it shows are listed in `site/src/showcase.json`; their media live in `site/public/characters/` and are committed. `npm run dev` and `npm run build` refresh them from your local library (`../characters`) when it exists, and use the committed copies when it doesn't. `SITE_URL` (set in the Pages workflow) fills canonical links, the share image, the sitemap and `llms.txt`.
+
+## Project layout
+
+- `src/engine.ts`: curated core chains (wound → lie → fear → defense/gift → truth), occupations, visible marks. PRs that extend these are welcome.
+- `src/methodology.ts`: the method as data (arc goals, flaws, fears, archetypes, trait lists…)
+- `src/random.ts`: seeded rolls and variant sets
+- `src/schema.ts`: the card schema (zod); `src/render.ts`: Markdown card rendering; `src/check.ts`: coherence red flags and questions
+- `src/tournament.ts`: rubric and role instructions (coherence, critic, judge, author, designer, editor)
+- `src/media.ts`: rules and card material for generation prompts
+- `src/concept.ts`, `src/pose.ts`: the concept pipeline and the A-pose figure; `src/scene.ts`: location and video; `src/voice.ts`; `src/theme.ts`
+- `src/fal.ts`, `src/ffmpeg.ts`, `src/config.ts` (models.json), `src/costs.ts` (the ledger), `src/next.ts` (next steps)
+- `src/store.ts`: the character library on disk
+- `src/tools/`: one file per MCP tool; `src/prompts/`: MCP prompts; `src/server.ts`; `src/index.ts`: CLI and stdio entry
+- `skills/` and `agents/`: the plugin's skills and reviewer agents; `.claude-plugin/`: the plugin manifest
+- `site/`: the showcase website; `design/`: its Pencil design
+- `examples/`: complete reference cards; `docs/character-anatomy.md`: diagrams of the method
+
+The full list of tools, the CLI and the media options are in [docs/reference.md](docs/reference.md).
+
 ## The workflow: issue → branch → develop → refactor → review → pull request
 
 Nobody pushes to `main`. Every change, including the maintainers', answers an issue and goes through a pull request that closes it.

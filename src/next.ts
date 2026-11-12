@@ -9,7 +9,7 @@ import {
 } from "./voice.js";
 
 /**
- * What can be made next for a character, following "How a character is made" (README): concept → location →
+ * What can be made next for a character, following "How a character is made" (docs/reference.md): concept → location →
  * idle video → voice (spoken in the video's moment, every language); music after the location; translations any
  * time after the edit. Only steps whose inputs exist are offered; paid ones carry their price.
  */
