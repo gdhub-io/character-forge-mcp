@@ -26,9 +26,6 @@ const CARD = [
 ];
 
 /** One price list for the steps and the commands (estimates from models.json pricing). Paid steps need a fal.ai key. */
-/** Section anchors other pages can link to (the router sends them here). */
-export const GUIDE_SECTIONS = ["install", "commands"];
-
 const FREE = "Free";
 const PRICE = {
 	concept: "≈ $0.02",
@@ -365,6 +362,7 @@ export function HowItWorks({ c, focus }: { c: Character; focus?: string }) {
 						</p>
 						<a
 							href={GITHUB_URL}
+							data-goatcounter-click="github"
 							className="mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-5.5 py-3.5 text-sm font-semibold text-accent-ink"
 						>
 							<IconBrandGithub size={15} stroke={1.75} /> GitHub

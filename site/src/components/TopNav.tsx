@@ -6,14 +6,13 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { LANGS, type Lang, ui } from "../i18n";
+import { onLinkClick, PATHS, type Page } from "../router";
 
 export const REPO = "gdhub-io/character-forge-mcp";
 export const GITHUB_URL = `https://github.com/${REPO}`;
 
-/** The site's pages, addressed by hash so it works on any static host. */
-export type Page = "characters" | "how";
-const HREF: Record<Page, string> = { characters: "#/", how: "#how-it-works" };
 const PAGES: Page[] = ["characters", "how"];
+const INSTALL = `${PATHS.how}#install`;
 
 export function TopNav({
 	page,
@@ -26,15 +25,23 @@ export function TopNav({
 }) {
 	const t = ui(lang);
 	const [menu, setMenu] = useState(false);
-	// Any menu link changes the hash: close the menu then.
+	// Any link moves to another page or section: close the menu then.
 	useEffect(() => {
 		const close = () => setMenu(false);
+		window.addEventListener("popstate", close);
 		window.addEventListener("hashchange", close);
-		return () => window.removeEventListener("hashchange", close);
+		return () => {
+			window.removeEventListener("popstate", close);
+			window.removeEventListener("hashchange", close);
+		};
 	}, []);
 	return (
 		<header className="relative flex items-center justify-between">
-			<a href="#/" className="flex items-center gap-2.5 text-fg sm:gap-3">
+			<a
+				href={PATHS.characters}
+				onClick={onLinkClick(PATHS.characters)}
+				className="flex items-center gap-2.5 text-fg sm:gap-3"
+			>
 				<span
 					aria-hidden
 					className="grid size-9 place-items-center rounded-[8px] border border-line bg-deep font-display text-[21px] leading-none font-semibold tracking-[-0.03em] sm:size-11 sm:rounded-[10px] sm:text-[26px]"
@@ -49,7 +56,8 @@ export function TopNav({
 				{PAGES.map((p) => (
 					<a
 						key={p}
-						href={HREF[p]}
+						href={PATHS[p]}
+						onClick={onLinkClick(PATHS[p])}
 						aria-current={p === page ? "page" : undefined}
 						className="flex flex-col items-center gap-1.5 text-sm"
 					>
@@ -90,12 +98,15 @@ export function TopNav({
 				)}
 				<a
 					href={GITHUB_URL}
+					data-goatcounter-click="github"
 					className="hidden items-center gap-2 rounded-full border border-line px-3.5 py-2.5 text-[13px] text-fg sm:flex"
 				>
 					<IconBrandGithub size={16} stroke={1.75} /> {t.github}
 				</a>
 				<a
-					href="#install"
+					href={INSTALL}
+					onClick={onLinkClick(INSTALL)}
+					data-goatcounter-click="install"
 					className="hidden items-center gap-2 rounded-full bg-accent px-4.5 py-2.5 text-[13px] font-semibold text-accent-ink sm:flex"
 				>
 					{t.install} <IconArrowUpRight size={14} stroke={2} />
@@ -120,7 +131,8 @@ export function TopNav({
 					{PAGES.map((p) => (
 						<a
 							key={p}
-							href={HREF[p]}
+							href={PATHS[p]}
+							onClick={onLinkClick(PATHS[p])}
 							className={`rounded px-3 py-2.5 text-sm hover:bg-white/7 ${p === page ? "font-semibold text-fg" : "text-dim"}`}
 						>
 							{t.nav[p]}
@@ -128,12 +140,15 @@ export function TopNav({
 					))}
 					<a
 						href={GITHUB_URL}
+						data-goatcounter-click="github"
 						className="rounded px-3 py-2.5 text-sm text-dim hover:bg-white/7"
 					>
 						{t.github}
 					</a>
 					<a
-						href="#install"
+						href={INSTALL}
+						onClick={onLinkClick(INSTALL)}
+						data-goatcounter-click="install"
 						className="mt-1 flex items-center justify-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink"
 					>
 						{t.install} <IconArrowUpRight size={14} stroke={2} />

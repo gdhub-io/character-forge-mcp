@@ -24,6 +24,7 @@ The card answers nine questions: what they want (and really need), why we care, 
 
 ## Links
 
-- [Website](%SITE_URL%/): showcase of characters made with it, and how it works
+- [Website](%SITE_URL%/): showcase of characters made with it
+- [How it works](%SITE_URL%/how-it-works): what it makes, how to install it, what you can ask for
 - [Source code and README](https://github.com/gdhub-io/character-forge-mcp): full documentation, the method, tools and CLI
 - [License (MIT)](https://github.com/gdhub-io/character-forge-mcp/blob/main/LICENSE)
