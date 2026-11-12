@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.gdhub-io/character-forge-mcp",
+  "title": "Character Forge",
+  "description": "Characters whose every trait grows from one story, then concept art, scene, video, voice, music.",
+  "websiteUrl": "https://characters.gdhub.io",
+  "repository": {
+    "url": "https://github.com/gdhub-io/character-forge-mcp",
+    "source": "github"
+  },
+  "version": "0.3.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@gdhub/character-forge-mcp",
+      "version": "0.3.1",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "FAL_KEY",
+          "description": "fal.ai key for pictures, video, voice and music. Optional: without it you get cards and ready prompts.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "CHARACTER_FORGE_DIR",
+          "description": "Folder where characters are saved (default ~/character-forge).",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

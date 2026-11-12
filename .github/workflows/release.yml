@@ -1,8 +1,8 @@
 name: Release
 
 # On every push to main, Release Please keeps a release PR up to date (version bump in package.json and
-# .claude-plugin/plugin.json, CHANGELOG.md). Merging that PR tags the release, creates the GitHub release and
-# publishes the package to npm.
+# .claude-plugin/plugin.json and server.json, CHANGELOG.md). Merging that PR tags the release, creates the GitHub
+# release, publishes the package to npm and lists the new version in the official MCP Registry.
 on:
   push:
     branches: [main]
@@ -39,3 +39,12 @@ jobs:
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # The MCP Registry only holds metadata (server.json) pointing at the npm package, so it goes after npm.
+      # The publisher is pinned; GitHub OIDC proves the io.github.gdhub-io namespace, no token needed.
+      - if: ${{ steps.release.outputs.release_created }}
+        env:
+          MCP_PUBLISHER_VERSION: v1.8.9
+        run: |
+          curl -sSfL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

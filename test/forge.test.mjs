@@ -261,12 +261,16 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
 	}
 });
 
-test("plugin manifest version matches package.json", () => {
-	const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
-	const plugin = JSON.parse(
-		readFileSync(path.join(root, ".claude-plugin/plugin.json"), "utf8"),
-	);
-	assert.equal(plugin.version, pkg.version);
+test("plugin manifest and MCP Registry entry match package.json", () => {
+	const read = (f) => JSON.parse(readFileSync(path.join(root, f), "utf8"));
+	const pkg = read("package.json");
+	assert.equal(read(".claude-plugin/plugin.json").version, pkg.version);
+	// The Registry rejects a publish whose name or version disagrees with the npm package.
+	const server = read("server.json");
+	assert.equal(server.name, pkg.mcpName);
+	assert.equal(server.version, pkg.version);
+	assert.equal(server.packages[0].identifier, pkg.name);
+	assert.equal(server.packages[0].version, pkg.version);
 });
 
 test("A-pose prompt never doubles punctuation", () => {
