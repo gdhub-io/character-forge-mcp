@@ -1,14 +1,13 @@
-import { readFile } from "node:fs/promises";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { MEDIA_KINDS, mediaBrief, saveMedia } from "../media.js";
-import { loadCard, promptFile } from "../store.js";
-import { reply } from "./util.js";
+import { MEDIA_KINDS, mediaBriefFor, saveMedia } from "../media.js";
+import { loadCard } from "../store.js";
+import { copyable, reply, SHOW_PROMPT } from "./util.js";
 
 const KIND = z
 	.enum(MEDIA_KINDS)
 	.describe(
-		"concept = T-pose sheet · illustration = key-art scene · voice = TTS voice design · video = Seedance-style clip · song = Suno · theme = instrumental leitmotif (ElevenLabs Music composition plan)",
+		"concept = A-pose sheet · illustration = key-art scene · voice = TTS voice design · video = image-to-video clip (Kling, Veo and similar) · song = Suno · theme = instrumental leitmotif (ElevenLabs Music composition plan)",
 	);
 
 export function registerMedia(server: McpServer) {
@@ -21,21 +20,7 @@ export function registerMedia(server: McpServer) {
 			inputSchema: { id: z.string().describe("Character id."), kind: KIND },
 			annotations: { readOnlyHint: true },
 		},
-		async ({ id, kind }) => {
-			const brief = mediaBrief(await loadCard(id), kind);
-			if (kind !== "voice") return reply(brief);
-			// The monologue plays over the scene and idle video: give the writer what those actually show.
-			const shown = await Promise.all(
-				[
-					["SCENE (what the still shows)", "scene.txt"],
-					["IDLE VIDEO (the motion in it)", "idle.txt"],
-				].map(async ([label, f]) => {
-					const t = await readFile(promptFile(id, f), "utf8").catch(() => "");
-					return t ? `${label}:\n${t.trim()}` : "";
-				}),
-			);
-			return reply([brief, ...shown.filter(Boolean)].join("\n\n"));
-		},
+		async ({ id, kind }) => reply(await mediaBriefFor(id, kind)),
 	);
 
 	server.registerTool(
@@ -58,7 +43,11 @@ export function registerMedia(server: McpServer) {
 		async ({ id, kind, sections }) => {
 			const card = await loadCard(id);
 			const file = await saveMedia(id, card.meta.name, { kind, sections });
-			return reply(`Saved ${kind} prompt: ${file}`, { file });
+			// Text in the message, not an attachment: the user copies it into another tool.
+			return reply(
+				`Saved ${kind} prompt: ${file}\n\n${SHOW_PROMPT} Then offer changes: revise it and call character_prompt_save again.\n\n${copyable(sections)}`,
+				{ file },
+			);
 		},
 	);
 }

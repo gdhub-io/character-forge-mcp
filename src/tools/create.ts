@@ -1,9 +1,9 @@
-import { existsSync } from "node:fs";
 import path from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { isUrl } from "../fal.js";
 import { RollOptionsSchema, rollToText } from "../random.js";
+import { readUserImage } from "../userimage.js";
 import { reply } from "./util.js";
 
 /** What the user started from decides how the author treats the roll. */
@@ -65,10 +65,9 @@ export function registerCreate(server: McpServer) {
 		},
 		async ({ brief, concept, variants = 3, ...opts }) => {
 			let image = concept?.trim() || undefined;
-			if (image && !isUrl(image)) {
-				image = path.resolve(image);
-				if (!existsSync(image))
-					throw new Error(`Concept image not found: ${image}`);
+			if (image) {
+				if (!isUrl(image)) image = path.resolve(image);
+				await readUserImage(image); // a real PNG/JPEG/WebP, or an https link to one, before anyone relies on it
 			}
 			const { mode, notes } = modeNotes(brief?.trim() || undefined, image);
 			const r = rollToText({ ...opts, variants });

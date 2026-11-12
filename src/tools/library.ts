@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { cardDocument } from "../resources.js";
 import {
-	cardMarkdown,
 	characterDir,
 	listCards,
 	listToText,
@@ -41,7 +41,7 @@ export function registerLibrary(server: McpServer) {
 		{
 			title: "Get a saved character",
 			description:
-				"Returns a saved character card as markdown (to show) or JSON (to edit and re-save with overwrite).",
+				"Returns a saved character card as a Markdown document to show the user (do so when a character is finished), or as JSON to edit and re-save with overwrite.",
 			inputSchema: {
 				id: z.string().describe("Character id."),
 				format: z
@@ -55,8 +55,12 @@ export function registerLibrary(server: McpServer) {
 			const card = await loadCard(id);
 			if (format === "json")
 				return { content: [text(JSON.stringify(card, null, 2))] };
+			// A document, so apps that render documents show the card; others read the same Markdown as text.
 			return {
-				content: [text(`${await cardMarkdown(card)}\n\n(${characterDir(id)})`)],
+				content: [
+					text(`Card of ${card.meta.name} (files in ${characterDir(id)}):`),
+					{ type: "resource" as const, resource: await cardDocument(card) },
+				],
 			};
 		},
 	);

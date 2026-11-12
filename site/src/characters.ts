@@ -28,6 +28,8 @@ export interface Character {
 	blurb: string;
 	/** A rights notice for a character that is not open source (shown under the disclaimer). */
 	rights?: string;
+	/** The How it works page takes its pictures from one character and its colours from another. */
+	guide?: string; // "pictures" or "palette"
 	focus: string;
 	avatar: { x: number; y: number; w: number };
 	theme: Theme;

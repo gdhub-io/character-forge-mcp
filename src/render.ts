@@ -439,7 +439,7 @@ export function renderMarkdown(
 		tags(c)
 			.map((t) => `\`${t}\``)
 			.join(" · "),
-		opts.conceptFile ? `![T-pose concept](${opts.conceptFile})` : "",
+		opts.conceptFile ? `![A-pose concept](${opts.conceptFile})` : "",
 		...main.map(mdSection),
 		mdSection(visual),
 	]

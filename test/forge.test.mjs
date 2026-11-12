@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import {
 	existsSync,
 	mkdtempSync,
@@ -109,12 +110,36 @@ test("example card validates; broken card reports paths", () => {
 	assert.match(r.issues, /uniqueness\.quirks/);
 });
 
-test("A-pose prompt carries the visual essentials", () => {
-	const p = buildTposePrompt(validateCard(example).card);
-	assert.match(p, /A-pose/);
-	assert.match(p, /Drowned Slate/);
-	assert.match(p, /barometer/);
-	assert.match(p, /front view/);
+test("the A-pose prompt carries the look, the body's own sides and the wear, cleanly", () => {
+	const card = validateCard(example).card;
+	const p = buildTposePrompt(card);
+	for (const must of [
+		/A-pose/,
+		/front view/,
+		/Drowned Slate/,
+		/barometer/,
+		/LEFT shoulder visibly lower/,
+		/Wear and care: /,
+		/Not idealized/,
+	])
+		assert.match(p, must);
+	// The body's numbers become sides the model can't mix up.
+	const tilted = structuredClone(card);
+	tilted.look.body = {
+		...tilted.look.body,
+		shoulder_tilt: -0.5,
+		head_tilt: 0.4,
+	};
+	assert.match(
+		buildTposePrompt(tilted),
+		/head canted toward the RIGHT shoulder/,
+	);
+	// No doubled punctuation from card text that already ends a sentence.
+	const shouty = structuredClone(card);
+	shouty.description.physical.face = "Scarred!";
+	assert.doesNotMatch(buildTposePrompt(shouty), /\.\.|!\./);
+	// A custom pose replaces the A-pose wording.
+	assert.doesNotMatch(buildTposePrompt(card, { poseImage: "x.png" }), /A-pose/);
 });
 
 test("MCP server: tools, roll, save, concept prompt, list", async () => {
@@ -212,6 +237,23 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
 			assert.ok(existsSync(path.join(dir, id, f)), f);
 		assert.ok(!existsSync(path.join(dir, id, "card.html")), "no card.html");
 
+		// The finished card reaches the chat as a document, and every saved card is an MCP resource.
+		const uri = "character-forge://marta-vell/card.md";
+		assert.ok(
+			saved.content.some((c) => c.type === "resource_link" && c.uri === uri),
+		);
+		const shown = await client.callTool({
+			name: "character_get",
+			arguments: { id },
+		});
+		const doc = shown.content.find((c) => c.type === "resource").resource;
+		assert.equal(doc.mimeType, "text/markdown");
+		assert.match(doc.text, /^# Marta Vell/m);
+		const { resources } = await client.listResources();
+		assert.ok(resources.some((r) => r.uri === uri && r.name === "Marta Vell"));
+		const read = await client.readResource({ uri });
+		assert.match(read.contents[0].text, /^# Marta Vell/m);
+
 		const again = await client.callTool({
 			name: "character_save",
 			arguments: { card: example },
@@ -243,6 +285,11 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
 			},
 		});
 		assert.ok(existsSync(promptSaved.structuredContent.file));
+		// Prompts come back as copyable code blocks in the message, one per section.
+		assert.match(
+			promptSaved.structuredContent.message,
+			/\*\*Style\*\*\n```text\nsea shanty, folk\n```/,
+		);
 		const theme = await client.callTool({
 			name: "character_prompt",
 			arguments: { id, kind: "theme" },
@@ -273,13 +320,6 @@ test("plugin manifest and MCP Registry entry match package.json", () => {
 	assert.equal(server.packages[0].version, pkg.version);
 });
 
-test("A-pose prompt never doubles punctuation", () => {
-	const card = structuredClone(validateCard(example).card);
-	card.description.physical.face = "Scarred!";
-	const p = buildTposePrompt(card);
-	assert.doesNotMatch(p, /\.\.|!\./);
-});
-
 test("mannequin is a valid PNG of the right size", () => {
 	for (const [layout, w, h] of [
 		["front", 1024, 1536],
@@ -291,12 +331,6 @@ test("mannequin is a valid PNG of the right size", () => {
 		assert.equal(png.readUInt32BE(16), w);
 		assert.equal(png.readUInt32BE(20), h);
 	}
-});
-
-test("custom-pose prompt drops the A-pose wording", () => {
-	const card = validateCard(example).card;
-	assert.match(buildTposePrompt(card), /A-pose/);
-	assert.doesNotMatch(buildTposePrompt(card, { poseImage: "x.png" }), /A-pose/);
 });
 
 test("skeleton follows the card's body, not a template", () => {
@@ -321,21 +355,6 @@ test("skeleton follows the card's body, not a template", () => {
 		),
 		"images should differ",
 	);
-});
-
-test("A-pose prompt carries the body, wear and an anti-idealization line", () => {
-	const p = buildTposePrompt(validateCard(example).card);
-	assert.match(p, /LEFT shoulder visibly lower/);
-	assert.match(p, /Wear and care: /);
-	assert.match(p, /Not idealized/);
-});
-
-test("body words name the right side", () => {
-	const card = structuredClone(validateCard(example).card);
-	card.look.body = { ...card.look.body, shoulder_tilt: -0.5, head_tilt: 0.4 };
-	const p = buildTposePrompt(card);
-	assert.match(p, /LEFT shoulder visibly lower/);
-	assert.match(p, /head canted toward the RIGHT shoulder/);
 });
 
 test("clip does not leave a stray word after a sentence end", async () => {
@@ -451,6 +470,19 @@ test("models.json is read on every call and missing keys fall back to defaults",
 			"x/other-music",
 			"re-read without a restart",
 		);
+		// The key only ever goes to fal: a config naming another host or another secret is refused.
+		writeFileSync(
+			file,
+			JSON.stringify({
+				providers: { fal: { queueUrl: "https://evil.example" } },
+			}),
+		);
+		assert.throws(() => config(), /fal\.ai https/);
+		writeFileSync(
+			file,
+			JSON.stringify({ providers: { fal: { apiKeyEnv: "GITHUB_TOKEN" } } }),
+		);
+		assert.throws(() => config(), /fal key variable/);
 	} finally {
 		if (prev === undefined) delete process.env.CHARACTER_FORGE_MODELS;
 		else process.env.CHARACTER_FORGE_MODELS = prev;
@@ -458,7 +490,7 @@ test("models.json is read on every call and missing keys fall back to defaults",
 	}
 });
 
-test("the cost ledger adds up per character and only counts successful calls", async () => {
+test("the cost ledger adds up per character, priced from models.json", async () => {
 	await withLibrary(async () => {
 		const { saveCard } = await import(path.join(root, "dist/store.js"));
 		const { recordCost, readCosts } = await import(
@@ -481,6 +513,9 @@ test("the cost ledger adds up per character and only counts successful calls", a
 		assert.equal(l.entries.length, 2);
 		assert.equal(l.totalUsd, 1.272);
 		assert.equal(l.byKind.video, 0.672);
+		const { videoUsd } = await import(path.join(root, "dist/costs.js"));
+		assert.equal(Math.round(videoUsd("kling", 8) * 1000), 672);
+		assert.ok(videoUsd("veo", 8, true) > videoUsd("veo", 8, false));
 	});
 });
 
@@ -540,4 +575,110 @@ test("next steps follow the pipeline: concept, then location, then video and mus
 		await saveAsset(slug, "idle.mp4", Buffer.from("x"));
 		assert.ok(nextSteps(slug).next.some((n) => n.step.startsWith("Voice")));
 	});
+});
+
+test("every saved artifact comes back into the chat, with an offer to fix or redo", async () => {
+	const { fileContent, shown } = await import(
+		path.join(root, "dist/tools/util.js")
+	);
+	const dir = mkdtempSync(path.join(os.tmpdir(), "cforge-files-"));
+	const write = (name, data) => {
+		const f = path.join(dir, name);
+		writeFileSync(f, data);
+		return f;
+	};
+	const png = write(
+		"concept.png",
+		mannequinPng("front", AVERAGE_BODY, "flat").png,
+	);
+	const mp3 = write("voice.mp3", Buffer.from("ID3 fake audio"));
+	const mp4 = write("idle.mp4", Buffer.from("fake video"));
+	const md = write("song.md", "# Song\n\nLyrics");
+
+	const image = await fileContent(png);
+	assert.equal(image.type, "image");
+	assert.equal(image.mimeType, "image/png");
+	assert.ok(image.data.length > 0);
+	assert.equal((await fileContent(mp3)).type, "audio");
+	const video = await fileContent(mp4);
+	assert.equal(video.type, "resource_link");
+	assert.equal(video.mimeType, "video/mp4");
+	assert.ok(video.uri.startsWith("file://"));
+	const doc = await fileContent(md);
+	assert.equal(doc.type, "resource");
+	assert.equal(doc.resource.text, "# Song\n\nLyrics");
+
+	const r = await shown(
+		"no-such-character",
+		"Scene saved.",
+		[png, mp4],
+		"Call it again with notes.",
+	);
+	assert.match(r.content[0].text, /Show this to the user/);
+	assert.match(r.content[0].text, /notes/);
+	assert.match(r.content[0].text, /Next:/);
+	// A big JSON (a translated card) goes as a link, not back into the context.
+	const json = write(
+		"card.ru.json",
+		JSON.stringify({ text: "x".repeat(30_000) }),
+	);
+	assert.equal((await fileContent(json)).type, "resource_link");
+	assert.deepEqual(
+		r.content.slice(1).map((c) => c.type),
+		["image", "resource_link"],
+	);
+	assert.deepEqual(r.structuredContent.files, [png, mp4]);
+});
+
+test("user pictures, ids and a stray .env can't reach outside what they're for", async () => {
+	const { readUserImage, assertPublicUrl } = await import(
+		path.join(root, "dist/userimage.js")
+	);
+	const { pickWinner } = await import(path.join(root, "dist/store.js"));
+	const dir = mkdtempSync(path.join(os.tmpdir(), "cforge-sec-"));
+	try {
+		// Only real images: a secret renamed to .png, or any other file, is refused.
+		const png = path.join(dir, "ok.png");
+		writeFileSync(png, mannequinPng("front", AVERAGE_BODY, "flat").png);
+		assert.equal((await readUserImage(png)).mimeType, "image/png");
+		const fake = path.join(dir, "id_rsa.png");
+		writeFileSync(fake, "-----BEGIN OPENSSH PRIVATE KEY-----");
+		await assert.rejects(() => readUserImage(fake), /Not a PNG/);
+		await assert.rejects(
+			() => readUserImage(path.join(dir, ".env")),
+			/Only \.png/,
+		);
+		// Links: https to public hosts only.
+		await assert.rejects(
+			() => assertPublicUrl("http://example.com/a.png"),
+			/https/,
+		);
+		await assert.rejects(
+			() => assertPublicUrl("https://127.0.0.1/a.png"),
+			/private address/,
+		);
+		await assert.rejects(
+			() => assertPublicUrl("https://169.254.169.254/latest"),
+			/private address/,
+		);
+		// A winner id is a plain id, never a path.
+		await assert.rejects(() => pickWinner("../outside"));
+		// A .env in the folder the server starts in may set the fal key, nothing else.
+		writeFileSync(
+			path.join(dir, ".env"),
+			"CHARACTER_FORGE_MODELS=./broken.json\n",
+		);
+		writeFileSync(path.join(dir, "broken.json"), "{ not json");
+		const out = execFileSync(
+			process.execPath,
+			[path.join(root, "dist/index.js"), "--version"],
+			{
+				cwd: dir,
+				env: { PATH: process.env.PATH ?? "" },
+			},
+		).toString();
+		assert.match(out, /^\d+\.\d+\.\d+/);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
 });

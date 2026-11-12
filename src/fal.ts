@@ -1,7 +1,7 @@
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { apiKey, config } from "./config.js";
+import { assertPublicUrl, readUserImage } from "./userimage.js";
 
 /** fal.ai queue client (raw HTTP, no SDK). The key, URLs and models come from models.json (see config.ts). */
 
@@ -15,7 +15,7 @@ export interface FalControlInput {
 	 * How the control image is used: a ControlNet condition (detect a pose, estimate depth, trace edges),
 	 * or "img2img" — the image is the starting canvas and keeps the composition (see strength).
 	 */
-	preprocess: "none" | "pose" | "depth" | "canny" | "img2img" | "gpt";
+	preprocess: "pose" | "depth" | "canny" | "img2img" | "gpt";
 	/** img2img only: how much to repaint the starting image, 0-1. */
 	strength?: number;
 	controlScale?: number;
@@ -211,13 +211,7 @@ export async function falUpload(
 
 /** URLs pass through; a local file is uploaded to fal storage. */
 export async function toImageUrl(ref: string): Promise<string> {
-	if (isUrl(ref)) return ref;
-	const ext = path.extname(ref).slice(1).toLowerCase();
-	const mime =
-		ext === "jpg" || ext === "jpeg"
-			? "image/jpeg"
-			: ext === "webp"
-				? "image/webp"
-				: "image/png";
-	return falUpload(await readFile(ref), mime, path.basename(ref));
+	if (isUrl(ref)) return (await assertPublicUrl(ref)).href;
+	const { bytes, mimeType } = await readUserImage(ref);
+	return falUpload(bytes, mimeType, path.basename(ref));
 }

@@ -79,7 +79,9 @@ You talk to the chat; it calls these tools. Paid ones run only when you ask for 
 | `character_translate` | Saves the card in another language (checked against the original) | free |
 | `character_next` | What can be made next for a character, with prices | free |
 | `character_costs` | What a character has cost so far | free |
-| `character_list` / `character_get` | List saved characters / return a card as Markdown or JSON | free |
+| `character_list` / `character_get` | List saved characters / show a card as a Markdown document (or JSON to edit) | free |
+
+Every saved card is also an MCP resource, `character-forge://<id>/card.md`, so apps with a resource picker can open or attach it.
 
 ## Generation prompts (on request)
 

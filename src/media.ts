@@ -1,6 +1,7 @@
+import { readFile } from "node:fs/promises";
 import { buildTposePrompt } from "./concept.js";
 import type { CharacterCard } from "./schema.js";
-import { savePrompt } from "./store.js";
+import { loadCard, promptFile, savePrompt } from "./store.js";
 
 /**
  * Generation prompts for other tools (image, voice, video, music), made one at a time and only on request.
@@ -158,7 +159,7 @@ The voice comes from WHO THEY ARE, not only age and pitch: what happened to them
    the music.
 4) "Delivery notes": 3 bullets (stability vs. expressiveness, pace, what to avoid).`,
 
-	video: `VIDEO — a 5-10 second clip for Seedance (also works for Kling, Veo, Runway). It shows ACTION that reveals the
+	video: `VIDEO — a 5-10 second image-to-video clip (Kling, Veo, Runway and similar). It shows ACTION that reveals the
 character, like the illustration but in motion.
 One clear action beat with a beginning and an end. Structure: subject (visual anchors) + action (use look.movement
 and their reactions) + scene + camera movement + lighting + style + mood. Name the camera move explicitly (static,
@@ -218,6 +219,28 @@ export function mediaBrief(c: CharacterCard, kind: MediaKind): string {
 		"",
 		`CARD MATERIAL:\n${material(c, kind)}`,
 	].join("\n");
+}
+
+/**
+ * The brief for a saved character, as the tool and the CLI both serve it. The voice monologue plays over the scene
+ * and the idle video, so its brief also carries what those actually show.
+ */
+export async function mediaBriefFor(
+	id: string,
+	kind: MediaKind,
+): Promise<string> {
+	const brief = mediaBrief(await loadCard(id), kind);
+	if (kind !== "voice") return brief;
+	const moment = await Promise.all(
+		[
+			["SCENE (what the still shows)", "scene.txt"],
+			["IDLE VIDEO (the motion in it)", "idle.txt"],
+		].map(async ([label, f]) => {
+			const t = await readFile(promptFile(id, f), "utf8").catch(() => "");
+			return t ? `${label}:\n${t.trim()}` : "";
+		}),
+	);
+	return [brief, ...moment.filter(Boolean)].join("\n\n");
 }
 
 export interface MediaItem {

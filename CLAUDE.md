@@ -56,6 +56,7 @@ The card's `look` section (shape language, silhouette, perfection, signature ite
 - **The prompt must fit Z-Image's ~512-token encoder** (a test enforces about 1800 characters, most important first, no hex codes). Long prompts silently dropped the outfit.
 - `index.ts` loads a `.env` from the working directory.
 - `src/media.ts` serves generation prompts **on request only**, one kind per call: `character_prompt` returns the target-specific rules plus card material, the model writes the prompt, and `character_prompt_save` stores it as `prompts/<kind>.md`. Never wire media prompts into character creation. The concept kind reuses `buildTposePrompt`.
+- `src/resources.ts` exposes every library card as an MCP resource (`character-forge://<id>/card.md`); `character_get` returns the same document, and `character_save` links it for library cards.
 - `src/tools/` has one file per MCP tool, wired in `src/tools/index.ts`. `src/prompts/` holds the MCP prompts.
 - `src/index.ts` is the CLI and stdio entry. CLI commands reuse store, concept and random helpers. For example, `RollOptionsSchema` drives both the `character_create` input and CLI flag parsing. `character_create` is the single entry for a new character (random, brief, concept image, or both); a user image travels in `meta.concept_image`, and `character_pick` imports it as the winner's concept.
 - `src/methodology.ts` holds `METHOD_GUIDE` and the konspekt's lists. Most lists are not rolled; `referenceLists()` gives them to the model as menus via `character_method`.

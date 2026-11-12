@@ -200,7 +200,7 @@ VARIANT TOURNAMENT — produce N competing variants of one concept and ship the 
    when the user gave their own image (character_pick has already made it the concept).
 8b. EDIT: an independent editor (role "editor") rewrites the winner's text for a reader who knows nothing of
    the world: plain, clear narration in a voice tuned to the character; no facts change. Save with overwrite.
-9. REPORT to the user: winner card, plus one line per losing variant (who they were, why they lost).
+9. SHOW the winner's card with character_get (a Markdown document the app can display), then REPORT: why it won, plus one line per losing variant (who they were, why they lost).
 
 Best results: run each reviewer as a separate agent with fresh context (Claude Code: the forge-character
 skill does this). In a single chat, play each role in a clearly separated pass, re-reading the card as a

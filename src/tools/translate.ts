@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { CharacterCardSchema } from "../schema.js";
 import { saveTranslation } from "../store.js";
-import { reply } from "./util.js";
+import { shown } from "./util.js";
 
 export function registerTranslate(server: McpServer) {
 	server.registerTool(
@@ -22,7 +22,13 @@ export function registerTranslate(server: McpServer) {
 		},
 		async ({ id, lang, card }) => {
 			const file = await saveTranslation(id, lang, card);
-			return reply(`Translation saved: ${file}`, { file });
+			return shown(
+				id,
+				`Translation saved: ${file}`,
+				[file],
+				"For changes, fix the translated card and call character_translate again.",
+				{ file },
+			);
 		},
 	);
 }

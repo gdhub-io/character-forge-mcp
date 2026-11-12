@@ -1,7 +1,8 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { cardUri } from "../resources.js";
 import { CharacterCardSchema } from "../schema.js";
-import { saveCard } from "../store.js";
+import { isDraft, saveCard } from "../store.js";
 import { reply } from "./util.js";
 
 export function registerSave(server: McpServer) {
@@ -23,14 +24,26 @@ export function registerSave(server: McpServer) {
 		},
 		async ({ card, overwrite }) => {
 			const saved = await saveCard(card, { overwrite });
-			return reply(
-				`Saved "${card.meta.name}" as id "${saved.slug}".\n${card.meta.logline}\nFiles:\n- ${saved.files.markdown}\n- ${saved.files.json}`,
-				{
-					id: saved.slug,
-					dir: saved.dir,
-					files: saved.files,
-				},
+			const message = `Saved "${card.meta.name}" as id "${saved.slug}".\n${card.meta.logline}\nFiles:\n- ${saved.files.markdown}\n- ${saved.files.json}`;
+			const data = { id: saved.slug, dir: saved.dir, files: saved.files };
+			if (isDraft(saved.slug)) return reply(message, data);
+			// A library card: link the document so the app can open it; character_get shows it in full.
+			const result = reply(
+				`${message}\nWhen the character is finished, show the card with character_get.`,
+				{ ...data, card: cardUri(saved.slug) },
 			);
+			return {
+				...result,
+				content: [
+					...result.content,
+					{
+						type: "resource_link" as const,
+						uri: cardUri(saved.slug),
+						name: `${card.meta.name} — card`,
+						mimeType: "text/markdown",
+					},
+				],
+			};
 		},
 	);
 }

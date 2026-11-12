@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { parseArgs } from "node:util";
+import { parseArgs, parseEnv } from "node:util";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { checkCard, checkToText } from "./check.js";
 import {
@@ -13,7 +14,7 @@ import {
 } from "./concept.js";
 import { config, usableKey } from "./config.js";
 import { costsToText, readCosts } from "./costs.js";
-import { MEDIA_KINDS, type MediaKind, mediaBrief } from "./media.js";
+import { MEDIA_KINDS, type MediaKind, mediaBriefFor } from "./media.js";
 import { nextToText } from "./next.js";
 import { RollOptionsSchema, rollToText } from "./random.js";
 import { generateIdleVideo, generateScene, type VideoModel } from "./scene.js";
@@ -43,16 +44,16 @@ Usage:
                                        save a translation of a saved card as card.<lang>.json
   character-forge render <id>          re-render card.md of a saved character
   character-forge prompt <id> [--style S] [--views ${VIEWS.join("|")}]
-                                       print the T-pose image prompt
-  character-forge concept <id> [--style S] [--views V] [--seed N] [--control 0-1] [--pose picture]
-                                       generate concept.png on fal.ai with a pose ControlNet (needs FAL_KEY);
+                                       print the A-pose image prompt
+  character-forge concept <id> [--style S] [--views V] [--seed N] [--pose picture]
+                                       generate concept.png on fal.ai (needs FAL_KEY);
                                        --pose puts the character in the pose of a picture → concept-pose.png
   character-forge media <id> --kind ${MEDIA_KINDS.join("|")}
                                        print the brief for writing one generation prompt
   character-forge scene <id> [--prompt P] [--notes N] [--quality low|medium|high]
-                                       the character in their environment (scene.png, ≈$0.05)
+                                       the character in their environment (scene.png)
   character-forge video <id> [--prompt P] [--notes N] [--seconds 8] [--model kling|veo] [--loop frame|crossfade|off] [--audio]
-                                       looping idle clip from scene.png (Kling ≈$0.084/s silent; Veo $0.15/s with sound)
+                                       looping idle clip from scene.png (Kling silent; Veo can add sound)
   character-forge voice <id> --description D --text T [--pitch -2]
                                        design the character's own voice (ElevenLabs for adults, Qwen + pitch for minors)
   character-forge say <id> --text T --name N
@@ -64,19 +65,23 @@ Usage:
 
 Env:
   CHARACTER_FORGE_DIR             library folder (default ~/character-forge)
-  FAL_KEY                         fal.ai key for all media (the variable name is set in models.json)
+  FAL_KEY                         fal.ai key for all media
   CHARACTER_FORGE_MODELS          a models.json to use instead of the package's (provider + model per media kind)
-  (a .env file in the working directory is loaded too)
+  (a .env file in the working directory can hold FAL_KEY; nothing else is read from it)
 `;
 
-// A .env in the working directory (gitignored) can hold FAL_KEY etc.; real env vars win. An empty or unexpanded
-// key from the plugin config must not block the .env one, so drop it first.
+// A .env in the working directory (gitignored) may hold the fal key, and only that: the server can start inside any
+// folder, including a cloned repo, whose .env must not be able to point the key or the model config elsewhere.
+// A real env var wins; an empty or unexpanded one from the plugin config doesn't count.
 const keyEnv = config().providers.fal.apiKeyEnv;
-if (!usableKey(process.env[keyEnv])) delete process.env[keyEnv];
-try {
-	process.loadEnvFile();
-} catch {
-	// no .env — fine
+if (!usableKey(process.env[keyEnv])) {
+	delete process.env[keyEnv];
+	try {
+		const fromFile = usableKey(parseEnv(readFileSync(".env", "utf8"))[keyEnv]);
+		if (fromFile) process.env[keyEnv] = fromFile;
+	} catch {
+		// no .env — fine
+	}
 }
 
 async function main() {
@@ -127,7 +132,6 @@ async function main() {
 		control: values.mode as
 			| "img2img"
 			| "gpt"
-			| "gpt2"
 			| "pose"
 			| "depth"
 			| "canny"
@@ -237,7 +241,7 @@ async function main() {
 			const kind = values.kind as MediaKind;
 			if (!MEDIA_KINDS.includes(kind))
 				fail(`--kind must be one of: ${MEDIA_KINDS.join(", ")}`);
-			console.log(mediaBrief(await loadCard(arg("id")), kind));
+			console.log(await mediaBriefFor(arg("id"), kind));
 			return;
 		}
 		case "scene": {

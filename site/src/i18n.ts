@@ -217,7 +217,6 @@ export function inLang(
 	kicker: string;
 	blurb: string;
 	voice?: string;
-	translated: boolean;
 } {
 	const t = lang === "en" ? undefined : c.i18n?.[lang];
 	const card = lang === "ru" && c.cardRu ? c.cardRu : c.card;
@@ -226,6 +225,5 @@ export function inLang(
 		kicker: t?.kicker ?? c.kicker,
 		blurb: t?.blurb ?? c.blurb,
 		voice: lang === "ru" ? (c.files.voiceRu ?? c.files.voice) : c.files.voice,
-		translated: card !== c.card,
 	};
 }

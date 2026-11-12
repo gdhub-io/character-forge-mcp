@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { config } from "./config.js";
+import { videoUsd } from "./costs.js";
 import { assetFile, isDraft, translationFile } from "./store.js";
 import {
 	OTHER_VOICE_LANGUAGES,
@@ -69,7 +70,7 @@ export function nextSteps(id: string): { done: string[]; next: NextStep[] } {
 				step: `Idle video (${VIDEO_SECONDS} s loop)`,
 				tool: "character_video",
 				why: "The voice comes after it.",
-				usd: p.video[models.video.default].second * VIDEO_SECONDS,
+				usd: videoUsd(models.video.default, VIDEO_SECONDS),
 			});
 		} else if ((done.push("video"), !has(PROFILE))) {
 			offer({
