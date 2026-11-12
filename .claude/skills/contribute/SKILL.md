@@ -7,17 +7,10 @@ description: Take a change to character-forge-mcp from intent to pull request �
 
 Nobody pushes to `main`; it is protected. Every change answers an issue, and its pull request closes that issue when it is squash-merged (the PR title becomes the commit Release Please reads). Follow the steps in order and tell the user, briefly, where you are. Creating issues, pushing and opening PRs are outward-facing: ask the user before the first one in a task.
 
-## 1. Intent = an issue
-- Restate in one or two sentences what changes and why.
-- Look for an existing issue first: `gh issue list --search "<words>" --state open`. If one fits, read it (`gh issue view N`) and use it.
-- Otherwise create one, filled like the templates in `.github/ISSUE_TEMPLATE/` (bug: what happened / how to reproduce; idea: what you want to do / your idea), with the matching label:
-  `gh issue create --title "…" --label bug|enhancement|documentation --body "…"`
-- One concern per issue and per PR. If the request mixes several, propose splitting it into several issues.
-- If the goal or the approach is unclear, ask before writing code, and record the answer in the issue.
+## 1–2. Intent and branch
+Run the `intent` skill: it finds or opens the issue, writes the intent into it (want, why, constraints, done when, how to check, out of scope), and opens a branch linked to the issue with `gh issue develop N`. A typo or one-file fix gets a short issue instead of a full intent, but always an issue.
 
-## 2. Branch, linked to the issue
-- `gh issue develop N --base main --name <type>/N-short-name --checkout` (type: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`). The branch shows up in the issue's Development panel.
-- If the working tree has unrelated changes, stop and ask what to do with them.
+If the working tree has unrelated changes, stop and ask what to do with them.
 
 ## 3. Develop
 - Follow CLAUDE.md (architecture, the card-field checklist, English-only product text, `.js` import extensions).
@@ -36,7 +29,8 @@ Nobody pushes to `main`; it is protected. Every change answers an issue, and its
 ## 6. Pull request that closes the issue
 - `git push -u origin <branch>`, then `gh pr create` with:
   - **Title** in Conventional Commits: `feat: …`, `fix: …`, `docs: …`; `!` for breaking (`feat!: …`). Imperative, under 70 characters.
-  - **Body** from `.github/pull_request_template.md`, starting with `Closes #N`. The "Linked issue" check fails without it, and on merge GitHub closes the issue.
+  - **Body** from `.github/pull_request_template.md`, starting with `Closes #N`. The "Linked issue" check fails without it, and on merge GitHub closes the issue. "How to verify" comes from the intent's "How to check it".
+- Comment on the issue what was decided along the way and what was deliberately not done.
 - Report the PR link. Then wait for CI; if it fails, read the logs (`gh pr checks`, `gh run view --log-failed`) and fix on the same branch.
 - If the work turns out to need more, open follow-up issues instead of growing the PR.
 

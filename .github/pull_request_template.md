@@ -4,9 +4,9 @@ Closes #
 
 <!-- What this changes and why. The line above links the issue and closes it on merge: put its number there. -->
 
-## How it was checked
+## How to verify
 
-<!-- Tests added or updated, what you ran, screenshots for site changes. -->
+<!-- The steps a reviewer (human or agent) follows to see it working: what to ask in the chat, the CLI command and its output, the site page. Plus the tests added or updated. -->
 
 ## Checklist
 
