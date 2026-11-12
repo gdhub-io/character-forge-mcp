@@ -9,34 +9,22 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { possessive } from "./card";
 import { type Character, themeVars, useCharacters } from "./characters";
 import { CardDrawer } from "./components/CardDrawer";
-import { GUIDE_SECTIONS, HowItWorks } from "./components/HowItWorks";
+import { HowItWorks } from "./components/HowItWorks";
 import { AMBIENT_VOLUME, LoopVideo } from "./components/LoopVideo";
 import { Switcher } from "./components/Switcher";
 import { TopNav } from "./components/TopNav";
 import { inLang, LANGS, type Lang, ui } from "./i18n";
+import { useLocation } from "./router";
 import { useThemeMusic } from "./useThemeMusic";
 import { useVoice } from "./useVoice";
 
 const AUTO_ADVANCE_MS = 30_000;
 
-/** Hash routes: "#how-it-works" (and its section anchors, e.g. "#install") is the guide; anything else the cast. */
-function useRoute() {
-	const read = () => window.location.hash.replace(/^#\/?/, "");
-	const [hash, setHash] = useState(read);
-	useEffect(() => {
-		const on = () => setHash(read());
-		window.addEventListener("hashchange", on);
-		return () => window.removeEventListener("hashchange", on);
-	}, []);
-	return hash;
-}
-
 export default function App() {
 	const list = useCharacters();
-	const hash = useRoute();
+	const { page, section } = useLocation();
 	if (!list) return <div className="h-full bg-black" />;
-	const section = GUIDE_SECTIONS.find((s) => s === hash);
-	if (hash === "how-it-works" || section) {
+	if (page === "how") {
 		// Chosen in showcase.json ("guide"), like the design: one character's pictures, another's colours.
 		const pictures = list.find((c) => c.guide === "pictures") ?? list[0];
 		const palette = list.find((c) => c.guide === "palette") ?? pictures;
@@ -167,6 +155,7 @@ function Showcase({ list }: { list: Character[] }) {
 					</p>
 					<div className="flex items-center gap-2 pt-1 sm:flex-wrap sm:gap-3">
 						<button
+							data-goatcounter-click="open-card"
 							type="button"
 							onClick={() => {
 								setActive(0);
@@ -180,6 +169,7 @@ function Showcase({ list }: { list: Character[] }) {
 							<button
 								type="button"
 								onClick={voice.toggle}
+								data-goatcounter-click="voice"
 								aria-label={voice.speaking ? t.stop : t.hearVoice(his)}
 								className="flex size-[46px] shrink-0 items-center justify-center gap-2.5 rounded-full border border-line bg-white/5 text-sm font-medium text-fg backdrop-blur-md sm:size-auto sm:px-5.5 sm:py-3.5"
 							>
