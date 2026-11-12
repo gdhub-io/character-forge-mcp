@@ -269,4 +269,4 @@ The character method is inspired by Sherri Sheridan's book *Developing Digital S
 
 ## License
 
-MIT
+[MIT](LICENSE), with one exception: the character **Fanya** (her name, story, card, look and the media in [`site/public/characters/fanya/`](site/public/characters/fanya/LICENSE.md)) is © Dzmitry Drynau, all rights reserved. She appears on the site as an example and may not be reused. The other example characters are under MIT like the rest of the code.

@@ -6005,7 +6005,7 @@
                               "fill": "$char-text",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "  \"args\": [\"-y\", \"github:gdhub-io/character-forge-mcp\"],",
+                              "content": "  \"args\": [\"-y\", \"@gdhub/character-forge-mcp\"],",
                               "lineHeight": 1.5,
                               "fontFamily": "$font-mono",
                               "fontSize": 13,
