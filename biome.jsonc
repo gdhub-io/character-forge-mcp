@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -7,17 +7,9 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		// Build output and the character library are generated: never lint or format them.
-		"includes": ["**", "!**/dist", "!characters", "!site/public"],
-		// The scanner watches every folder it is not told to skip; build output and the character library
-		// (images, video, sound) would keep the editor's Biome busy.
-		"experimentalScannerIgnores": [
-			".git",
-			"dist",
-			"characters",
-			"site/dist",
-			"site/public"
-		]
+		// Build output and the character library (images, video, sound) are generated: never scan, lint or format
+		// them ("!!" also keeps the editor's scanner out of them).
+		"includes": ["**", "!!**/dist", "!!characters", "!!site/public"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -40,7 +32,7 @@
 			"site/scripts/**/*.mjs"
 		],
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"suspicious": {
 				"noDoubleEquals": "warn"
 			},
@@ -52,6 +44,10 @@
 				"useSemanticElements": "off"
 			}
 		}
+	},
+	"css": {
+		// The site's stylesheet uses Tailwind v4 directives (@theme, @apply).
+		"parser": { "tailwindDirectives": true }
 	},
 	"javascript": {
 		"formatter": {
