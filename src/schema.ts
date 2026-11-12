@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MEDIUMS } from "./methodology.js";
+import type { BodyShape } from "./pose.js";
 
 export const SlugSchema = z
 	.string()
@@ -59,18 +60,175 @@ const MetaSchema = z.object({
 	tagline: text("A short memorable hook, 3-8 words."),
 });
 
+const scale = (min: number, max: number, describe: string) =>
+	z.number().min(min).max(max).describe(describe);
+const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const percent = (describe: string) =>
+	z.number().int().min(0).max(100).describe(describe);
+
+/** One innate temperament scale: where they were born, how far life can move it, and how it shows. */
+const trait = (low: string, high: string) =>
+	z
+		.object({
+			value: percent(`Born value, 0 = ${low}, 100 = ${high}.`),
+			plasticity: percent(
+				"How far life can move it: the value stays within born ± plasticity/2.",
+			),
+			shows: text("One line: how this shows in this particular being."),
+		})
+		.describe(`${low} (0) → ${high} (100).`);
+
+export const TEMPERAMENT_SCALES = {
+	extraversion: trait(
+		"withdrawn, seeks solitude, recharges alone",
+		"outgoing, seeks company, draws energy from others",
+	),
+	neuroticism: trait(
+		"calm, even, cheerful by default",
+		"anxious, moody, gloomy by default",
+	),
+	agreeableness: trait(
+		"rebel, contrarian, hard to sway",
+		"soft, accommodating, goes along",
+	),
+	conscientiousness: trait(
+		"chaotic, impulsive, lives by chance",
+		"orderly, disciplined, lives by a plan",
+	),
+	openness: trait(
+		"sticks to the familiar, practical",
+		"curious, creative, drawn to art, music and the new",
+	),
+	sensitivity: trait(
+		"dandelion: barely moved by good or bad surroundings",
+		"orchid: shaped hard by both bad and good surroundings",
+	),
+} as const;
+export type TemperamentScale = keyof typeof TEMPERAMENT_SCALES;
+/** The scales in their fixed order: rolls draw them in it. */
+export const TEMPERAMENT_KEYS = Object.keys(
+	TEMPERAMENT_SCALES,
+) as TemperamentScale[];
+const FRAME_KEYS = [
+	"head_heights",
+	"shoulders",
+	"hips",
+	"legs",
+	"arms",
+] as const;
+type FrameKey = (typeof FRAME_KEYS)[number];
+
+const PART = /^[a-z][a-z_-]*$/;
+
+/** What a life event can change in them: the DNA's characteristics, by name. Lineage is history: nothing changes it. */
+const ChangeablePath = z.union([
+	z.enum([
+		...TEMPERAMENT_KEYS.map((k) => `temperament.${k}` as const),
+		...FRAME_KEYS.map((k) => `frame.${k}` as const),
+		"species",
+		"sex",
+		"body_plan",
+		"covering",
+		"face",
+		"build_tendency",
+	]),
+	z.string().regex(new RegExp(`^colors\\.${PART.source.slice(1)}`)),
+]);
+
+/** Body proportions they were born with; they build the concept's pose figure (always a humanoid A-pose). */
+const FrameSchema = z
+	.object({
+		head_heights: scale(
+			3,
+			10,
+			"Standing height in head lengths, as drawn in the art style: ~4 small child, ~6 teen or stocky, 7-7.5 average adult, 8+ tall and elongated, 9.5-10 fashion-sketch extreme.",
+		),
+		shoulders: scale(
+			0.6,
+			1.6,
+			"Shoulder width vs an average adult of their kind: 1 average, 0.8 narrow, 1.3 broad.",
+		),
+		hips: scale(
+			0.6,
+			1.6,
+			"Hip width vs an average adult of their kind: 1 average, 0.8 narrow, 1.3 wide.",
+		),
+		legs: scale(
+			0.8,
+			1.2,
+			"Leg length vs average: 0.9 short-legged, 1.1 long-legged.",
+		),
+		arms: scale(0.85, 1.15, "Arm length vs average: 0.9 short, 1.1 long."),
+	})
+	.describe(
+		"Innate proportions. For a non-humanoid body, the closest humanoid reading (the concept sheet is a humanoid A-pose).",
+	);
+
+/** What they were born (or made) with. Never changed by life; everything acquired is layered on top. */
+const DnaSchema = z
+	.object({
+		temperament: z
+			.object(TEMPERAMENT_SCALES)
+			.describe(
+				"Innate temperament: six scales. Take the rolled numbers unless the brief fixes them; the wound lands on this temperament.",
+			),
+		species: text("Human or otherwise."),
+		sex: text(
+			"Sex they were born or made with, or 'none' (gender as presented lives in description).",
+		),
+		ancestry: text(
+			"Lineage or origin they were born from; for made beings, who made them and from what.",
+		),
+		body_plan: text(
+			"How the body is built: biped, quadruped, serpentine, winged, many-limbed, amorphous...",
+		),
+		covering: text(
+			"What covers the body and its natural texture: skin, fur, scales, feathers, bark, plating; hair type if any.",
+		),
+		colors: z
+			.array(
+				z.object({
+					part: z
+						.string()
+						.regex(PART)
+						.describe(
+							"Body part as one lowercase English word (skin, hair, eyes, scales, stag-hide...); it stays the same in translations, so life events can name it.",
+						),
+					hex: hex.describe("Natural colour, #RRGGBB."),
+				}),
+			)
+			.min(1)
+			.describe(
+				"Natural colours of the body, before life changed them (dye, sun, scars).",
+			),
+		face: text("Face or head features they were born with, one line."),
+		frame: FrameSchema,
+		build_tendency: percent(
+			"Innate build: 0 lean and wiry → 100 heavy and solid.",
+		),
+		born_differences: z
+			.array(text("One innate body difference and how it shows."))
+			.describe(
+				"Body differences they were born or made with: a missing or extra limb, heterochromia, a birthmark... Rare: usually empty. Injuries and wear from life are marks in look, not here.",
+			),
+	})
+	.describe(
+		"DNA: what they were born or made with, the bottom layer of the core. Temperament + innate appearance.",
+	);
+
 const CoreSchema = z.object({
+	dna: DnaSchema,
 	wound: text("The formative wound everything grows from."),
 	lie: text("The false belief the wound taught them, in their own words."),
 	truth: text("The truth they must learn — the need, stated as a belief."),
 	central_paradox: text(
-		"The contradiction that makes them vivid: how their best and worst traits are two faces of the same wound.",
+		"The contradiction that makes them vivid: the wound landing on this temperament, so their best and worst traits are two faces of it.",
 	),
 	dramatic_question: text(
 		"The yes/no question the story answers about them, e.g. 'Will she ring the bell for the man who drowned her town?'",
 	),
 	spark_links: text(
-		"How the surprising elements (job, world, archetype, look) grew out of the wound — the 'inevitable but unexpected' logic.",
+		"How the surprising elements (job, world, archetype, look) grew out of the wound and the DNA — the 'inevitable but unexpected' logic.",
 	),
 });
 
@@ -161,34 +319,84 @@ const PsychologySchema = z.object({
 	),
 });
 
+/** The value a change sets must be one the characteristic can hold: a 0-100 scale, a proportion in range, a colour. */
+const ChangeSchema = z
+	.object({
+		characteristic: ChangeablePath.describe(
+			"Which characteristic it changed in them, by its name in core.dna: temperament.extraversion, frame.legs, colors.hair (a part named in colors), covering, face, build_tendency...",
+		),
+		to: z
+			.union([z.number(), z.string().trim().min(1)])
+			.describe(
+				"What it became after the event: a number for a scale (0-100, within born ± plasticity/2), a proportion (in the frame's range) or the build; #RRGGBB for a colour; text otherwise.",
+			),
+		how: text("How and why the event changed it."),
+	})
+	.superRefine(({ characteristic, to }, ctx) => {
+		const [head, key] = characteristic.split(".");
+		const schema =
+			head === "temperament" || head === "build_tendency"
+				? percent("")
+				: head === "frame"
+					? (FrameSchema.shape[key as FrameKey] as z.ZodNumber | undefined)
+					: head === "colors"
+						? hex
+						: z.string();
+		// An unknown characteristic is already reported by ChangeablePath.
+		if (schema && !schema.safeParse(to).success)
+			ctx.addIssue({
+				code: "custom",
+				path: ["to"],
+				message: `${characteristic} can't become ${JSON.stringify(to)}`,
+			});
+	});
+
 const DescriptionSchema = z.object({
 	name_meaning: text("Why this name: etymology, metaphor, sound."),
 	age: text("Age or apparent age."),
-	gender: text("Gender / presentation."),
-	species: text("Human or otherwise."),
+	gender: text("Gender as they present it (sex at birth lives in core.dna)."),
 	cultural_background: text(
-		"Cultural / ethnic / regional background and how it shows.",
+		"The culture they grew up in and how it shows (their lineage lives in core.dna).",
 	),
 	physical: z
 		.object({
-			height_build: text("Height, weight, body type."),
-			face: text("Face, eyes, skin."),
-			hair: text("Hair."),
+			height_build: text("Height, weight, body type now."),
+			face: text("Face, eyes, skin now."),
+			hair: text("Hair (or crest, mane, none) now."),
 			first_impression: text("Overall impression at first glance."),
 		})
 		.describe(
-			"Body basics. Marks, movement and clothing live in the look section.",
+			"How the body looks NOW: the DNA plus what life did (weight, age, sun, dye). Marks, movement and clothing live in the look section.",
 		),
 	life_events: z
 		.array(
 			z.object({
 				age: text("Age when it happened."),
+				weight: z
+					.enum(["wound", "major", "minor"])
+					.describe(
+						"How much it shaped them: 'wound' for the formative hurt (exactly one event), 'major' for a turning point, 'minor' for something small that still left a trace.",
+					),
 				event: text("What happened."),
-				effect: text("How it changed them."),
+				effect: text(
+					"How it changed them, given the temperament it landed on.",
+				),
+				changes: z
+					.array(ChangeSchema)
+					.optional()
+					.describe(
+						"What this event made of them: which characteristics it changed, to what and how — a hard childhood made them more anxious, a fever turned their hair white, a growth trial stretched their legs. The DNA itself never changes (it keeps what they were born with); this records what life made of it. Leave out what it didn't touch.",
+					),
 			}),
 		)
 		.length(3)
-		.describe("Exactly 3 formative life events."),
+		.refine(
+			(events) => events.filter((e) => e.weight === "wound").length === 1,
+			"Exactly one life event is the wound (weight 'wound').",
+		)
+		.describe(
+			"Exactly 3 formative life events. One of them is the wound itself (weight 'wound'), with what it changed in them.",
+		),
 	hobbies: list(
 		"Hobbies, skills, interests, collections, sports, music, weekends.",
 		2,
@@ -319,9 +527,9 @@ const BackstorySchema = z.object({
 });
 
 const TraitsSchema = z.object({
-	energy: text("Energy level."),
-	temperament: text("Temperament: reaction speed, excitability."),
-	social: text("Introvert / extravert."),
+	personality: text(
+		"What they are like in life now, as a person: mood, energy, how they are with others (alone or in company, leader or follower, rebel or conformist), their social life and what they love. The DNA temperament after the wound and the life events; a stranger should know them from this paragraph.",
+	),
 	habits: list("Behavioral habits.", 2),
 	best_trait: text("ONE thing they do better than anyone in the world."),
 	worst_trait: text("ONE trait that could bring their downfall."),
@@ -350,33 +558,9 @@ const DestinySchema = z.object({
 	ending: text("Where they end up — master of two worlds (even if they die)."),
 });
 
-const scale = (min: number, max: number, describe: string) =>
-	z.number().min(min).max(max).describe(describe);
-
-/** Proportions and asymmetries: they build the pose skeleton, so every body is the character's own, not a template. */
+/** Posture and asymmetries on top of the innate frame (core.dna.frame): together they build the pose figure. */
 const BodySchema = z
 	.object({
-		head_heights: scale(
-			3,
-			10,
-			"Standing height in head lengths, as drawn in the art style: ~4 small child, ~6 teen or stocky, 7-7.5 average adult, 8+ tall and elongated, 9.5-10 fashion-sketch extreme.",
-		),
-		shoulders: scale(
-			0.6,
-			1.6,
-			"Shoulder width vs an average adult of their sex: 1 average, 0.8 narrow, 1.3 broad.",
-		),
-		hips: scale(
-			0.6,
-			1.6,
-			"Hip width vs an average adult of their sex: 1 average, 0.8 narrow, 1.3 wide.",
-		),
-		legs: scale(
-			0.8,
-			1.2,
-			"Leg length vs average: 0.9 short-legged, 1.1 long-legged.",
-		),
-		arms: scale(0.85, 1.15, "Arm length vs average: 0.9 short, 1.1 long."),
 		shoulder_tilt: scale(
 			-1,
 			1,
@@ -398,11 +582,11 @@ const BodySchema = z
 				"Knees: straight, knock-kneed (inward) or bow-legged (outward).",
 			),
 		why: text(
-			"Where these proportions and asymmetries come from (genes, work, injury, age, habit), each tied to the story.",
+			"Where this posture and these asymmetries come from (work, injury, age, habit; or built in, if so), each tied to the story.",
 		),
 	})
 	.describe(
-		"The body's own proportions and imperfections. Not idealized: average is fine, symmetry is rare.",
+		"Posture and asymmetries on top of the frame (core.dna.frame, as life events changed it). Not idealized: symmetry is rare.",
 	);
 
 const LookSchema = z
@@ -419,30 +603,16 @@ const LookSchema = z
 		body: BodySchema,
 		blocking: z
 			.object({
-				hair: z
-					.string()
-					.regex(/^#[0-9a-fA-F]{6}$/)
-					.describe("Hair colour."),
-				skin: z
-					.string()
-					.regex(/^#[0-9a-fA-F]{6}$/)
-					.describe("Skin (or fur / scales) colour."),
-				top: z
-					.string()
-					.regex(/^#[0-9a-fA-F]{6}$/)
-					.describe("Main colour of the upper body and arms (sleeves)."),
-				bottom: z
-					.string()
-					.regex(/^#[0-9a-fA-F]{6}$/)
-					.describe("Main colour of the lower body and legs."),
-				footwear_left: z
-					.string()
-					.regex(/^#[0-9a-fA-F]{6}$/)
-					.describe("Footwear on the character's LEFT foot."),
-				footwear_right: z
-					.string()
-					.regex(/^#[0-9a-fA-F]{6}$/)
-					.describe("Footwear on the character's RIGHT foot."),
+				hair: hex.describe(
+					"Hair colour now: the natural one as age and life changed it (grey, dye, sun).",
+				),
+				skin: hex.describe(
+					"Skin (or fur / scales) colour now: the natural one as age and life changed it.",
+				),
+				top: hex.describe("Main colour of the upper body and arms (sleeves)."),
+				bottom: hex.describe("Main colour of the lower body and legs."),
+				footwear_left: hex.describe("Footwear on the character's LEFT foot."),
+				footwear_right: hex.describe("Footwear on the character's RIGHT foot."),
 				accessories: z
 					.array(
 						z.object({
@@ -460,7 +630,7 @@ const LookSchema = z
 								.describe(
 									"Where on the body (the character's own left/right).",
 								),
-							color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+							color: hex,
 							size: z.enum(["small", "medium", "large"]).optional(),
 							item: z
 								.string()
@@ -493,7 +663,9 @@ const LookSchema = z
 		marks: z
 			.array(
 				z.object({
-					mark: text("Scar, tattoo, prosthetic, imperfection..."),
+					mark: text(
+						"Scar, tattoo, prosthetic, wear... Acquired only: innate differences live in core.dna.",
+					),
 					location: text("Exactly where (left/right matters)."),
 					origin: text("Which event in their life caused it."),
 				}),
@@ -521,10 +693,7 @@ const LookSchema = z
 			.array(
 				z.object({
 					name: text("Colour name."),
-					hex: z
-						.string()
-						.regex(/^#[0-9a-fA-F]{6}$/)
-						.describe("#RRGGBB"),
+					hex: hex.describe("#RRGGBB"),
 					meaning: text("What this colour carries in their story."),
 				}),
 			)
@@ -566,7 +735,158 @@ export const CharacterCardSchema = z.object({
 	look: LookSchema,
 });
 
-export type CharacterCard = z.infer<typeof CharacterCardSchema>;
+/**
+ * A card read from disk. Cards saved before the DNA layer get their innate parts (species, proportions) moved into
+ * core.dna and a personality made from the old energy/temperament/social lines; their temperament stays unknown
+ * until the card is rewritten, and character_check asks for it.
+ */
+/** The shape of a card that may predate the DNA layer, for tools that accept one (a translation of an old card). */
+export const LegacyCardSchema = CharacterCardSchema.extend({
+	core: CoreSchema.extend({
+		dna: DnaSchema.partial().required({
+			species: true,
+			frame: true,
+			born_differences: true,
+		}),
+	}),
+});
+export const StoredCardSchema = z.preprocess(upgradeLegacy, LegacyCardSchema);
+
+export type CharacterCard = z.infer<typeof StoredCardSchema>;
+
+type Json = Record<string, unknown>;
+const asObject = (v: unknown): Json | undefined =>
+	v && typeof v === "object" && !Array.isArray(v) ? (v as Json) : undefined;
+function upgradeLegacy(raw: unknown): unknown {
+	const card = asObject(raw);
+	const core = asObject(card?.core);
+	const traits = asObject(card?.traits);
+	const events = asObject(card?.description)?.life_events;
+	const weighed =
+		Array.isArray(events) && events.every((e) => asObject(e)?.weight);
+	if (!card || !core || (core.dna && traits?.personality && weighed))
+		return raw;
+	const next: Json = structuredClone(card);
+	const nextCore = next.core as Json;
+	if (!nextCore.dna) {
+		const body = asObject(asObject(next.look)?.body) ?? {};
+		nextCore.dna = {
+			species: asObject(next.description)?.species,
+			born_differences: [],
+			frame: Object.fromEntries(FRAME_KEYS.map((k) => [k, body[k]])),
+		};
+	}
+	// Which old event was the wound is unknown: the first one stands for it until the card is rewritten.
+	const nextEvents = asObject(next.description)?.life_events;
+	if (Array.isArray(nextEvents))
+		nextEvents.forEach((e, i) => {
+			const ev = asObject(e);
+			if (ev && !ev.weight) ev.weight = i === 0 ? "wound" : "major";
+		});
+	const t = asObject(next.traits);
+	if (t && !t.personality)
+		t.personality = [
+			["Energy", t.energy],
+			["Temperament", t.temperament],
+			["Social", t.social],
+		]
+			.filter(([, v]) => typeof v === "string")
+			.map(([k, v]) => `${k}: ${v}.`)
+			.join(" ");
+	return next;
+}
+
+/** What life made of the DNA, event by event: characteristic → its value now (absent = as born). The DNA stays as born. */
+export function changedBy(c: CharacterCard): Map<string, number | string> {
+	const now = new Map<string, number | string>();
+	for (const e of c.description.life_events)
+		for (const ch of e.changes ?? []) now.set(ch.characteristic, ch.to);
+	return now;
+}
+
+/** "extraversion 55 → 30 now, neuroticism 58, …" — the born temperament and what life events made of it. */
+export function temperamentLine(c: CharacterCard): string {
+	const t = c.core.dna.temperament;
+	if (!t) return "";
+	const now = changedBy(c);
+	return TEMPERAMENT_KEYS.map((k) => {
+		const v = now.get(`temperament.${k}`);
+		return `${k} ${t[k].value}${v === undefined || v === t[k].value ? "" : ` → ${v} now`}`;
+	}).join(", ");
+}
+
+/** The whole body for the pose figure: the innate frame, as life events changed it, plus the posture. */
+export function bodyOf(
+	c: CharacterCard,
+): BodyShape & CharacterCard["look"]["body"] {
+	const frame = { ...c.core.dna.frame };
+	const now = changedBy(c);
+	for (const k of FRAME_KEYS) {
+		const v = now.get(`frame.${k}`);
+		if (typeof v === "number") frame[k] = v;
+	}
+	return { ...frame, ...c.look.body };
+}
+
+/** Why this change can't happen to this DNA (a colour it doesn't have, a scale moved past its plasticity), if so. */
+export function badChange(
+	dna: CharacterCard["core"]["dna"],
+	path: string,
+	to: number | string,
+): string | undefined {
+	const [head, key] = path.split(".");
+	if (head === "colors" && !dna.colors?.some((x) => x.part === key))
+		return `no colour part "${key}"`;
+	const scale =
+		head === "temperament"
+			? dna.temperament?.[key as TemperamentScale]
+			: undefined;
+	if (
+		scale &&
+		typeof to === "number" &&
+		Math.abs(to - scale.value) > scale.plasticity / 2
+	)
+		return `${to} is outside the born corridor ${scale.value} ± ${scale.plasticity / 2}; life can't move it that far`;
+	return undefined;
+}
+
+/**
+ * What a playing character keeps in mind (a scene, a meeting, later life in time). ALWAYS: who they are, in every
+ * prompt. AUTHOR: what the character doesn't know about themselves; knowing it would make them wise too early.
+ * VISUAL: for images and video. Everything else is RECALLED when the moment calls for it.
+ */
+export const CARD_USE = {
+	always: [
+		"meta.name",
+		"meta.logline",
+		"description.age",
+		"core.dna",
+		"core.wound",
+		"core.lie",
+		"core.central_paradox",
+		"goals.want",
+		"traits.personality",
+		"traits.best_trait",
+		"traits.worst_trait",
+		"fears.fears",
+		"fears.mask",
+		"psychology.strongest_trigger",
+		"psychology.emotional_baseline",
+		"description.speech.manner",
+		"description.speech.pet_words",
+		"look.signature_item",
+		"look.story_reads",
+	],
+	author: [
+		"core.truth",
+		"core.dramatic_question",
+		"goals.need",
+		"goals.arc_goal",
+		"goals.goal_climax",
+		"destiny",
+	],
+	visual: ["look"],
+} as const;
 
 export function slugify(name: string): string {
 	const slug = name

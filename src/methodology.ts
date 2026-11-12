@@ -449,27 +449,6 @@ export const WORST_TRAITS = [
 	"lazy",
 ] as const;
 
-export const ENERGY = [
-	"very low",
-	"low",
-	"medium",
-	"high",
-	"explosive",
-] as const;
-export const TEMPERAMENT = [
-	"choleric",
-	"sanguine",
-	"phlegmatic",
-	"melancholic",
-] as const;
-export const SOCIAL = [
-	"strong introvert",
-	"introvert",
-	"ambivert",
-	"extravert",
-	"strong extravert",
-] as const;
-
 export const MEDIUMS = [
 	"film",
 	"game",
@@ -565,7 +544,6 @@ export function referenceLists(): string {
 		`Best traits: ${BEST_TRAITS.join(", ")}.`,
 		`Worst traits: ${WORST_TRAITS.join(", ")}.`,
 		`Other traits: ${OTHER_TRAITS.join(", ")}.`,
-		`Energy: ${ENERGY.join(", ")} · Temperament: ${TEMPERAMENT.join(", ")} · Social: ${SOCIAL.join(", ")}.`,
 	].join("\n\n");
 }
 
@@ -573,12 +551,21 @@ export const METHOD_GUIDE = `
 CHARACTER METHOD. A strong character is ONE causal system, not a list of traits.
 
 0. CORE — build this first; every other section must trace back to it.
-   WOUND: the formative hurt. LIE: the false belief the wound taught them.
+   DNA: what they were born (or made) with, never changed by life. TEMPERAMENT: six scales 0-100 — extraversion
+   (withdrawn → outgoing), neuroticism (calm, cheerful → anxious, gloomy), agreeableness (rebel → accommodating),
+   conscientiousness (chaotic → orderly), openness (familiar → curious, creative), sensitivity (dandelion: barely
+   moved by surroundings → orchid: shaped hard by both bad and good). Each has a born value, a plasticity (how far
+   life can move it) and a line on how it shows. INNATE APPEARANCE: species, sex, lineage, body plan, covering,
+   natural colours, face, frame, build, and the rare born difference. The being can be anything: say it in terms
+   of its kind. Rule: born with it → DNA; got it from life (scars, posture, weight, dye, habits) → the rest.
+   WOUND: the formative hurt, landing on that temperament — one of the life events, with what it changed. LIE: the false belief the wound taught them.
    FEAR: what the lie makes them dread. DEFENSE: how they protect the lie = their WORST trait.
    GIFT: what the same wound forged = their BEST trait. Best and worst are two faces of one wound:
-   that is the CENTRAL PARADOX that makes them vivid. TRUTH: what they must learn = the NEED.
+   that is the CENTRAL PARADOX that makes them vivid — the wound × the temperament it hit: the same hurt turns
+   inward in a withdrawn orchid and into bravado in an outgoing dandelion. TRUTH: what they must learn = the NEED.
    WANT feeds the lie; NEED is the truth; the climax forces a choice between them.
    Surprising elements (job, world, look, archetype) must grow out of the core: unexpected, yet inevitable.
+   Every trait has a cause: the DNA, the wound, or both.
 
 Then fill the 9 sections; the card schema mirrors them.
 
@@ -605,9 +592,12 @@ Then fill the 9 sections; the card schema mirrors them.
    childhood family climate; a VISUAL / AUDIO device to show their inner state on screen.
 
 4. DESCRIPTION — a name that means something (etymology, metaphor of a trait — e.g. Nettly Frost:
-   stinging nettle + cold); physical look (height, weight, hair, eyes, clothing, posture, scars,
-   imperfections, cultural background, first impression); 3 formative life events, one sentence
-   each (age + event + how it changed their view of life); hobbies (travel, music, weekends,
+   stinging nettle + cold); how the body looks NOW (the DNA plus what life did), the culture they grew up in,
+   first impression; 3 formative life events, one sentence each (age + event + how it changed them, given the
+   temperament it landed on), each weighed — exactly one is the WOUND, the others MAJOR turning points or
+   MINOR traces (a stolen hat is not a wound) — each listing what it made of them: which characteristics it changed, to what and how — a
+   temperament scale within its plasticity, a proportion, a colour, the covering, the face. The DNA stays as born;
+   the changes are life's layer on top of it; hobbies (travel, music, weekends,
    collections, sport); speech (manner, pet words, sample lines); sociology (status, education,
    money, friends, family traditions, place, how world events affect them); biggest
    disappointment; most valued thing; secret dream and how they see their future; what is missing.
@@ -635,7 +625,9 @@ Then fill the 9 sections; the card schema mirrors them.
    changes under pressure. CONTRADICTIONS: they behave differently with
    mom, friend, lover, boss — give at least 2 secondary characters that reveal other sides.
 
-8. CHARACTER TRAITS — energy, temperament, introvert/extravert, habits.
+8. CHARACTER TRAITS — PERSONALITY first: who they are in life now, as a person a stranger would meet — mood,
+   energy, alone or in company, leader or follower, rebel or conformist, their social life, what they love.
+   It is the DNA temperament after the wound and the life events; a reader must know them from it. Then habits.
    Dougan's formula: ONE best trait (what they do better than anyone in the world),
    ONE worst trait (could bring their downfall), THREE other traits for texture.
    Character is revealed through choices, actions, reactions, own dialogue and what others
@@ -647,8 +639,9 @@ Then fill the 9 sections; the card schema mirrors them.
    Every scene moves the hero one step closer to the goal; villains, too, show who they are by
    moving toward theirs, not by standing still. Ideally every line of dialogue changes their fate.
 
-LOOK — derived from the story, never invented beside it: shape language, silhouette, how perfect or
-   flawed they are, the body's own proportions and asymmetries (never an idealized template), ONE signature item (their attribute) from the backstory, marks with origins,
+LOOK — how they look NOW, at their age today: the DNA as life, age and the life events changed it, never as they
+   were born. Derived from the story, never invented beside it: shape language, silhouette, how perfect or
+   flawed they are, the posture life gave a body built on the DNA frame (never an idealized template), ONE signature item (their attribute) from the backstory, marks with origins,
    movement (gait, idle pose, gesture, under stress), outfit pieces with reasons, a palette with meanings,
    and 3 things a stranger reads in 3 seconds. Every element shows a part of the story.
 

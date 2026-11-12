@@ -18,6 +18,7 @@ import {
 	type CharacterCard,
 	CharacterCardSchema,
 	SlugSchema,
+	StoredCardSchema,
 	slugify,
 } from "./schema.js";
 
@@ -141,16 +142,30 @@ export type ValidationResult =
 	| { ok: true; card: CharacterCard }
 	| { ok: false; issues: string };
 
-export function validateCard(input: unknown): ValidationResult {
-	const parsed = CharacterCardSchema.safeParse(input);
+/**
+ * A new card (from the model, a translation) must be complete; a card read from disk may predate the DNA layer and
+ * is upgraded on read.
+ */
+export function validateCard(
+	input: unknown,
+	{ stored = false } = {},
+): ValidationResult {
+	const parsed = (stored ? StoredCardSchema : CharacterCardSchema).safeParse(
+		input,
+	);
 	return parsed.success
 		? { ok: true, card: parsed.data }
 		: { ok: false, issues: z.prettifyError(parsed.error) };
 }
 
-/** Reads and validates a card.json from any path. Throws with readable issues. */
-export async function loadCardFile(file: string): Promise<CharacterCard> {
-	const result = validateCard(JSON.parse(await readFile(file, "utf8")));
+/** Reads and validates a card.json from any path (a stored one may predate the DNA layer). Throws with readable issues. */
+export async function loadCardFile(
+	file: string,
+	{ stored = true } = {},
+): Promise<CharacterCard> {
+	const result = validateCard(JSON.parse(await readFile(file, "utf8")), {
+		stored,
+	});
 	if (!result.ok) throw new Error(`Invalid card ${file}:\n${result.issues}`);
 	return result.card;
 }
@@ -230,10 +245,11 @@ export async function saveTranslation(
 	if (!/^[a-z]{2}$/.test(lang) || lang === "en")
 		throw new Error(`Unsupported translation language "${lang}".`);
 	const original = await loadCard(slug);
-	const v = validateCard(input);
+	// A card saved before the DNA layer is translated as it is: the translation can't invent its temperament.
+	const v = validateCard(input, { stored: !original.core.dna.temperament });
 	if (!v.ok) throw new Error(`Invalid translated card:\n${v.issues}`);
 	const card = { ...v.card, meta: { ...v.card.meta, slug } };
-	const fixed = /^(#[0-9a-fA-F]{6}|[a-z0-9_-]+)$/; // lowercase ids, slugs, enums and #colours stay as in the original
+	const fixed = /^(#[0-9a-fA-F]{6}|[a-z0-9_.-]+)$/; // lowercase ids, slugs, enums, body parts, change paths and #colours stay as in the original
 	const diffs: string[] = [];
 	const walk = (a: unknown, b: unknown, at: string) => {
 		if (Array.isArray(a)) {

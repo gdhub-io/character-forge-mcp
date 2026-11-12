@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { CharacterCardSchema } from "../schema.js";
+import { LegacyCardSchema } from "../schema.js";
 import { saveTranslation } from "../store.js";
 import { shown } from "./util.js";
 
@@ -17,7 +17,7 @@ export function registerTranslate(server: McpServer) {
 					.string()
 					.regex(/^[a-z]{2}$/)
 					.describe("Language code, e.g. 'ru'."),
-				card: CharacterCardSchema,
+				card: LegacyCardSchema,
 			},
 		},
 		async ({ id, lang, card }) => {

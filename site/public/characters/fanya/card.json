@@ -18,10 +18,69 @@
     "tagline": "Appointed. Allegedly."
   },
   "core": {
+    "dna": {
+      "temperament": {
+        "extraversion": {
+          "value": 72,
+          "plasticity": 55,
+          "shows": "Made sociable: even at the bottom of the pile she sat facing the room, waiting to be picked."
+        },
+        "neuroticism": {
+          "value": 14,
+          "plasticity": 40,
+          "shows": "Unflappable by make: three years of being passed over never crumpled her stitching."
+        },
+        "agreeableness": {
+          "value": 28,
+          "plasticity": 45,
+          "shows": "Stubborn by make: she never stayed propped the way the children wanted."
+        },
+        "conscientiousness": {
+          "value": 92,
+          "plasticity": 30,
+          "shows": "Neat by make: she sat straight and kept her ribbon tidy even when no one played with her."
+        },
+        "openness": {
+          "value": 52,
+          "plasticity": 45,
+          "shows": "Middling curiosity: she noticed new clothes and new toys, but liked her place on the shelf."
+        },
+        "sensitivity": {
+          "value": 66,
+          "plasticity": 55,
+          "shows": "Takes what the family says to heart, for better or worse."
+        }
+      },
+      "species": "A plush toy bunny: a very fluffy, curly-pile soft toy with an embroidered nose and mouth and half-closed stitched eyes. She comes alive when the humans aren't looking.",
+      "sex": "Female: a girl bunny, sewn that way at the factory.",
+      "ancestry": "Factory-made: one of a batch of plush bunnies sold by a big-city toy store.",
+      "body_plan": "Biped plush toy, sewn to toy proportions.",
+      "covering": "Very fluffy, curly, tangled pile, shorter on the muzzle; an embroidered nose and mouth and stitched eyes.",
+      "colors": [
+        {
+          "part": "pile",
+          "hex": "#D8C6C2"
+        },
+        {
+          "part": "eyes",
+          "hex": "#3A393B"
+        }
+      ],
+      "face": "Heavy-lidded stitched slit eyes that look permanently unimpressed, an embroidered nose and a small stitched mouth.",
+      "frame": {
+        "head_heights": 3,
+        "shoulders": 0.8,
+        "hips": 0.95,
+        "legs": 0.9,
+        "arms": 0.95
+      },
+      "build_tendency": 40,
+      "born_differences": []
+    },
     "wound": "For her first three years in the family she was 'just the bunny', a baby toy at the bottom of the pile, passed over for every game. Then came the ninth birthday of the eldest daughter, Kira. Kira dressed her in a doll's crimson blazer, stamped PAID on her paw with a toy rubber stamp, sat her at the head of the table with a toy calculator and announced 'Madam Banker'. The room laughed for an hour. She took the laughter for applause and the title for a real appointment.",
     "lie": "A bunny is nobody. Madam Banker is somebody, and the post must be earned every single day.",
     "truth": "They laughed because they loved the bunny. She never needed the post to be somebody.",
-    "central_paradox": "She is completely sure she holds an office, and that certainty makes her the most competent toy in the house. It also makes her the funniest, because she is the only one who doesn't know the office began as a joke. The seriousness that keeps the shelf running is the same seriousness that hides the bunny from herself.",
+    "central_paradox": "She is completely sure she holds an office, and that certainty makes her the most competent toy in the house. It also makes her the funniest, because she is the only one who doesn't know the office began as a joke. The seriousness that keeps the shelf running is the same seriousness that hides the bunny from herself. The joke landed on a toy made sociable, unflappable and orderly, so she didn't sulk at the laughter: she took office.",
     "dramatic_question": "When she learns 'Madam Banker' was a joke, will Fanya defend the post, or let herself be the bunny they loved all along?",
     "spark_links": "Nobody took this toy seriously until a laughing room handed her a title, and she took it literally. The job, the blazer, the carrot economy and her deadpan all grow from that one misread joke. She never winks at the audience because she genuinely doesn't know there is a joke. The silver sneakers are the first thing she ever chose for herself; she got them by trading with the other toys at night."
   },
@@ -30,7 +89,7 @@
     "need": "To let herself be just the bunny, seen small and soft, and to ask for help instead of earning her place every day.",
     "motivation": "She sincerely believes she was appointed, that every problem has a plan, and that she must justify the appointment every day.",
     "arc_goal": "To become a new Fanya, one who wears the blazer because she likes it, not because she has to earn it.",
-    "goal_climax": "Kira, now grown, has just dug up the old party video, titled \"Madam Banker lol\", and left the family tablet on the sofa. At night Fanya finds it and plays it, and every toy on the shelf watches her watch it. Her last plan would actually work: delete the file before Kira wakes up and keep the post forever. Or she can tear that plan out of her diary, ask Bobo, the old teddy who was at the party and always knew, what really happened, and be the bunny.",
+    "goal_climax": "Kira, now grown, has dug up the old party video, titled \"Madam Banker lol\", and left the family tablet on the sofa. At night, pinned under the bookshelf her third plan brought down, Fanya reaches it and plays it for the first time, and every toy on the shelf watches her watch it. Her last plan would actually work: delete the file before Kira wakes up and keep the post forever. Or she can tear that plan out of her diary, ask Bobo, the old teddy who was at the party and always knew, what really happened, and be the bunny.",
     "conflicting_goals": "Keeping the post means denying the video and staying alone in her office. Being loved as she is means giving up the title she has built her life on.",
     "scene_goal_example": "Present the quarterly carrot report to the other shelf toys before the cat finishes walking across the presentation."
   },
@@ -74,7 +133,7 @@
       }
     ],
     "superpower": "She draws up a workable plan for any situation in five seconds, and she sees an asset in any object. A sock is storage, a bath toy is a ferry, a dropped spoon is capital.",
-    "vulnerability": "Whatever cannot be planned: chance, physics and other people's feelings. Chaos doesn't frighten her. She simply doesn't register it until it shows up in her own ledger.",
+    "vulnerability": "Whatever cannot be planned: chance, physics and other people's feelings. She reads the world only through her ledger, the same way she read the party's laughter as applause, so chaos doesn't register until it shows up in the ledger.",
     "sympathy_hook": "When she says 'as your Banker', the other shelf toys exchange a look, and nobody tells her the truth. They love her too much.",
     "first_appearance": "A toy on the shelf says 'I have a problem.' Fanya straightens her jacket: 'Right. Sit down. We'll draw up a plan now.' Three numbered steps later the problem is solved. Behind her, unnoticed, the whole bookshelf is coming down one book at a time.",
     "jeopardy": "The truth, that her title began as a birthday joke, is in a video on the family tablet. One bad night could put it in front of her."
@@ -103,7 +162,6 @@
     "name_meaning": "Fanya is the short, homely form of Faina, a name usually traced to the Greek for 'shining', and she does like to be the brightest thing on the shelf. To English ears the first syllable sounds like 'fun'. She would never see that as the point: she is the funniest character in the house precisely because she has never once tried to be.",
     "age": "Eleven years in the family; carries herself like a businesswoman in her thirties.",
     "gender": "Female; presents as a businesswoman, and dresses exactly as she pleases.",
-    "species": "A plush toy bunny: a very fluffy, curly-pile soft toy with an embroidered nose and mouth and half-closed stitched eyes. She comes alive when the humans aren't looking.",
     "cultural_background": "A shop-bought plush from a big-city toy store, raised in an ordinary family flat. Her culture is the toy shelf's: who sits where, who gets taken to bed, who goes in the box. She absorbed the grown-ups' kitchen-table talk about budgets, mortgages and 'putting money aside for a rainy day', and she applies all of it, word for word, to carrots.",
     "physical": {
       "height_build": "About thirty centimetres tall, with toy proportions: a huge round head and a small soft body.",
@@ -114,18 +172,40 @@
     "life_events": [
       {
         "age": "3",
+        "weight": "wound",
         "event": "At Kira's ninth birthday party, the family's eldest daughter dressed her as 'Madam Banker' and 'appointed' her in front of a laughing room.",
-        "effect": "She took the joke as a promotion and decided to earn it every day."
+        "effect": "She took the joke as a promotion and decided to earn it every day.",
+        "changes": [
+          {
+            "characteristic": "temperament.extraversion",
+            "to": 88,
+            "how": "The 'appointment' gave her sociability an office: now she briefs, chairs and presides."
+          },
+          {
+            "characteristic": "temperament.agreeableness",
+            "to": 14,
+            "how": "As Madam Banker she stopped taking 'no' from anyone."
+          }
+        ]
       },
       {
         "age": "4",
+        "weight": "minor",
         "event": "She drew up her first plan for another toy, and it worked.",
         "effect": "To her, that proved she deserved the appointment. Planning became her calling."
       },
       {
         "age": "5",
+        "weight": "major",
         "event": "Her friend, the old clockwork mouse, was put in the charity bag during a spring clean. Her rescue plan failed, and the bag left the flat with him inside.",
-        "effect": "She could have asked the other toys to help her reach the bag, but a Banker doesn't ask a bunny for help. She decided the office needed more control, not less."
+        "effect": "She could have asked the other toys to help her reach the bag, but a Banker doesn't ask a bunny for help. She decided the office needed more control, not less.",
+        "changes": [
+          {
+            "characteristic": "temperament.conscientiousness",
+            "to": 98,
+            "how": "After the failed rescue she trusts only written, numbered plans."
+          }
+        ]
       }
     ],
     "hobbies": [
@@ -161,7 +241,7 @@
     },
     "biggest_disappointment": "The clockwork mouse went into the charity bag. Her plan failed because asking for help didn't suit a Banker.",
     "most_valued": "Her business, her independence, her reputation, order in her reserves, and the toys she helps.",
-    "secret_dream": "The most secure carrot store in the world, with everyone living 'to plan'. Privately: one evening of being just a bunny without anyone laughing.",
+    "secret_dream": "The most secure carrot store in the world, with everyone living 'to plan'. Underneath, never admitted even to herself: to be loved as just a bunny, with nothing to earn.",
     "missing": "Someone who helps her. She doesn't know how to ask."
   },
   "fears": {
@@ -242,7 +322,7 @@
     "contradictions": [
       {
         "with_whom": "Bobo, a threadbare teddy who was at the party and has kept the secret for eight years",
-        "behavior": "Her longest-standing client. With him she is a warm mentor, and he is the only one who knows who she was before the title."
+        "behavior": "Her longest-standing client. With him she is a warm mentor. He sat at the bottom of the pile with her in the 'just the bunny' years, so he is the only one who remembers who she was before the title."
       },
       {
         "with_whom": "Lyuba, a sleepy rag doll who takes life as it comes",
@@ -259,9 +339,7 @@
     ]
   },
   "traits": {
-    "energy": "high",
-    "temperament": "Quick to decide, never flustered: within seconds of a problem the jacket is straight and three numbered steps are on paper. Sanguine drive under a calm, phlegmatic surface; her face never moves.",
-    "social": "extravert",
+    "personality": "Brisk, sociable and completely unflappable. She runs the toy shelf like a bank: she briefs everyone at night, keeps the ledger and draws up plans for other toys' lives, asked or not. She leads by default and hears objections as notes for the next draft. Her mood is sunny and certain; nothing shows on her face, everything shows in her paws. Her social life is the shelf, where every toy is a client and a friend. She loves the business news on the kitchen radio, the shipping forecast, films where someone makes a list, and new clothes.",
     "habits": [
       "Straightens her jacket before every decision",
       "Counts carrots under her breath",
@@ -286,7 +364,7 @@
       },
       {
         "situation": "She's laughed at",
-        "reaction": "Laughs politely along, then: 'And how many carrots have you put away for winter?'"
+        "reaction": "Nods once, as if accepting applause, then: 'And how many carrots have you put away for winter?'"
       },
       {
         "situation": "Her plan collapses",
@@ -302,21 +380,16 @@
   "destiny": {
     "ordinary_world": "Madam Banker of the children's room: everything sorted and under control, and she helps everyone.",
     "void": "Nobody helps her, because a Banker doesn't ask, and nobody sees the bunny under the title.",
-    "threshold": "Kira, now packing for university, digs out the old video of the 'Madam Banker' party and shows it to the family. The tablet is left on the sofa overnight.",
-    "ordeal": "She works through a numbered series of plans to correct the record. Plan 1, a formal statement read to the shelf toys, ends with the curtains on the floor. Plan 2, recovering her 'title deeds' from the toy box, floods the bathroom. Plan 3, a re-enactment of her appointment with herself presiding, brings down the bookshelf. Each plan hits its narrow target, the flat behind her is wrecked, and she ticks the box and walks on. Plan 4, deleting the video before Kira wakes, would work.",
-    "transformation": "With her paw over the delete button, she stops. She tears Plan 4 out of her diary, takes the blazer off, and asks Bobo, the old teddy, to tell her what really happened at the party. Then she lets the shelf toys help her up.",
-    "ending": "Next morning she puts the blazer back on, because she likes it, straightens it and says 'Everything's sorted.' She signs the ledger 'Fanya'."
+    "threshold": "Kira, now packing for university and sorting the children's room into 'keep' and 'charity' boxes, digs out the old video of the 'Madam Banker' party and shows it to the family in the living room. From her shelf Fanya hears the laughter and the title 'Madam Banker lol', but can't see the screen. The tablet is left on the sofa overnight.",
+    "ordeal": "Through the night, without having seen the video, she works through a numbered series of plans to correct the record. Plan 1, a formal statement read to the shelf toys, ends with Kroll shouting 'the bunny!' and the curtains on the floor. Plan 2, recovering her 'title deeds' from the toy box, floods the bathroom. Plan 3, a re-enactment of her appointment with herself presiding, brings the bookshelf down on top of her. Each plan hits its narrow target, the flat behind her is wrecked, and she ticks the box. Pinned under the shelf, she can just reach the tablet.",
+    "transformation": "She plays the video for the first time, then holds her paw over Plan 4, the delete button, and stops. She tears Plan 4 out of her diary, takes the blazer off, and asks Bobo, the old teddy, to tell her what really happened at the party. Then she lets the shelf toys lift the bookshelf off her; Lyuba, who never asks anyone for anything, is the first to push.",
+    "ending": "In the morning Kira, packing, finds her on the sofa and puts her in the university suitcase, not the charity box. Fanya puts the blazer back on, because she likes it, straightens it and says 'Everything's sorted.' She signs the ledger 'Fanya'."
   },
   "look": {
     "shape_language": "Round dominates: a huge cloud of curly fluff for a head, round fingerless paws and a soft round body. It is a toy made to be hugged. Over that roundness sits one hard, square thing: the crimson blazer, with crisp notched lapels, square flap pockets, a straight hem and turned-up cuffs cut square. A soft creature wears square armour, and that contrast is both the joke and the character.",
     "silhouette": "In black fill: a giant round puff of a head, about a third of her height, on a small body with boxy shoulders. Below it come a straight blazer hem at the hips, loose trouser legs that run straight down, and low chunky sneakers. In profile the bunny shows: the ears lie flat back along the skull and are gathered by the ribbon, and its ends hang down behind the head like a girl's ponytail. It avoids the stock cute bunny (ears up, big shiny eyes, pastel dress) and the stock lady boss (heels, pencil skirt). It is a cuddly toy wearing a work uniform with total conviction.",
     "perfection": "She is polished wherever she has control. The blazer is always straight and both gold buttons are done up. The cuffs are turned to the same width on both sides, the trousers are pressed straight, and the ribbon is tied fresh. She is not polished where she has no control: her fur is a wild tangle of curls that no brush has ever tamed. It shows eleven years of hugs, and she has stopped trying. She grooms the outfit, not the fluff.",
     "body": {
-      "head_heights": 3,
-      "shoulders": 0.8,
-      "hips": 0.95,
-      "legs": 0.9,
-      "arms": 0.95,
       "shoulder_tilt": 0,
       "head_tilt": 0,
       "stoop": 0,
@@ -421,6 +494,6 @@
       "She chose her own style and doesn't care what you think of it."
     ],
     "art_style": "stylized 3D, soft-toy realism: curly plush pile, felt and wool textures, neutral studio light",
-    "turnaround_notes": "T-pose, arms straight out. The head is a third of her height: a round cloud of curly, pale rose-beige pile. Her face is stitched: heavy-lidded, half-closed slit eyes, an embroidered nose and mouth on a shorter-pile muzzle, all half lost in curls. Her paws are round fluffy mitts with no fingers. The ears hang BACK and never stand up; they lie flat along the skull and are tied together near the tips with a flat white ribbon whose ends hang straight down the back of the head to the collar, visible in the side and back views. The blazer is crimson, not pink: hip length, single-breasted and buttoned with two gold buttons, notched lapels open to mid-chest, two flap pockets, short sleeves with wide turned-up cuffs, and a straight back with a centre seam. The cream ribbed crew-neck sweater shows between the lapels. Loose dark grey trousers break over the shoes. Both sneakers are identical: silver metallic low-tops with an embossed pattern, white laces and white soles. No tail is visible and no mark is visible."
+    "turnaround_notes": "A-pose, arms angled down. The head is a third of her height: a round cloud of curly, pale rose-beige pile. Her face is stitched: heavy-lidded, half-closed slit eyes, an embroidered nose and mouth on a shorter-pile muzzle, all half lost in curls. Her paws are round fluffy mitts with no fingers. The ears hang BACK and never stand up; they lie flat along the skull and are tied together near the tips with a flat white ribbon whose ends hang straight down the back of the head to the collar, visible in the side and back views. The blazer is crimson, not pink: hip length, single-breasted and buttoned with two gold buttons, notched lapels open to mid-chest, two flap pockets, short sleeves with wide turned-up cuffs, and a straight back with a centre seam. The cream ribbed crew-neck sweater shows between the lapels. Loose dark grey trousers break over the shoes. Both sneakers are identical: silver metallic low-tops with an embossed pattern, white laces and white soles. No tail is visible and no mark is visible."
   }
 }

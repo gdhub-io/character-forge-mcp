@@ -1,4 +1,4 @@
-import type { CharacterCard } from "./schema.js";
+import { type CharacterCard, TEMPERAMENT_KEYS } from "./schema.js";
 
 /**
  * One description of the card's content (sections → blocks), rendered to Markdown.
@@ -25,22 +25,65 @@ interface Section {
 
 const q = (s: string) => `“${s}”`;
 
-/** The body's proportions in words, then why: "7.8 heads, shoulders ×1.25, … — <why>". */
-function bodyLine(b: CharacterCard["look"]["body"]): string {
+type Dna = CharacterCard["core"]["dna"];
+
+/** "7.8 heads, shoulders ×1.25, hips ×0.9, legs ×1.05, arms ×1". */
+const frameLine = (f: Dna["frame"]) =>
+	`${f.head_heights} heads, shoulders ×${f.shoulders}, hips ×${f.hips}, legs ×${f.legs}, arms ×${f.arms}`;
+
+/** The acquired posture in words, then why: "right shoulder lower 0.3, stoop 0.2 — <why>". */
+function postureLine(b: CharacterCard["look"]["body"]): string {
 	const side = (v: number, lower: string) =>
 		v === 0 ? "" : `${v > 0 ? "right" : "left"} ${lower} ${Math.abs(v)}`;
 	const parts = [
-		`${b.head_heights} heads`,
-		`shoulders ×${b.shoulders}`,
-		`hips ×${b.hips}`,
-		`legs ×${b.legs}`,
-		`arms ×${b.arms}`,
 		side(b.shoulder_tilt, "shoulder lower"),
 		side(b.head_tilt, "head tilt"),
 		b.stoop ? `stoop ${b.stoop}` : "",
 		b.knees === "straight" ? "" : `${b.knees} knees`,
 	].filter(Boolean);
-	return `${parts.join(", ")} — ${b.why}`;
+	return `${parts.join(", ") || "upright, level"} — ${b.why}`;
+}
+
+/** Born with: the temperament scales (if known) and the innate appearance. */
+function dnaBlocks(dna: Dna): Block[] {
+	const t = dna.temperament;
+	const label = (k: string) => k[0].toUpperCase() + k.slice(1);
+	const rows: [string, string | undefined][] = [
+		["Species", dna.species],
+		["Sex", dna.sex],
+		["Lineage", dna.ancestry],
+		["Body plan", dna.body_plan],
+		["Covering", dna.covering],
+		[
+			"Natural colours",
+			dna.colors?.map((c) => `${c.part} \`${c.hex}\``).join(", "),
+		],
+		["Face", dna.face],
+		["Frame", frameLine(dna.frame)],
+		[
+			"Build",
+			dna.build_tendency === undefined
+				? undefined
+				: `${dna.build_tendency}/100 (lean → heavy)`,
+		],
+		["Born differences", dna.born_differences?.join("; ") || undefined],
+	];
+	return [
+		...(t
+			? [
+					{
+						title: "Born with",
+						list: TEMPERAMENT_KEYS.map((k) => ({
+							lead: `${label(k)} ${t[k].value}/100`,
+							text: t[k].shows,
+						})),
+					},
+				]
+			: []),
+		{
+			rows: rows.filter((r): r is [string, string] => Boolean(r[1])),
+		},
+	];
 }
 
 function sections(c: CharacterCard): { main: Section[]; visual: Section } {
@@ -63,6 +106,7 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 			n: "00",
 			title: "Core",
 			blocks: [
+				...dnaBlocks(core.dna),
 				{
 					kind: "chain",
 					cards: [
@@ -156,7 +200,6 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 						["Name", d.name_meaning],
 						["Age", d.age],
 						["Gender", d.gender],
-						["Species", d.species],
 						["Cultural background", d.cultural_background],
 					],
 				},
@@ -169,8 +212,8 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 					title: "Formative events",
 					timeline: true,
 					list: d.life_events.map((e) => ({
-						lead: e.age,
-						text: `${e.event} → ${e.effect}`,
+						lead: e.weight === "major" ? e.age : `${e.age} · ${e.weight}`,
+						text: `${e.event} → ${e.effect}${(e.changes ?? []).map((x) => ` [${x.characteristic} → ${x.to}: ${x.how}]`).join("")}`,
 					})),
 				},
 				{
@@ -294,6 +337,7 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 			n: "08",
 			title: "Character traits",
 			blocks: [
+				{ title: "In life", prose: t.personality },
 				{
 					kind: "traits",
 					cards: [
@@ -302,14 +346,7 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 						...t.other_traits.map((x) => ({ label: "Other trait", text: x })),
 					],
 				},
-				{
-					rows: [
-						["Energy", t.energy],
-						["Temperament", t.temperament],
-						["Social", t.social],
-						["Habits", t.habits.join("; ")],
-					],
-				},
+				{ rows: [["Habits", t.habits.join("; ")]] },
 				{
 					title: "Reactions",
 					list: t.reactions.map((r) => ({
@@ -349,7 +386,7 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 					["Shape language", lk.shape_language],
 					["Silhouette", lk.silhouette],
 					["Perfection", lk.perfection],
-					["Body", bodyLine(lk.body)],
+					["Posture", postureLine(lk.body)],
 				],
 			},
 			{
@@ -398,7 +435,7 @@ const tags = (c: CharacterCard) => [
 	c.meta.genre,
 	c.uniqueness.archetype,
 	c.description.age,
-	c.description.species,
+	c.core.dna.species,
 ];
 
 // ---------- Markdown ----------

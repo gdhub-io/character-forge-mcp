@@ -18,19 +18,82 @@
     "tagline": "Made tall. Made himself a weapon."
   },
   "core": {
+    "dna": {
+      "temperament": {
+        "extraversion": {
+          "value": 34,
+          "plasticity": 50,
+          "shows": "Quiet from the start: before the trial he watched games more than he joined them."
+        },
+        "neuroticism": {
+          "value": 63,
+          "plasticity": 50,
+          "shows": "A watchful, jumpy child even before the ward."
+        },
+        "agreeableness": {
+          "value": 38,
+          "plasticity": 45,
+          "shows": "Never easy to boss around, even at five."
+        },
+        "conscientiousness": {
+          "value": 40,
+          "plasticity": 50,
+          "shows": "Lived day to day like the rest of the Underdeck kids."
+        },
+        "openness": {
+          "value": 60,
+          "plasticity": 45,
+          "shows": "A tinkerer and a dreamer: he drew and took things apart as soon as he could hold a stub of chalk."
+        },
+        "sensitivity": {
+          "value": 78,
+          "plasticity": 60,
+          "shows": "An orchid: what adults did to him went deep, for better or worse."
+        }
+      },
+      "species": "Human",
+      "sex": "Male",
+      "ancestry": "A third-generation Underdeck family of mixed Baltic and Filipino descent.",
+      "body_plan": "Biped (human).",
+      "covering": "Pale skin that freckles; thick black hair.",
+      "colors": [
+        {
+          "part": "skin",
+          "hex": "#D9BC9E"
+        },
+        {
+          "part": "hair",
+          "hex": "#1C1A1A"
+        },
+        {
+          "part": "eyes",
+          "hex": "#2A211C"
+        }
+      ],
+      "face": "A small round face with big dark eyes and freckles.",
+      "frame": {
+        "head_heights": 6,
+        "shoulders": 0.95,
+        "hips": 0.95,
+        "legs": 1,
+        "arms": 1
+      },
+      "build_tendency": 30,
+      "born_differences": []
+    },
     "wound": "When Pike was seven, his mother signed him into Halden Bioworks' 'Reach' growth trial for the cash bonus she needed to keep their room. Dr. Ilse Marrow's daily injections stretched him to two metres by the age of nine, and he has kept growing ever since. The trial snapped his shin twice and killed Nell, the girl in the bed beside his. Halden paid a fine that was smaller than his mother's rent.",
     "lie": "The world is ruled by predators. You're either the one with the reach, or you're the one they reach for.",
     "truth": "His long reach is for pulling children to safety, even the children who betrayed others.",
-    "central_paradox": "The long body Halden built to sell is what lets him lift the Underdeck kids out of every flood and away from every recruiter's van. The same body is what makes him hit first. His protectiveness and his violence come from the same place.",
+    "central_paradox": "The long body Halden built to sell is what lets him lift the Underdeck kids out of every flood and away from every recruiter's van. The same body is what makes him hit first. His protectiveness and his violence come from the same place. The trial landed on a quiet, stubborn orchid, so he took it as proof that adults sell children, and the hurt came out as fists, not tears.",
     "dramatic_question": "When Dr. Marrow comes back to recruit new children, will Pike hurt her the way she hurt him, or will he give up the revenge he has built his life around in order to protect the kids?",
-    "spark_links": "He is a mentor to the younger children because he is the oldest survivor of the trial. He is very tall and thin because extra reach was exactly what the trial was trying to sell. The story is set in the slums of a 2090 megacity because only the poorest families sign their children into trials. He is violent because no adult was ever held to account for Nell's death."
+    "spark_links": "He is a mentor to the younger children because he is the only survivor of the trial left in the Underdeck. He is very tall and thin because extra reach was exactly what the trial was trying to sell. The story is set in the slums of a 2090 megacity because only the poorest families sign their children into trials. He is violent because no adult was ever held to account for Nell's death."
   },
   "goals": {
     "want": "To find Dr. Ilse Marrow when she comes back to the Underdeck to recruit, and make her feel what the injections felt like.",
     "need": "To learn that his strength is for protecting people, not for paying them back, even when the person he protects is someone he despises.",
     "motivation": "Nell died in the bed beside his and nobody came. If no court will make Marrow pay, he will.",
     "arc_goal": "To learn compassion: to use his reach to shield even the people he hates, instead of using it to hit the people who hurt him.",
-    "goal_climax": "Marrow's van is pulling out of the flooded loading bay with Gus inside. Gus is an eight-year-old who sold the names of Pike's crew to the recruiters, and whose own father signed him into the trial for the bonus. Pike's heart is racing past its limit, and he has the strength for one last reach through the van window. He can drag Marrow out and beat her, or pull Gus free and let her go.",
+    "goal_climax": "Marrow's van is driving into the Lift Gates with Gus inside. Gus is an eight-year-old whose own father signed him into the trial for the bonus, and who sold the names of Pike's crew to the recruiters to buy his own name off the list; they took the names and kept him anyway. Pike's heart is racing past its limit, and he has the strength for one last reach through the van window before the gates close. He can drag Marrow out and beat her, or pull Gus free and let her go.",
     "conflicting_goals": "Revenge means going for Marrow. Protection means saving Gus, the boy he hates most, while the woman responsible for Nell's death gets away.",
     "scene_goal_example": "Tear the new recruitment flyer off the Underdeck noticeboard before any parent can read how big the bonus is."
   },
@@ -91,7 +154,6 @@
     "name_meaning": "A pike is both a long spear and a fish that strikes from cover. Ostrander is his mother's family name, from the Baltic districts of the city.",
     "age": "10",
     "gender": "Boy",
-    "species": "Human",
     "cultural_background": "A third-generation Underdeck kid of mixed Baltic and Filipino descent. He speaks the clipped street pidgin of the lower levels.",
     "physical": {
       "height_build": "Two metres thirty-five at ten years old and still growing. He is painfully thin and all joints: long arms and legs, knock knees, a narrow chest, a small child's soft belly, and a head that looks too small for his body.",
@@ -102,18 +164,62 @@
     "life_events": [
       {
         "age": "7",
+        "weight": "wound",
         "event": "His mother signed him into Halden's 'Reach' growth trial for the bonus money.",
-        "effect": "He learned that the people who love you can still sell you."
+        "effect": "He learned that the people who love you can still sell you.",
+        "changes": [
+          {
+            "characteristic": "frame.head_heights",
+            "to": 10,
+            "how": "Daily Reach injections stretched him to ten heads tall: a ten-year-old's head on a giant's body."
+          },
+          {
+            "characteristic": "frame.shoulders",
+            "to": 0.75,
+            "how": "His chest and shoulders never caught up with the length."
+          },
+          {
+            "characteristic": "frame.hips",
+            "to": 0.75,
+            "how": "His hips stayed a small boy's."
+          },
+          {
+            "characteristic": "frame.legs",
+            "to": 1.18,
+            "how": "His leg bones outgrew everything else."
+          },
+          {
+            "characteristic": "frame.arms",
+            "to": 1.15,
+            "how": "His arms grew to hang past his knees."
+          }
+        ]
       },
       {
         "age": "9",
+        "weight": "major",
         "event": "Nell, the other child in his ward, died when her heart stopped in the bed next to his. Halden paid a small fine and carried on.",
-        "effect": "He learned that nobody comes to help kids like them."
+        "effect": "He learned that nobody comes to help kids like them.",
+        "changes": [
+          {
+            "characteristic": "temperament.neuroticism",
+            "to": 85,
+            "how": "Watching Nell die in the next bed left him braced for the next loss."
+          }
+        ]
       },
       {
         "age": "9",
+        "weight": "major",
         "event": "He broke a Halden recruiter's nose, and that recruiter never came back.",
-        "effect": "He learned that force works when nothing else does."
+        "effect": "He learned that force works when nothing else does.",
+        "changes": [
+          {
+            "characteristic": "temperament.agreeableness",
+            "to": 18,
+            "how": "Breaking the recruiter's nose taught him that hitting first works."
+          }
+        ]
       }
     ],
     "hobbies": [
@@ -153,6 +259,11 @@
         "fear": "Dr. Ilse Marrow",
         "root": "She ran the trial, held his arm still for the injections, and recorded his pain as data.",
         "conscious": true
+      },
+      {
+        "fear": "Being sold again by someone who loves him",
+        "root": "His mother signed him over for money, and she still says it was for him.",
+        "conscious": false
       },
       {
         "fear": "That he is turning into a predator like her",
@@ -225,9 +336,7 @@
     ]
   },
   "traits": {
-    "energy": "Explosive in short bursts, then exhausted",
-    "temperament": "Choleric",
-    "social": "Introvert",
+    "personality": "Watchful, hard and quiet with anyone over a child's height, and almost everyone is. Inside the shell is a scared ten-year-old who wants to be tucked in at night. He leads the Underdeck kids because he is the biggest, not because he wants to: he protects them and hits anyone who threatens them, and he is starting to like the hitting. Adults get no obedience from him. His social life is his crew, his mother on double shifts and Gus, whom he hates. He loves old cartoon reruns, the sweetest drinks he can find, paper-boat races and drawing a very tall superhero.",
     "habits": [
       "Counts the kids every hour",
       "Ducks under every doorway",
@@ -262,26 +371,21 @@
   "destiny": {
     "ordinary_world": "Guarding the drainage pipe and the noticeboard in the flooded Underdeck.",
     "void": "Nobody will ever make Marrow pay, and no fight he wins fills the hole Nell's death left.",
-    "threshold": "Marrow's name appears on a new Reach flyer, and Gus sells the names of Pike's crew to her.",
-    "ordeal": "At the van window, his failing heart leaves him strength for only one reach: Marrow or Gus.",
+    "threshold": "Marrow's name appears on a new Reach flyer, and Gus sells her the names of Pike's crew. Her van will take the signed-up children up through the Lift Gates to the trial clinic on the Sunlight Levels, where no one from below can follow.",
+    "ordeal": "At the Lift Gates, at the van window, his failing heart leaves him strength for only one reach: Marrow or Gus.",
     "transformation": "He reaches for Gus and lets Marrow go. For the first time, he uses his reach to save someone he hates.",
-    "ending": "Marrow drives away free, the trial carries on in another district, and the woman responsible for Nell's death is never punished. Once he is pulled out, Gus tears up the list of names he sold and joins Pike's crew. Pike gives him Nell's star night-light, and has to live every day beside the boy he hates, knowing he let the doctor go. In the last scene the crew, Gus among them, hold up the night-lights Pike rewired for them, and for once it is Pike who is lit up."
+    "ending": "Marrow drives up through the Lift Gates free, the trial carries on in another district, and the woman responsible for Nell's death is never punished. Once he is pulled out, Gus goes to every family in the crew and tells them each name he sold, so they can hide their children from the next van; then he joins Pike's crew. Pike gives him Nell's star night-light, and has to live every day beside the boy he hates, knowing he let the doctor go. His mother Dana is waiting at the drainage pipe when he comes back; for the first time he lets her hold him, though he no longer fits on her lap. In the last scene the crew, Pip in front and Gus among them, hold up the night-lights Pike rewired for them, and for once it is Pike who is lit up."
   },
   "look": {
     "shape_language": "Long, thin vertical lines broken by sharp knots at the joints (knees, elbows, knuckles): this is the reach the trial was built to sell. Only one soft, round shape breaks the pattern: his small round child's face, echoed by the round amber star glowing on his chest.",
     "silhouette": "A 2.35-metre stick figure with a tiny head, stooped forward, arms crossed tightly. Knobbly knock knees, and a hoodie so short it rides up over a strip of child's belly. The silhouette deliberately avoids both the hulking-brute giant and the lanky slacker teenager: filled in solid black, it reads as a stretched child, not a big man.",
     "perfection": "Everything he wears is outgrown and patched, but kept as clean as he can manage. Nothing is made for a child this tall, so every hem stops short and every seam is strained. It looks like poverty, not neglect: he keeps the little ones' things in better shape than his own.",
     "body": {
-      "head_heights": 10,
-      "shoulders": 0.75,
-      "hips": 0.75,
-      "legs": 1.18,
-      "arms": 1.15,
       "shoulder_tilt": -0.15,
       "head_tilt": 0,
       "stoop": 0.5,
       "knees": "knock",
-      "why": "The Reach injections stretched his long bones far faster than the rest of him grew, so a ten-year-old's small head and narrow chest sit on a giant's limbs: an extreme ten heads tall. His knees knock because his bones grew faster than his muscles could hold them straight. His left shin, broken twice and badly healed, is slightly shorter than the right, so his left shoulder sits a little lower. His rounded stoop comes from ducking under every doorway since the trial."
+      "why": "The Reach injections stretched his long bones far faster than the rest of him grew: a ten-year-old's small head and narrow chest now sit on a giant's limbs, ten heads tall. His knees knock because his bones grew faster than his muscles could hold them straight. His left shin, broken twice and badly healed, is slightly shorter than the right, so his left shoulder sits a little lower. His rounded stoop comes from ducking under every doorway since the trial."
     },
     "blocking": {
       "hair": "#1C1A1A",
