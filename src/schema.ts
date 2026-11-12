@@ -540,6 +540,14 @@ const LookSchema = z
 			.describe(
 				"Exactly 3 things a stranger understands about them in 3 seconds, without a word.",
 			),
+		stranger_view: z
+			.string()
+			.trim()
+			.min(1)
+			.optional()
+			.describe(
+				"What a stranger sees in the first seconds, as plain observation in 3-6 sentences: height and build, face, hair, clothes, what they carry, how they stand and move. Only what eyes can see in ordinary light: no names, owners, origins, histories, meanings or anything hidden (hair hanging over one ear is seen; that the ear is deaf is not). Characters who meet them know only this.",
+			),
 		art_style: text(
 			"Art style for the concept, e.g. 'stylized 3D, painterly textures'.",
 		),

@@ -162,6 +162,9 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
 			"character_create",
 			"character_get",
 			"character_list",
+			"character_meet",
+			"character_meet_event",
+			"character_meet_turn",
 			"character_method",
 			"character_next",
 			"character_pick",
@@ -681,4 +684,155 @@ test("user pictures, ids and a stray .env can't reach outside what they're for",
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
+});
+
+test("a scene: everyone acts each round, a question jumps the queue, and no one sees another's thoughts", async () => {
+	await withLibrary(async (dir) => {
+		const { saveCard } = await import(path.join(root, "dist/store.js"));
+		const {
+			startScene,
+			addTurn,
+			addEvent,
+			nextSpeaker,
+			packetFor,
+			attitudePaths,
+		} = await import(path.join(root, "dist/meet.js"));
+		const as = (name) => ({
+			...example,
+			meta: { ...example.meta, slug: undefined, name },
+		});
+		await saveCard(as("Ann Ash"));
+		await saveCard(as("Bo Birch"));
+		await saveCard(as("Cy Cole"));
+		const s = await startScene({
+			characters: ["ann-ash", "bo-birch", "cy-cole"],
+			situation: "A lift at night; the light goes out.",
+			max_rounds: 3,
+			tasks: [
+				{ character: "ann-ash", task: "ANN-TASK: deliver a letter upstairs" },
+			],
+			events: [
+				{ round: 2, what: "The cable groans and the lift drops a metre." },
+			],
+		});
+		const turn = (others, extra = {}) => ({
+			thought: "SECRET-THOUGHT",
+			feelings: others.map((o) => ({
+				toward: o,
+				emotion: "wary",
+				valence: -0.2,
+				why: "a stranger in the dark",
+			})),
+			wants_to_say: [],
+			hides: [{ from: "all", what: "SECRET-HIDDEN", why: "fear" }],
+			wants_to_ask: [],
+			urgency: 0.5,
+			...extra,
+		});
+		assert.equal(nextSpeaker(s), "ann-ash");
+		await assert.rejects(
+			addTurn(s.id, "bo-birch", turn(["ann-ash", "cy-cole"])),
+			/ann-ash's turn/,
+		);
+		await assert.rejects(
+			addTurn(s.id, "ann-ash", turn(["bo-birch"])),
+			/missing: cy-cole/,
+		);
+		let r = await addTurn(
+			s.id,
+			"ann-ash",
+			turn(["bo-birch", "cy-cole"], {
+				says: "Who's there?",
+				to: ["cy-cole"],
+				question_to: "cy-cole",
+			}),
+		);
+		assert.equal(
+			nextSpeaker(r.scene),
+			"cy-cole",
+			"the one asked answers first",
+		);
+		const packet = packetFor(r.scene, "cy-cole");
+		assert.match(packet, /Who's there\?/);
+		assert.match(packet, /YOU WERE ASKED/);
+		assert.doesNotMatch(
+			packet,
+			/ANN-TASK/,
+			"a task is known only to its character",
+		);
+		assert.match(packetFor(r.scene, "ann-ash"), /YOUR TASK.*ANN-TASK/);
+		assert.doesNotMatch(
+			packet,
+			/\bround\b/i,
+			"no game mechanics in what the character reads",
+		);
+		assert.match(
+			packet,
+			/drifting past you toward the horizon/,
+			"others are seen through stranger_view",
+		);
+		assert.doesNotMatch(packet, /deaf/, "not through the author's fields");
+		assert.doesNotMatch(
+			packet,
+			/SECRET|Ann Ash/,
+			"no thoughts, no names not said aloud",
+		);
+		assert.match(
+			packetFor(r.scene, "ann-ash"),
+			/SECRET-THOUGHT/,
+			"own thoughts carry over",
+		);
+		r = await addTurn(
+			s.id,
+			"cy-cole",
+			turn(["ann-ash", "bo-birch"], { says: "Me.", urgency: 0.9 }),
+		);
+		r = await addTurn(
+			s.id,
+			"bo-birch",
+			turn(["ann-ash", "cy-cole"], { action: "steps back" }),
+		);
+		assert.equal(r.scene.round, 2);
+		assert.match(
+			packetFor(r.scene, "cy-cole"),
+			/SUDDENLY: The cable groans/,
+			"a planned event happens as its round begins",
+		);
+		await assert.rejects(
+			addTurn(s.id, "cy-cole", {
+				...turn(["ann-ash", "bo-birch"]),
+				feelings: [
+					...turn(["ann-ash", "bo-birch"]).feelings,
+					...turn(["ann-ash"]).feelings,
+				],
+			}),
+			/One feeling per character/,
+		);
+		r = await addEvent(s.id, "The door opens a crack.");
+		assert.match(
+			packetFor(r.scene, "cy-cole"),
+			/SUDDENLY: The door opens a crack/,
+		);
+		assert.equal(nextSpeaker(r.scene), "cy-cole", "the most urgent goes first");
+		for (const id of ["cy-cole", "ann-ash", "bo-birch"])
+			r = await addTurn(
+				s.id,
+				id,
+				turn(["ann-ash", "bo-birch", "cy-cole"].filter((x) => x !== id)),
+			);
+		assert.equal(r.scene.done, "a full round of silence");
+		assert.equal(nextSpeaker(r.scene), undefined);
+		const ab = attitudePaths(r.scene).find(
+			(p) => p.from === "ann-ash" && p.to === "bo-birch",
+		);
+		assert.equal(ab.path.length, 2);
+		const md = readFileSync(
+			path.join(dir, "_scenes", s.id, "scene.md"),
+			"utf8",
+		);
+		assert.match(md, /## Attitudes/);
+		assert.match(md, /Suddenly:\*\* The cable groans/);
+		assert.match(md, /ends \*\*wary\*\*/);
+		assert.match(md, /a full round of silence/);
+	});
 });
