@@ -28,7 +28,7 @@ If the working tree has unrelated changes, stop and ask what to do with them.
 
 ## 6. Pull request that closes the issue
 - `git push -u origin <branch>`, then `gh pr create` with:
-  - **Title** in Conventional Commits: `feat: …`, `fix: …`, `docs: …`; `!` for breaking (`feat!: …`). Imperative, under 70 characters.
+  - **Title** in Conventional Commits, typed by who the change is for (CONTRIBUTING.md, "Commit and PR titles"): `feat`/`fix`/`perf` only for changes users of the tool notice (they make a release); `docs`, `refactor`, `test`, `ci`, `build`, `chore` otherwise. `!` only when users must change something. Imperative, under 70 characters.
   - **Body** from `.github/pull_request_template.md`, starting with `Closes #N`. The "Linked issue" check fails without it, and on merge GitHub closes the issue. "How to verify" comes from the intent's "How to check it".
 - Comment on the issue what was decided along the way and what was deliberately not done.
 - Report the PR link. Then wait for CI; if it fails, read the logs (`gh pr checks`, `gh run view --log-failed`) and fix on the same branch.

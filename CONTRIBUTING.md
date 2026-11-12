@@ -33,9 +33,29 @@ Nobody pushes to `main`. Every change, including the maintainers', answers an is
 3. **Develop.** Add or update tests for behavior you change.
 4. **Refactor.** Before review, simplify what you wrote: no dead code, no duplicated helpers, comments only where the code can't speak for itself.
 5. **Review.** Re-read your diff as a stranger. `npm run lint` and `npm test` must pass.
-6. **Pull request.** Fill in the template and start the description with `Closes #<number>`: a check requires it, and merging closes the issue. The title must follow [Conventional Commits](https://www.conventionalcommits.org): `feat: …`, `fix: …`, `docs: …`, `refactor: …`, `test: …`, `chore: …`. Add `!` for a breaking change (`feat!: …`).
+6. **Pull request.** Fill in the template and start the description with `Closes #<number>`: a check requires it, and merging closes the issue. The title must follow [Conventional Commits](https://www.conventionalcommits.org); see [Commit and PR titles](#commit-and-pr-titles).
 
 With [Claude Code](https://claude.com/claude-code), run `/contribute` in the repo: `/intent` writes the intent into the issue and branches from it, then and walks through the rest, including `/simplify` for the refactor and `/code-review` for the review.
+
+## Commit and PR titles
+
+[Conventional Commits](https://www.conventionalcommits.org): `type(optional scope): what it does`, imperative, lower case, under 70 characters. Choose the type by **who the change is for**: only changes that people using character-forge will notice make a release.
+
+| Type | For | Release |
+|---|---|---|
+| `feat` | Something new for users: a tool, a CLI command, a card field, a media step | yes (minor; patch while on 0.x) |
+| `fix` | A bug users can hit | yes (patch) |
+| `perf` | Faster or cheaper for users, same behavior | yes (patch) |
+| `docs` | README, CONTRIBUTING, comments, the site's text | no |
+| `refactor` | Code changes with no behavior change | no |
+| `test` | Tests only | no |
+| `ci` | GitHub Actions, checks | no |
+| `build` | Packaging, dependencies (Dependabot uses `chore(deps)`) | no |
+| `chore` | The development workflow, skills for contributors, repo settings, anything else | no |
+
+Add `!` after the type (`feat!: …`) when users must change something on their side: a renamed tool, a removed field, a new required setting. Scopes are optional, for example `feat(voice): …` or `fix(site): …`.
+
+Examples: `feat: start a character from a concept image`, `fix(voice): keep long Russian lines from being cut off`, `ci: run tests on Node 24`, `chore: add the intent skill`, `docs: add the share image to the README`.
 
 ## Versions and releases
 
