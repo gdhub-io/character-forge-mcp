@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.3](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.2...v0.3.3) (2026-11-13)
+
+
+### Features
+
+* a DNA layer in the card core, so characters have a personality, not only a wound ([#38](https://github.com/gdhub-io/character-forge-mcp/issues/38)) ([e818ca9](https://github.com/gdhub-io/character-forge-mcp/commit/e818ca95038ef670047947f6687e00a0f6ee4f01))
+* characters meet in one scene (experimental) ([#39](https://github.com/gdhub-io/character-forge-mcp/issues/39)) ([9cd11ac](https://github.com/gdhub-io/character-forge-mcp/commit/9cd11ac40dbc3598c005bcab01077df9ceb8e6e5))
+
+
+### Bug Fixes
+
+* wait for npm before listing a release in the MCP Registry ([#28](https://github.com/gdhub-io/character-forge-mcp/issues/28)) ([d569fa9](https://github.com/gdhub-io/character-forge-mcp/commit/d569fa9fd25962cd4b4fad1f7fdaeaff525bf716))
+
 ## [0.3.2](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.1...v0.3.2) (2026-11-12)
 
 
