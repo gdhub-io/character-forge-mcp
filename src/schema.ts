@@ -926,12 +926,68 @@ export const CARD_USE = {
 		"goals.goal_climax",
 		"identification",
 		"psychology.visual_device",
+		"backstory.contradictions",
+		"uniqueness.archetype",
+		"psychology.states.reactive",
+		"psychology.states.active",
+		"uniqueness.twist",
 		"fears.overcoming",
 		"look.signature_item.how_carried",
 		"destiny",
 	],
 	visual: ["look"],
 } as const;
+
+const at = (o: unknown, keys: string[]): unknown =>
+	keys.reduce<unknown>((v, k) => asObject(v)?.[k], o);
+
+/** The DNA as the character lives it: the temperament now (born → after their life events) and the body's kind. */
+const dnaInMind = (c: CharacterCard) =>
+	[
+		`temperament 0-100 (born → now): ${temperamentLine(c) || "unknown"}`,
+		c.core.dna.species,
+		c.core.dna.sex,
+		c.core.dna.body_plan,
+	]
+		.filter(Boolean)
+		.join("; ");
+
+/**
+ * The character's view of themselves, for playing them (a scene, a meeting): the ALWAYS fields lead, the rest of the
+ * card follows as what they can recall, minus the author's fields and the look (they don't see themselves from
+ * outside). A fear they don't admit drives them, but they can't think it, so only the conscious ones stay.
+ */
+export function playerView(card: CharacterCard): string {
+	const self = structuredClone(card) as unknown as Json;
+	const fears = asObject(self.fears);
+	if (fears && Array.isArray(fears.fears))
+		fears.fears = fears.fears.filter((f) => asObject(f)?.conscious);
+	// The wound is theirs to tell (self_story); the events keep only what happened, not the author's reading of it.
+	const description = asObject(self.description);
+	if (description && Array.isArray(description.life_events))
+		description.life_events = description.life_events
+			.map(asObject)
+			.filter((e) => e && e.weight !== "wound")
+			.map((e) => ({ age: e?.age, event: e?.event }));
+	const always = CARD_USE.always
+		.map((p) => [p, at(self, p.split("."))] as const)
+		.filter(([, v]) => v !== undefined)
+		.map(
+			([p, v]) =>
+				`- ${p}: ${p === "core.dna" ? dnaInMind(card) : typeof v === "string" ? v : JSON.stringify(v)}`,
+		);
+	for (const p of [
+		"meta",
+		...CARD_USE.always,
+		...CARD_USE.author,
+		...CARD_USE.visual,
+	]) {
+		const keys = p.split(".");
+		const parent = asObject(at(self, keys.slice(0, -1)));
+		if (parent) delete parent[keys[keys.length - 1]];
+	}
+	return `ALWAYS IN YOU:\n${always.join("\n")}\n\nWHAT YOU CAN RECALL WHEN THE MOMENT CALLS FOR IT:\n${JSON.stringify(self)}`;
+}
 
 export function slugify(name: string): string {
 	const slug = name

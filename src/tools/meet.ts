@@ -4,13 +4,12 @@ import {
 	addEvent,
 	addTurn,
 	attitudePaths,
-	DEFAULT_ROUNDS,
 	MEET_PROTOCOL,
 	nextSpeaker,
 	packetFor,
 	type Scene,
+	SceneSetupSchema,
 	sceneDir,
-	stance,
 	startScene,
 	TurnSchema,
 } from "../meet.js";
@@ -23,15 +22,8 @@ async function next(s: Scene, file: string) {
 	const data = { scene: s.id, round: s.round, folder: sceneDir(s.id) };
 	if (!speaker) {
 		const r = reply(
-			`The scene has ended (${s.done}). Saved: ${file}\n\nFollow step 5 of the protocol: show scene.md, then retell it for the user in their language.`,
-			{
-				...data,
-				done: s.done,
-				attitudes: attitudePaths(s).map((p) => ({
-					...p,
-					ends: stance(p.path[p.path.length - 1].valence),
-				})),
-			},
+			`The scene has ended (${s.done}). Saved: ${file}\n\nFollow the protocol's last step: show scene.md, then retell it for the user in their language.`,
+			{ ...data, done: s.done, attitudes: attitudePaths(s) },
 		);
 		return { ...r, content: [...r.content, await fileContent(file)] };
 	}
@@ -48,63 +40,11 @@ export function registerMeet(server: McpServer) {
 			title: "Characters meet (experimental)",
 			description:
 				"Experimental. Puts 2-5 saved characters into one situation as strangers and starts a scene. Each round every character, in turn, thinks (feelings toward each other, what they want to say, hide or ask) and then speaks, acts or stays silent. Returns the director's protocol, the first speaker and their packet; record each turn with character_meet_turn.",
-			inputSchema: {
-				characters: z
-					.array(SlugSchema)
-					.min(2)
-					.max(5)
-					.describe("Ids of saved characters, in the order they enter."),
-				situation: z
-					.string()
-					.trim()
-					.min(1)
-					.describe(
-						"The user's situation, in English: a place, and any details they gave (time, roles, what is going on).",
-					),
-				max_rounds: z
-					.number()
-					.int()
-					.min(1)
-					.max(12)
-					.default(DEFAULT_ROUNDS)
-					.describe("When the scene stops at the latest."),
-				tasks: z
-					.array(
-						z.object({
-							character: SlugSchema,
-							task: z
-								.string()
-								.trim()
-								.min(1)
-								.describe(
-									"Why they are here right now and what they need, in English. Only this character learns it.",
-								),
-						}),
-					)
-					.default([])
-					.describe(
-						"One task per character: the user's, or written by you from the card's want to fit the situation.",
-					),
-				events: z
-					.array(
-						z.object({
-							round: z.number().int().min(1),
-							what: z
-								.string()
-								.trim()
-								.min(1)
-								.describe("What suddenly happens, in English."),
-						}),
-					)
-					.default([])
-					.describe(
-						"Planned sudden changes everyone perceives, each at the start of its round.",
-					),
-			},
+			inputSchema: SceneSetupSchema.shape,
 		},
 		async (setup) => {
-			const s = await startScene(setup);
-			const first = await next(s, `${sceneDir(s.id)}/scene.md`);
+			const r = await startScene(setup);
+			const first = await next(r.scene, r.file);
 			return {
 				...first,
 				content: [

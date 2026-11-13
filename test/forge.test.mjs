@@ -871,7 +871,7 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 		await saveCard(as("Ann Ash"));
 		await saveCard(as("Bo Birch"));
 		await saveCard(as("Cy Cole"));
-		const s = await startScene({
+		const { scene: s } = await startScene({
 			characters: ["ann-ash", "bo-birch", "cy-cole"],
 			situation: "A lift at night; the light goes out.",
 			max_rounds: 3,
@@ -897,6 +897,53 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 			...extra,
 		});
 		assert.equal(nextSpeaker(s), "ann-ash");
+		// The character plays its temperament as life made it, and never sees the author's fields.
+		const self = packetFor(s, "ann-ash");
+		assert.match(
+			self,
+			/temperament 0-100 \(born → now\): extraversion 18 → 14 now/,
+		);
+		assert.doesNotMatch(self, /core\.wound|central_paradox|"truth"/);
+		assert.doesNotMatch(
+			self,
+			/"weight":"wound"/,
+			"the wound is theirs to tell, not the author's",
+		);
+		// Others are strangers: known by stage ids, not by the names in their ids.
+		assert.match(self, /- person-b: /);
+		assert.doesNotMatch(
+			self.split("WHO ELSE IS HERE")[1].split("WHAT HAS HAPPENED")[0],
+			/bo-birch|cy-cole/,
+		);
+		// A second take in the same second is a new scene, never an overwrite.
+		const again = await startScene(
+			{ characters: ["ann-ash", "bo-birch"], situation: "Again." },
+			new Date(s.created),
+		);
+		assert.notEqual(again.scene.id, s.id);
+		await assert.rejects(
+			() =>
+				startScene({
+					characters: ["ann-ash", "bo-birch"],
+					situation: "Late.",
+					max_rounds: 2,
+					events: [{ round: 5, what: "Never." }],
+				}),
+			/after the last round/,
+		);
+		await assert.rejects(
+			() => addTurn(s.id, "ann-ash", turn(["bo-birch", "cy-cole", "ann-ash"])),
+			/only for the other characters present/,
+		);
+		await assert.rejects(
+			() =>
+				addTurn(
+					s.id,
+					"ann-ash",
+					turn(["bo-birch", "cy-cole"], { question_to: "person-b" }),
+				),
+			/A question needs a line/,
+		);
 		await assert.rejects(
 			addTurn(s.id, "bo-birch", turn(["ann-ash", "cy-cole"])),
 			/ann-ash's turn/,

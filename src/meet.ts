@@ -3,10 +3,10 @@
  * character); this module keeps the record, decides who acts next and builds each character's packet, so a character
  * only ever sees its own thoughts and what the others said and did.
  */
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { CARD_USE, type CharacterCard, SlugSchema } from "./schema.js";
+import { type CharacterCard, playerView, SlugSchema } from "./schema.js";
 import { loadCard, outputDir, writeJson } from "./store.js";
 
 export const SCENES_DIR = "_scenes";
@@ -24,7 +24,7 @@ const Targets = z.preprocess(
 );
 
 /** Where a feeling sits between a fight and love. One scale for every scene, so outcomes compare. */
-export const STANCES: [number, string][] = [
+const STANCES: [number, string][] = [
 	[-0.8, "ready to fight"],
 	[-0.5, "hostile, quarrelling"],
 	[-0.2, "wary"],
@@ -33,9 +33,11 @@ export const STANCES: [number, string][] = [
 	[0.8, "close, trusting"],
 	[1, "in love, devoted"],
 ];
-export const stance = (v: number) =>
+const stance = (v: number) =>
 	(STANCES.find(([max]) => v <= max) ?? STANCES[STANCES.length - 1])[1];
 const SCALE = `-1 … +1: ${STANCES.map(([max, label]) => `up to ${max} ${label}`).join("; ")}.`;
+/** "ready to fight → … → in love, devoted": the scale in words, for the guide and the protocol. */
+const SCALE_WORDS = STANCES.map(([, label]) => label).join(" → ");
 
 export const TurnSchema = z.object({
 	thought: text(
@@ -105,11 +107,13 @@ export const TurnSchema = z.object({
 		.optional()
 		.describe("Public. True if they leave the scene for good."),
 });
-export type Turn = z.infer<typeof TurnSchema>;
+type Turn = z.infer<typeof TurnSchema>;
 type RecordedTurn = Turn & { speaker: string; round: number };
 
 interface CastMember {
 	id: string;
+	/** A neutral stage id (person-a, person-b…): what the others call them until a name is said aloud. */
+	stage?: string;
 	name: string;
 	/** What a stranger sees: the only thing the others know about them at first. */
 	seen: string;
@@ -117,7 +121,7 @@ interface CastMember {
 	self: string;
 }
 
-export interface SceneEvent {
+interface SceneEvent {
 	round: number;
 	what: string;
 	at?: number;
@@ -162,74 +166,13 @@ function strangerView(card: CharacterCard): string {
 	].join(" ");
 }
 
-const at = (o: unknown, p: string): unknown =>
-	p
-		.split(".")
-		.reduce<unknown>(
-			(v, k) =>
-				v && typeof v === "object"
-					? (v as Record<string, unknown>)[k]
-					: undefined,
-			o,
-		);
-
-/**
- * The character's view of themselves. ALWAYS fields lead (who they are in every moment); the rest of the card follows
- * as what they can recall, minus the author's fields (their truth, need and ending: knowing them would make them wise
- * too early) and the look (they don't see themselves from outside).
- */
-/**
- * Beyond CARD_USE.author, these also tell a character its own future: the later stages of its story and the twist.
- * Someone living the moment can't know them.
- */
-const FUTURE = [
-	"psychology.states.reactive",
-	"psychology.states.active",
-	"uniqueness.twist",
-];
-
-/** Deletes the fields at these dotted paths from a card copy. */
-function without(card: unknown, paths: readonly string[]) {
-	const copy = structuredClone(card) as Record<string, unknown>;
-	for (const p of paths) {
-		const keys = p.split(".");
-		const parent =
-			keys.length > 1 ? at(copy, keys.slice(0, -1).join(".")) : copy;
-		if (parent && typeof parent === "object")
-			delete (parent as Record<string, unknown>)[keys[keys.length - 1]];
-	}
-	return copy;
-}
-
-export function selfSheet(card: CharacterCard): string {
-	const sheet = without(card, FUTURE);
-	const fears = at(sheet, "fears") as
-		| { fears?: { conscious: boolean }[] }
-		| undefined;
-	// A fear they don't admit drives them, but they can't think it.
-	if (fears?.fears) fears.fears = fears.fears.filter((f) => f.conscious);
-	const always = CARD_USE.always
-		.map((p) => [p, at(sheet, p)] as const)
-		.filter(([, v]) => v !== undefined)
-		.map(
-			([p, v]) => `- ${p}: ${typeof v === "string" ? v : JSON.stringify(v)}`,
-		);
-	const rest = without(sheet, [
-		...CARD_USE.always,
-		...CARD_USE.author,
-		...CARD_USE.visual,
-	]);
-	delete rest.meta;
-	return `ALWAYS IN YOU:\n${always.join("\n")}\n\nWHAT YOU CAN RECALL WHEN THE MOMENT CALLS FOR IT:\n${JSON.stringify(rest)}`;
-}
-
 export const sceneDir = (id: string) => {
 	if (!SlugSchema.safeParse(id).success)
 		throw new Error(`Invalid scene id: ${id}`);
 	return path.join(outputDir(), SCENES_DIR, id);
 };
 
-export async function loadScene(id: string): Promise<Scene> {
+async function loadScene(id: string): Promise<Scene> {
 	return JSON.parse(
 		await readFile(path.join(sceneDir(id), "scene.json"), "utf8"),
 	);
@@ -246,24 +189,58 @@ async function saveScene(scene: Scene): Promise<string> {
 	return md;
 }
 
-export interface SceneSetup {
-	characters: string[];
-	situation: string;
-	max_rounds?: number;
-	tasks?: { character: string; task: string }[];
-	events?: { round: number; what: string }[];
-}
+/** What starts a scene: the character_meet input, defined once. */
+export const SceneSetupSchema = z.object({
+	characters: z
+		.array(SlugSchema)
+		.min(2)
+		.max(5)
+		.describe("Ids of saved characters, in the order they enter."),
+	situation: text(
+		"The user's situation, in English: a place, and any details they gave (time, roles, what is going on).",
+	),
+	max_rounds: z
+		.number()
+		.int()
+		.min(1)
+		.max(12)
+		.default(DEFAULT_ROUNDS)
+		.describe("When the scene stops at the latest."),
+	tasks: z
+		.array(
+			z.object({
+				character: SlugSchema,
+				task: text(
+					"Why they are here right now and what they need, in English. Only this character learns it.",
+				),
+			}),
+		)
+		.default([])
+		.describe("One task per character (see the protocol)."),
+	events: z
+		.array(
+			z.object({
+				round: z.number().int().min(1),
+				what: text("What suddenly happens, in English."),
+			}),
+		)
+		.default([])
+		.describe(
+			"Planned sudden changes everyone perceives, each at the start of its round.",
+		),
+});
 
 export async function startScene(
-	{
+	setup: z.input<typeof SceneSetupSchema>,
+	now = new Date(),
+): Promise<{ scene: Scene; file: string }> {
+	const {
 		characters: ids,
 		situation,
-		max_rounds = DEFAULT_ROUNDS,
-		tasks = [],
-		events = [],
-	}: SceneSetup,
-	now = new Date(),
-): Promise<Scene> {
+		max_rounds,
+		tasks,
+		events,
+	} = SceneSetupSchema.parse(setup);
 	if (new Set(ids).size !== ids.length)
 		throw new Error("Each character can be in the scene only once.");
 	const stray = tasks.map((t) => t.character).filter((c) => !ids.includes(c));
@@ -271,32 +248,48 @@ export async function startScene(
 		throw new Error(
 			`Tasks for characters not in the scene: ${stray.join(", ")}.`,
 		);
+	const late = events.filter((e) => e.round > max_rounds);
+	if (late.length)
+		throw new Error(
+			`Events after the last round (${max_rounds}) would never happen: rounds ${late.map((e) => e.round).join(", ")}.`,
+		);
 	const cards = await Promise.all(ids.map(loadCard));
 	const stamp = now
 		.toISOString()
-		.slice(0, 16)
+		.slice(0, 19)
 		.replace(/[-:]/g, "")
 		.replace("T", "-");
+	// Never overwrite an earlier scene: a second take in the same second gets -2, -3…
+	const base = `${stamp}-${ids.map((i) => i.split("-")[0]).join("-")}`;
+	let id = base;
+	for (let n = 2; await exists(path.join(sceneDir(id), "scene.json")); n++)
+		id = `${base}-${n}`;
 	const scene: Scene = {
-		id: `${stamp}-${ids.map((i) => i.split("-")[0]).join("-")}`,
-		situation: situation.trim(),
+		id,
+		situation,
 		created: now.toISOString(),
 		max_rounds,
-		tasks: Object.fromEntries(tasks.map((t) => [t.character, t.task.trim()])),
-		events: events.map((e) => ({ round: e.round, what: e.what.trim() })),
+		tasks: Object.fromEntries(tasks.map((t) => [t.character, t.task])),
+		events: events.map((e) => ({ ...e })),
 		cast: cards.map((c, i) => ({
 			id: ids[i],
+			stage: `person-${String.fromCharCode(97 + i)}`,
 			name: c.meta.name,
 			seen: strangerView(c),
-			self: selfSheet(c),
+			self: playerView(c),
 		})),
 		turns: [],
 		round: 1,
 	};
 	stampEvents(scene);
-	await saveScene(scene);
-	return scene;
+	return { scene, file: await saveScene(scene) };
 }
+
+const exists = (file: string) =>
+	access(file).then(
+		() => true,
+		() => false,
+	);
 
 /** Planned events of the current round happen as it begins. */
 function stampEvents(s: Scene) {
@@ -315,7 +308,7 @@ export async function addEvent(
 	return { scene: s, file: await saveScene(s) };
 }
 
-export const present = (s: Scene) =>
+const present = (s: Scene) =>
 	s.cast
 		.map((c) => c.id)
 		.filter((id) => !s.turns.some((t) => t.speaker === id && t.leaves));
@@ -324,6 +317,16 @@ export const present = (s: Scene) =>
  * Who acts next. Every present character gets one turn per round. First whoever was asked a question they haven't
  * had a turn to answer, then the most urgent (by their last turn; newcomers in cast order), ties in cast order.
  */
+/** The questions put to this character since their last turn: they answer first. */
+const pendingQuestions = (s: Scene, id: string) => {
+	const last = lastIndex(s.turns, (t) => t.speaker === id);
+	return s.turns.filter((t, i) => t.question_to === id && i > last);
+};
+
+/** What suddenly happened right before turn i (or now, for i = the number of turns). */
+const eventsAt = (s: Scene, i: number) =>
+	s.events.filter((e) => e.at === i).map((e) => e.what);
+
 export function nextSpeaker(s: Scene): string | undefined {
 	if (s.done) return undefined;
 	const spoke = new Set(
@@ -332,9 +335,7 @@ export function nextSpeaker(s: Scene): string | undefined {
 	const waiting = present(s).filter((id) => !spoke.has(id));
 	const lastTurnOf = (id: string) =>
 		lastIndex(s.turns, (t) => t.speaker === id);
-	const asked = waiting.find((id) =>
-		s.turns.some((t, i) => t.question_to === id && i > lastTurnOf(id)),
-	);
+	const asked = waiting.find((id) => pendingQuestions(s, id).length);
 	if (asked) return asked;
 	const urgency = (id: string) => s.turns[lastTurnOf(id)]?.urgency ?? 0.5;
 	return waiting.reduce<string | undefined>(
@@ -356,7 +357,29 @@ export async function addTurn(
 	const expected = nextSpeaker(s);
 	if (speaker !== expected)
 		throw new Error(`It is ${expected}'s turn, not ${speaker}'s.`);
+	// Players name each other by stage id; the record keeps the real ids.
+	const real = (x: string) =>
+		x === "all" ? x : (s.cast.find((c) => c.stage === x)?.id ?? x);
+	for (const f of turn.feelings) f.toward = real(f.toward);
+	turn.to = turn.to?.map(real);
+	if (turn.question_to) turn.question_to = real(turn.question_to);
+	for (const w of [...turn.wants_to_say, ...turn.wants_to_ask])
+		w.to = w.to.map(real);
+	for (const h of turn.hides) h.from = h.from.map(real);
 	const others = present(s).filter((c) => c !== speaker);
+	const elsewhere = turn.feelings
+		.map((f) => f.toward)
+		.filter((t) => !others.includes(t));
+	if (elsewhere.length)
+		throw new Error(
+			`feelings are only for the other characters present; not for: ${[...new Set(elsewhere)].join(", ")}.`,
+		);
+	if (turn.question_to && !others.includes(turn.question_to))
+		throw new Error(
+			`question_to must be another character present, not ${turn.question_to}.`,
+		);
+	if (turn.question_to && !turn.says)
+		throw new Error("A question needs a line: put it in says.");
 	const missing = others.filter(
 		(o) => !turn.feelings.some((f) => f.toward === o),
 	);
@@ -371,16 +394,15 @@ export async function addTurn(
 		throw new Error(
 			`One feeling per character (name a mixed one, e.g. "stung but caring"); more than one for: ${twice.join(", ")}.`,
 		);
-	const cast = new Set(s.cast.map((c) => c.id));
 	const unknown = [
-		...turn.feelings.map((f) => f.toward),
 		...(turn.to ?? []),
-		...(turn.question_to ? [turn.question_to] : []),
 		...[...turn.wants_to_say, ...turn.wants_to_ask].flatMap((w) => w.to),
 		...turn.hides.flatMap((h) => h.from),
-	].filter((t) => t !== "all" && !cast.has(t));
+	].filter((t) => t !== "all" && !others.includes(t));
 	if (unknown.length)
-		throw new Error(`Not in this scene: ${[...new Set(unknown)].join(", ")}.`);
+		throw new Error(
+			`Not here (gone, yourself, or never in this scene): ${[...new Set(unknown)].join(", ")}.`,
+		);
 	s.turns.push({ ...turn, speaker, round: s.round });
 
 	if (present(s).length < 2) s.done = "everyone else has left";
@@ -396,7 +418,7 @@ export async function addTurn(
 	return { scene: s, file: await saveScene(s) };
 }
 
-export const PLAYER_GUIDE = `
+const PLAYER_GUIDE = `
 ROLE: YOU ARE THE CHARACTER. Not an actor, not a narrator: you live this moment from inside, with only what you know.
 
 - WHO YOU ARE is your whole self. ALWAYS IN YOU drives every moment: your temperament, wound, lie, fears, mask, personality, worst and best trait. Let it decide, not politeness and not the plot.
@@ -405,7 +427,7 @@ ROLE: YOU ARE THE CHARACTER. Not an actor, not a narrator: you live this moment 
 - The others are strangers from other places, the way people from different countries or cultures are. You know only what you see and what was said aloud. Their stage ids are not names you know; use a name only once someone has said it. You may discover a link (neighbours, a shared person, a past) only through what is said.
 - YOUR TASK is why you are here right now. Pursue it: it may need the others, or put you in their way. The others have reasons of their own that you don't know.
 - Think first, then decide what to show. Say less than you think, hide what your fear tells you to hide, ask what you need to know. What you list in hides stays out of says and action. But hiding everything is its own lie: as trust or pressure grows, things come out. A secret can be told, a feeling confessed, a temper lost.
-- Your feeling for each other character comes from where your card meets what they show and do, and it can go anywhere on one scale: from ready to fight, through quarrelling, wary, neutral and liking, to close and in love. Threat (they touch your wound or fear, or block your task) pushes it down: you argue, block them, strike, or step away if you feel weaker. Recognition (your gift, empathy, attraction, a shared need) pushes it up: you help, open up, touch, confess. Nothing at stake: you ignore them. Let it move as far as the moment truly takes it, either way, and no further.
+- Your feeling for each other character comes from where your card meets what they show and do, and it can go anywhere on one scale: ${SCALE_WORDS}. Threat (they touch your wound or fear, or block your task) pushes it down: you argue, block them, strike, or step away if you feel weaker. Recognition (your gift, empathy, attraction, a shared need) pushes it up: you help, open up, touch, confess. Nothing at stake: you ignore them. Let it move as far as the moment truly takes it, either way, and no further.
 - A line starting SUDDENLY is something that just happened; everyone present perceives it. React to it.
 - You live a moment, not a game: there are no turns, rounds or scene for you. Never mention them, and never count or number your questions like moves.
 - Silence is a valid answer. Leaving (leaves: true) is final.
@@ -421,19 +443,22 @@ export function packetFor(s: Scene, speaker: string): string {
 	const me = s.cast.find((c) => c.id === speaker);
 	if (!me) throw new Error(`${speaker} is not in this scene.`);
 	const here = present(s).filter((id) => id !== speaker);
-	const seen = (id: string) => s.cast.find((c) => c.id === id)?.seen ?? "";
-	const events = (at: number) =>
-		s.events.filter((e) => e.at === at).map((e) => `- SUDDENLY: ${e.what}`);
+	const member = (id: string) => s.cast.find((c) => c.id === id);
+	const seen = (id: string) => member(id)?.seen ?? "";
+	// Others are known by stage ids, never by the names in their ids, until a name is said aloud.
+	const stage = (id: string) => (id === "all" ? id : (member(id)?.stage ?? id));
+	const events = (i: number) =>
+		eventsAt(s, i).map((what) => `- SUDDENLY: ${what}`);
 	const publicLog = s.turns.flatMap((t, i) => {
 		const parts = [
 			t.action && `(${t.action})`,
 			t.says &&
-				`says${t.to?.length ? ` to ${t.to.join(", ")}` : ""}: "${t.says}"`,
+				`says${t.to?.length ? ` to ${t.to.map(stage).join(", ")}` : ""}: "${t.says}"`,
 			t.leaves && "(leaves)",
 		].filter(Boolean);
 		return [
 			...events(i),
-			`- ${t.speaker === speaker ? "YOU" : t.speaker} ${parts.length ? parts.join(" ") : "(silent)"}`,
+			`- ${t.speaker === speaker ? "YOU" : stage(t.speaker)} ${parts.length ? parts.join(" ") : "(silent)"}`,
 		];
 	});
 	publicLog.push(...events(s.turns.length));
@@ -441,24 +466,20 @@ export function packetFor(s: Scene, speaker: string): string {
 		.filter((t) => t.speaker === speaker)
 		.map(
 			(t) =>
-				`- thought: ${t.thought} | felt: ${t.feelings.map((f) => `${f.toward} ${f.emotion} ${f.valence}`).join("; ")}${t.hides.length ? ` | hid: ${t.hides.map((h) => h.what).join("; ")}` : ""}`,
+				`- thought: ${t.thought} | felt: ${t.feelings.map((f) => `${stage(f.toward)} ${f.emotion} ${f.valence}`).join("; ")}${t.hides.length ? ` | hid: ${t.hides.map((h) => h.what).join("; ")}` : ""}`,
 		);
-	const pending = s.turns.filter(
-		(t, i) =>
-			t.question_to === speaker &&
-			i > lastIndex(s.turns, (x) => x.speaker === speaker),
-	);
+	const pending = pendingQuestions(s, speaker);
 	return [
-		`You are ${me.name} (${speaker}).\n\nWHO YOU ARE (your own card, as you know yourself):\n${me.self}`,
+		`You are ${me.name} (${stage(speaker)}).\n\nWHO YOU ARE (your own card, as you know yourself):\n${me.self}`,
 		`SITUATION: ${s.situation}`,
 		s.tasks[speaker] ? `YOUR TASK (only you know it): ${s.tasks[speaker]}` : "",
-		`WHO ELSE IS HERE (how they look in full light, in the author's words. The situation decides how much of it you perceive now; you never know whose a thing is, who issued it or its history):\n${here.map((id) => `- ${id}: ${seen(id)}`).join("\n")}`,
+		`WHO ELSE IS HERE (how they look in full light, in the author's words. The situation decides how much of it you perceive now; you never know whose a thing is, who issued it or its history):\n${here.map((id) => `- ${stage(id)}: ${seen(id)}`).join("\n")}`,
 		`WHAT HAS HAPPENED (public):\n${publicLog.length ? publicLog.join("\n") : "Nothing yet. This is the first moment."}`,
 		mine.length
 			? `YOUR EARLIER THOUGHTS (only you know):\n${mine.join("\n")}`
 			: "",
 		pending.length
-			? `YOU WERE ASKED: ${pending.map((t) => `${t.speaker}: "${t.says ?? ""}"`).join(" ")}`
+			? `YOU WERE ASKED: ${pending.map((t) => `${stage(t.speaker)}: "${t.says ?? ""}"`).join(" ")}`
 			: "",
 		PLAYER_GUIDE,
 	]
@@ -466,7 +487,7 @@ export function packetFor(s: Scene, speaker: string): string {
 		.join("\n\n");
 }
 
-/** Each character's attitude to each other, turn by turn: the scene's emotional curve. */
+/** Each character's attitude to each other, turn by turn (the scene's emotional curve), and where it ended. */
 export function attitudePaths(s: Scene) {
 	return s.cast.flatMap((a) =>
 		s.cast
@@ -486,13 +507,17 @@ export function attitudePaths(s: Scene) {
 							})),
 					),
 			}))
-			.filter((p) => p.path.length),
+			.filter((p) => p.path.length)
+			.map((p) => ({
+				...p,
+				ends: stance(p.path[p.path.length - 1].valence),
+			})),
 	);
 }
 
 const signed = (v: number) => (v > 0 ? `+${v}` : `${v}`);
 
-export function renderScene(s: Scene): string {
+function renderScene(s: Scene): string {
 	const name = (id: string) =>
 		id === "all" ? "everyone" : (s.cast.find((c) => c.id === id)?.name ?? id);
 	const out = [
@@ -505,8 +530,8 @@ export function renderScene(s: Scene): string {
 		out.push(
 			`**Why they are here** (each knows only their own):\n${tasks.map((c) => `- ${c.name}: ${s.tasks[c.id]}`).join("\n")}`,
 		);
-	const sudden = (at: number) =>
-		s.events.filter((e) => e.at === at).map((e) => `> **Suddenly:** ${e.what}`);
+	const sudden = (i: number) =>
+		eventsAt(s, i).map((what) => `> **Suddenly:** ${what}`);
 	let round = 0;
 	for (const [i, t] of s.turns.entries()) {
 		if (t.round !== round) {
@@ -543,6 +568,7 @@ export function renderScene(s: Scene): string {
 			`${head.join(" ")}\n\n<details><summary>inside</summary>\n\n${inner.join("\n")}\n\n</details>`,
 		);
 	}
+	out.push(...sudden(s.turns.length));
 	const paths = attitudePaths(s);
 	if (paths.length)
 		out.push(
@@ -550,7 +576,7 @@ export function renderScene(s: Scene): string {
 			paths
 				.map(
 					(p) =>
-						`- ${name(p.from)} → ${name(p.to)}: ${p.path.map((x) => `${signed(x.valence)} ${x.emotion}`).join(" → ")} — ends **${stance(p.path[p.path.length - 1].valence)}**`,
+						`- ${name(p.from)} → ${name(p.to)}: ${p.path.map((x) => `${signed(x.valence)} ${x.emotion}`).join(" → ")} — ends **${p.ends}**`,
 				)
 				.join("\n"),
 		);
@@ -566,5 +592,5 @@ MEET PROTOCOL (experimental). You are the DIRECTOR: you run the scene and you ne
 2. Hand the packet to the speaker. In Claude Code: one character-player subagent per character, spawned on its first turn and continued (SendMessage) on later turns, so each keeps only its own mind; if it can't be continued, spawn a fresh one with the packet (it carries everything). In other clients, play the speaker yourself from the packet and their card only.
 3. Pass the JSON it returns to character_meet_turn unchanged (scene id, speaker id, turn). If the tool rejects it, send the error back to the same character and ask for a corrected turn.
 4. Repeat with the next speaker and packet the tool returns, until it says the scene has ended.
-5. Show the user scene.md. Then, in their language, retell it for a reader who knows neither card: first two or three plain sentences on who each character is and why they are here; then the scene simply, said, thought (one short line), did, with no long inner reasoning; then where each pair ended on the scale (fight … neutral … love) and what moved it.
+5. Show the user scene.md. Then, in their language, retell it for a reader who knows neither card: first two or three plain sentences on who each character is and why they are here; then the scene simply, said, thought (one short line), did, with no long inner reasoning; then where each pair ended on the scale (${SCALE_WORDS}) and what moved it.
 `.trim();
