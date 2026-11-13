@@ -14,6 +14,10 @@ import { ui } from "../i18n";
 import { GITHUB_URL, REPO, TopNav } from "./TopNav";
 
 const CARD = [
+	[
+		"What they were born with",
+		"Temperament and body, before life touched them.",
+	],
 	["What they want", "And what they really need."],
 	["Why we care", "What makes an audience root for them."],
 	["How they think", "Their inner voice and what sets them off."],
@@ -105,6 +109,16 @@ const COMMANDS: Command[] = [
 		ask: ["Write Marta’s music."],
 		get: "A music track",
 		cost: PRICE.music,
+	},
+	{
+		label: "Characters meet",
+		tool: "character_meet",
+		text: "Experimental, in Claude Code. Put 2–5 of your characters into one situation as strangers and watch them play it out in turns. You see what each one says and does, what they privately think, and how they come to feel about each other.",
+		ask: [
+			"/meet marta-vell pike-ostrander — stuck in a lift at night, the light goes out",
+		],
+		get: "A scene with their thoughts",
+		cost: FREE,
 	},
 	{
 		label: "Get a prompt",
@@ -238,7 +252,7 @@ export function HowItWorks({ c, focus }: { c: Character; focus?: string }) {
 					</h2>
 					<p className="mt-4 text-[15px] leading-relaxed text-dim">
 						Ask in your chat: “a lighthouse keeper for my game” or just
-						“surprise me”. You get a character card that answers nine questions
+						“surprise me”. You get a character card that answers ten questions
 						about them.
 					</p>
 				</div>

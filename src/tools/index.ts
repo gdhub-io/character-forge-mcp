@@ -5,6 +5,7 @@ import { registerCosts } from "./costs.js";
 import { registerCreate } from "./create.js";
 import { registerLibrary } from "./library.js";
 import { registerMedia } from "./media.js";
+import { registerMeet } from "./meet.js";
 import { registerMethod } from "./method.js";
 import { registerNext } from "./next.js";
 import { registerPick } from "./pick.js";
@@ -31,4 +32,5 @@ export function registerTools(server: McpServer) {
 	registerTranslate(server);
 	registerCosts(server);
 	registerNext(server);
+	registerMeet(server);
 }

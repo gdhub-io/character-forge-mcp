@@ -148,6 +148,9 @@ and tie every visible element to the story instead of inventing a different look
 - story_reads: exactly 3 things a stranger understands in 3 seconds. If the character is a villain or a threat, one of
   them must be "this person is dangerous", carried by stance, gaze, expression and silhouette, never by ugliness alone:
   a strange body reads as pitiable unless the face and posture are in control.
+- stranger_view: what a stranger sees in the first seconds, 3-6 plain sentences: height and build, face, hair, clothes,
+  what they carry, stance and movement. Only what eyes can see: no names, owners, origins, histories or meanings, nothing
+  hidden (hair over an ear is seen; a deaf ear is not). Other characters who meet them know only this.
 - blocking: the colour block-in for the concept (#RRGGBB) — hair, skin (or fur/scales), top, bottom, and footwear for
   the character's LEFT and RIGHT foot separately. These colours steer the generated concept, so pick the dominant
   real colour of each zone (often from the palette), not an accent. Hair and skin are their colours now: the natural

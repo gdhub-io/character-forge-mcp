@@ -81,6 +81,8 @@ Restart the app and ask in the chat:
 
 You get a full character card. Then ask for more, one step at a time: *"Draw the concept"*, *"Put her in her place"*, *"Bring the picture to life"*, *"Give her a voice"*, *"Write her music"*. Not sure what's next? Ask *"What's next?"*.
 
+**Experimental: characters meet.** In Claude Code, type `/meet` with 2–5 saved characters and a situation, for example `/meet marta-vell pike-ostrander — stuck in a lift at night, the light goes out`. They meet as strangers and play the scene in turns. You get a script with each one's private thoughts under their lines, and how each one's feelings toward the others changed. Free: the chat plays the characters.
+
 - **Free**: characters, cards, translations, and ready-made prompts you can use in any image, video, voice or music generator.
 - **Paid**: pictures, video, voice and music, made with your own fal.ai key. A whole character costs about $1.50. Nothing paid happens until you ask for it.
 - **Your files**: each character gets a folder in `CHARACTER_FORGE_DIR` (`~/character-forge` if you don't set it), with the card, the pictures, video and sound.

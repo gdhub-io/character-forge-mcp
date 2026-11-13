@@ -80,6 +80,7 @@ You talk to the chat; it calls these tools. Paid ones run only when you ask for 
 | `character_next` | What can be made next for a character, with prices | free |
 | `character_costs` | What a character has cost so far | free |
 | `character_list` / `character_get` | List saved characters / show a card as a Markdown document (or JSON to edit) | free |
+| `character_meet` / `character_meet_turn` / `character_meet_event` | Experimental: 2–5 saved characters meet in one situation. Starts the scene with the director's protocol, records each turn (private thoughts and feelings toward each other, then a line, an action or silence), adds a twist mid-scene; saves `scene.md` and `scene.json` | free |
 
 Every saved card is also an MCP resource, `character-forge://<id>/card.md`, so apps with a resource picker can open or attach it.
 

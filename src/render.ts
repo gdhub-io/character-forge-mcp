@@ -384,6 +384,9 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 		blocks: [
 			{ palette: lk.palette },
 			{ title: "Reads in 3 seconds", list: lk.story_reads },
+			...(lk.stranger_view
+				? [{ title: "Seen by a stranger", prose: lk.stranger_view } as Block]
+				: []),
 			{
 				rows: [
 					["Shape language", lk.shape_language],
