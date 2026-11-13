@@ -117,6 +117,9 @@ function sections(c: CharacterCard): { main: Section[]; visual: Section } {
 				},
 				{
 					rows: [
+						...(core.self_story
+							? [["As they tell it", core.self_story] as [string, string]]
+							: []),
 						["Central paradox", core.central_paradox],
 						["Dramatic question", core.dramatic_question],
 						["Why these sparks", core.spark_links],

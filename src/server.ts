@@ -12,7 +12,8 @@ export const VERSION: string = JSON.parse(
 const INSTRUCTIONS = `
 character-forge builds vivid, story-ready characters (film, games, ads, books): a full character card
 plus an A-pose concept sheet. Characters are random in the sense "you can't guess who you'll get", but
-every part of the card grows from one core (wound → lie → fear → defense/gift → truth).
+every part of the card grows from one core: the DNA they were born with (temperament, innate body) and the wound
+that landed on it (wound → lie → fear → defense/gift → truth). What a character keeps in mind is written from inside.
 
 Always start with character_method: it contains the method, the card format and the variant-tournament
 protocol (3 variants of one concept compete; only the strongest ships). Run a single variant only if the

@@ -221,6 +221,53 @@ test("check flags a character who presses on the lie but is missing from the arc
 	assert.match(q, /SETUP → PAYOFF:/);
 });
 
+test("rewriting a card keeps fields this version doesn't know", async () => {
+	await withLibrary(async (dir) => {
+		const { saveCard, loadCard, writeCard } = await import(
+			path.join(root, "dist/store.js")
+		);
+		const { slug } = await saveCard(example);
+		const file = path.join(dir, slug, "card.json");
+		const raw = JSON.parse(readFileSync(file, "utf8"));
+		raw.look.stranger_view = "A tall woman in a soaked shirt.";
+		raw.description.life_events[0].mood = "from a newer version";
+		writeFileSync(file, JSON.stringify(raw));
+		await writeCard(await loadCard(slug));
+		const after = JSON.parse(readFileSync(file, "utf8"));
+		assert.equal(after.look.stranger_view, raw.look.stranger_view);
+		assert.equal(after.description.life_events[0].mood, "from a newer version");
+	});
+});
+
+test("a playing character keeps in mind only what it knows", async () => {
+	const { CARD_USE } = await import(path.join(root, "dist/schema.js"));
+	for (const secret of [
+		"core.wound",
+		"core.truth",
+		"core.central_paradox",
+		"meta.logline",
+		"fears.overcoming",
+		"destiny",
+	]) {
+		assert.ok(!CARD_USE.always.includes(secret), secret);
+		assert.ok(CARD_USE.author.includes(secret), secret);
+	}
+	assert.ok(CARD_USE.always.includes("core.self_story"));
+	const card = validateCard(example).card;
+	assert.match(
+		checkCard(card).questions.join("\n"),
+		/SELF-KNOWLEDGE: .*I know exactly what I'm worth/,
+	);
+	const noStory = structuredClone(example);
+	delete noStory.core.self_story;
+	assert.equal(
+		validateCard(noStory).ok,
+		false,
+		"new cards tell the wound from inside",
+	);
+	assert.equal(validateCard(noStory, { stored: true }).ok, true);
+});
+
 test("example card validates; broken card reports paths", () => {
 	assert.equal(validateCard(example).ok, true);
 	const broken = structuredClone(example);

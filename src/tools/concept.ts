@@ -10,7 +10,7 @@ export function registerConcept(server: McpServer) {
 		{
 			title: "Generate A-pose concept sheet",
 			description:
-				"Builds an A-pose model-sheet prompt from a saved card's look and, with FAL_KEY set, generates it on fal.ai: a faceless figure built from look.body (the character's own proportions) is drawn front and back and given to GPT Image as the pose reference, with the full look → concept.png (the card is re-rendered with it). pose_image puts the character in the pose of any picture → concept-pose.png. Without FAL_KEY (or with dry_run) returns the prompt only. Paid: tell the user the price from character_next and wait for a yes.",
+				"Builds an A-pose model-sheet prompt from a saved card's look and, with FAL_KEY set, generates it on fal.ai: a faceless figure built from the card's body (the proportions they were born with, as life events changed them, plus their posture) is drawn front and back and given to GPT Image as the pose reference, with the full look → concept.png (the card is re-rendered with it). pose_image puts the character in the pose of any picture → concept-pose.png. Without FAL_KEY (or with dry_run) returns the prompt only. Paid: tell the user the price from character_next and wait for a yes.",
 			annotations: {
 				openWorldHint: true,
 				destructiveHint: false,

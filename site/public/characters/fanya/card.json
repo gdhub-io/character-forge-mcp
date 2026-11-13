@@ -78,6 +78,7 @@
       "born_differences": []
     },
     "wound": "For her first three years in the family she was 'just the bunny', a baby toy at the bottom of the pile, passed over for every game. Then came the ninth birthday of the eldest daughter, Kira. Kira dressed her in a doll's crimson blazer, stamped PAID on her paw with a toy rubber stamp, sat her at the head of the table with a toy calculator and announced 'Madam Banker'. The room laughed for an hour. She took the laughter for applause and the title for a real appointment.",
+    "self_story": "I spent three years at the bottom of the pile as 'just the bunny'. Then, at Kira's ninth birthday, the family appointed me Madam Banker: the blazer, the PAID stamp, the head of the table, and a whole hour of applause. I have earned that post every day since, and I intend to keep earning it.",
     "lie": "A bunny is nobody. Madam Banker is somebody, and the post must be earned every single day.",
     "truth": "They laughed because they loved the bunny. She never needed the post to be somebody.",
     "central_paradox": "She is completely sure she holds an office, and that certainty makes her the most competent toy in the house. It also makes her the funniest, because she is the only one who doesn't know the office began as a joke. The seriousness that keeps the shelf running is the same seriousness that hides the bunny from herself. The joke landed on a toy made sociable, unflappable and orderly, so she didn't sulk at the laughter: she took office.",
@@ -154,7 +155,7 @@
     "psychological_issues": "Perfectionism about her own image, and a reflexive need to control how she is seen.",
     "insecurity": "That under the title she is 'just the bunny' again. She never puts it into words. She simply never takes the blazer off.",
     "strong_beliefs": "Every problem has a plan. Winter reserves are the foundation of everything. You dress the way you like.",
-    "strongest_trigger": "Anyone questioning her authority. Mockery itself doesn't register, because she takes laughter as applause.",
+    "strongest_trigger": "Anyone questioning her authority, and above all being called 'the bunny'.",
     "childhood": "Three years at the bottom of the toy pile, then, at one birthday party, a 'promotion' overnight. The family was noisy, teasing and warm, and she learned to read every laugh as a vote of confidence.",
     "visual_device": "Her ears and ribbon show her mood, because her face never moves. Normally the ears hang neatly back, tied at the tips with a white ribbon. When she says 'we'll draw up a plan now', they lift a little and the ribbon swings. In a rare moment of doubt, the ears sag flat and the ribbon droops. After every disaster: a beat of stillness, the jacket straighten, 'Right.'"
   },
@@ -267,7 +268,7 @@
         "conscious": false
       }
     ],
-    "mask": "Everything's always sorted. When laughed at, she laughs along and asks about carrots, honestly believing it's applause.",
+    "mask": "Everything's always sorted. Laughter at her meetings is applause, and she accepts it with a nod before asking about carrots.",
     "courage_source": "Someone else needs a plan. Helping others makes her forget her own fear.",
     "overcoming": "She hides the fear completely until the truth about the title arrives and breaks through. Then she finds that being the bunny they laughed at with love isn't frightening at all."
   },
@@ -493,6 +494,7 @@
       "She is all business and in charge.",
       "She chose her own style and doesn't care what you think of it."
     ],
+    "stranger_view": "A plush toy bunny about thirty centimetres tall, with a huge round head and a small soft body of curly, tangled, pale rose-beige fluff. Her face is stitched: heavy-lidded slit eyes that look permanently unimpressed, an embroidered nose and a small stitched mouth. Her long ears lie back along her head, tied at the tips with a white ribbon. She wears a buttoned crimson blazer with gold buttons over a cream sweater, wide dark grey trousers and silver sneakers. She stands with her paws folded in front and her head slightly tilted, as if listening to a report, and walks in short, brisk steps, never hopping.",
     "art_style": "stylized 3D, soft-toy realism: curly plush pile, felt and wool textures, neutral studio light",
     "turnaround_notes": "A-pose, arms angled down. The head is a third of her height: a round cloud of curly, pale rose-beige pile. Her face is stitched: heavy-lidded, half-closed slit eyes, an embroidered nose and mouth on a shorter-pile muzzle, all half lost in curls. Her paws are round fluffy mitts with no fingers. The ears hang BACK and never stand up; they lie flat along the skull and are tied together near the tips with a flat white ribbon whose ends hang straight down the back of the head to the collar, visible in the side and back views. The blazer is crimson, not pink: hip length, single-breasted and buttoned with two gold buttons, notched lapels open to mid-chest, two flap pockets, short sleeves with wide turned-up cuffs, and a straight back with a centre seam. The cream ribbed crew-neck sweater shows between the lapels. Loose dark grey trousers break over the shoes. Both sneakers are identical: silver metallic low-tops with an embossed pattern, white laces and white soles. No tail is visible and no mark is visible."
   }

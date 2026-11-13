@@ -558,7 +558,10 @@ CHARACTER METHOD. A strong character is ONE causal system, not a list of traits.
    life can move it) and a line on how it shows. INNATE APPEARANCE: species, sex, lineage, body plan, covering,
    natural colours, face, frame, build, and the rare born difference. The being can be anything: say it in terms
    of its kind. Rule: born with it → DNA; got it from life (scars, posture, weight, dye, habits) → the rest.
-   WOUND: the formative hurt, landing on that temperament — one of the life events, with what it changed. LIE: the false belief the wound taught them.
+   WOUND: the formative hurt, landing on that temperament — one of the life events, with what it changed.
+   SELF-STORY: the same wound as they tell it to themselves, from inside: what they know and believe, never the
+   author's hindsight. What a character keeps in mind is written from inside; the truth, the future and the
+   audience's view belong to the author. LIE: the false belief the wound taught them.
    FEAR: what the lie makes them dread. DEFENSE: how they protect the lie = their WORST trait.
    GIFT: what the same wound forged = their BEST trait. Best and worst are two faces of one wound:
    that is the CENTRAL PARADOX that makes them vivid — the wound × the temperament it hit: the same hurt turns

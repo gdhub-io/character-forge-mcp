@@ -218,7 +218,12 @@ const DnaSchema = z
 
 const CoreSchema = z.object({
 	dna: DnaSchema,
-	wound: text("The formative wound everything grows from."),
+	wound: text(
+		"The formative wound everything grows from, as the author knows it (the character may not).",
+	),
+	self_story: text(
+		"The wound as they tell it to themselves: first person, in their voice, only what they know or believe. No hindsight, no future, nothing only the author knows (if they took a joke for an honour, it is an honour here). A playing character keeps this in mind instead of the wound.",
+	),
 	lie: text("The false belief the wound taught them, in their own words."),
 	truth: text("The truth they must learn — the need, stated as a belief."),
 	central_paradox: text(
@@ -756,6 +761,7 @@ export const LegacyCardSchema = CharacterCardSchema.extend({
 			frame: true,
 			born_differences: true,
 		}),
+		self_story: CoreSchema.shape.self_story.optional(),
 	}),
 });
 export const StoredCardSchema = z.preprocess(upgradeLegacy, LegacyCardSchema);
@@ -765,7 +771,7 @@ export type CharacterCard = z.infer<typeof StoredCardSchema>;
 type Json = Record<string, unknown>;
 const asObject = (v: unknown): Json | undefined =>
 	v && typeof v === "object" && !Array.isArray(v) ? (v as Json) : undefined;
-function upgradeLegacy(raw: unknown): unknown {
+export function upgradeLegacy(raw: unknown): unknown {
 	const card = asObject(raw);
 	const core = asObject(card?.core);
 	const traits = asObject(card?.traits);
@@ -801,7 +807,29 @@ function upgradeLegacy(raw: unknown): unknown {
 			.filter(([, v]) => typeof v === "string")
 			.map(([k, v]) => `${k}: ${v}.`)
 			.join(" ");
+	// The moved fields go, so keeping unknown fields on a rewrite doesn't bring them back.
+	if (t) for (const k of ["energy", "temperament", "social"]) delete t[k];
+	const d = asObject(next.description);
+	if (d && nextCore.dna) delete d.species;
+	const b = asObject(asObject(next.look)?.body);
+	if (b && nextCore.dna) for (const k of FRAME_KEYS) delete b[k];
 	return next;
+}
+
+/**
+ * Fields a stored card has that this version's schema doesn't know (a newer version, another branch) survive a
+ * rewrite: zod strips them on parse, so they are copied back from the card as it was read.
+ */
+export function keepUnknown<T>(read: unknown, parsed: T): T {
+	const a = asObject(read);
+	const b = asObject(parsed);
+	if (Array.isArray(read) && Array.isArray(parsed))
+		return parsed.map((x, i) => keepUnknown(read[i], x)) as T;
+	if (!a || !b) return parsed;
+	const out: Json = { ...b };
+	for (const [k, v] of Object.entries(a))
+		out[k] = k in b ? keepUnknown(v, b[k]) : v;
+	return out as T;
 }
 
 /** What life made of the DNA, event by event: characteristic → its value now (absent = as born). The DNA stays as born. */
@@ -860,18 +888,18 @@ export function badChange(
 
 /**
  * What a playing character keeps in mind (a scene, a meeting, later life in time). ALWAYS: who they are, in every
- * prompt. AUTHOR: what the character doesn't know about themselves; knowing it would make them wise too early.
- * VISUAL: for images and video. Everything else is RECALLED when the moment calls for it.
+ * prompt, so these fields are written from inside: nothing the character doesn't know (fears: the conscious ones).
+ * AUTHOR: what they don't know — the truth, the future, how the story or the audience sees them; knowing it would
+ * make them wise too early or play the ending. VISUAL: for images and video. Everything else is RECALLED when the
+ * moment calls for it.
  */
 export const CARD_USE = {
 	always: [
 		"meta.name",
-		"meta.logline",
 		"description.age",
 		"core.dna",
-		"core.wound",
+		"core.self_story",
 		"core.lie",
-		"core.central_paradox",
 		"goals.want",
 		"traits.personality",
 		"traits.best_trait",
@@ -882,15 +910,24 @@ export const CARD_USE = {
 		"psychology.emotional_baseline",
 		"description.speech.manner",
 		"description.speech.pet_words",
-		"look.signature_item",
-		"look.story_reads",
+		"look.signature_item.item",
 	],
 	author: [
+		"meta.logline",
+		"meta.tagline",
+		"core.wound",
 		"core.truth",
+		"core.central_paradox",
 		"core.dramatic_question",
+		"core.spark_links",
 		"goals.need",
 		"goals.arc_goal",
+		"goals.conflicting_goals",
 		"goals.goal_climax",
+		"identification",
+		"psychology.visual_device",
+		"fears.overcoming",
+		"look.signature_item.how_carried",
 		"destiny",
 	],
 	visual: ["look"],

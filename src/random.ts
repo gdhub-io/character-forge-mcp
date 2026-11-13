@@ -228,7 +228,8 @@ HOW TO BUILD A STRONG CHARACTER FROM THIS ROLL
    characterful: the one with the clearest want-vs-need conflict, the most visual identity and the most
    playable scenes. Briefly tell the user which you chose.
 4. The wound lands on the DNA: the same hurt turns inward in a withdrawn orchid and into bravado in an outgoing
-   dandelion. The wound is one of the 3 life events (weight "wound"), and its changes record what it did to
+   dandelion. Write core.self_story: the wound as they tell it to themselves, knowing only what they know.
+   The wound is one of the 3 life events (weight "wound"), and its changes record what it did to
    the temperament; the others are "major" turning points or "minor" traces.
    Write core.central_paradox as temperament × wound, and traits.personality as the person they
    became: mood, energy, how they are with others, social life, what they love.

@@ -17,9 +17,11 @@ import { renderMarkdown } from "./render.js";
 import {
 	type CharacterCard,
 	CharacterCardSchema,
+	keepUnknown,
 	SlugSchema,
 	StoredCardSchema,
 	slugify,
+	upgradeLegacy,
 } from "./schema.js";
 
 /** Generated images, video and sound live in assets/; every prompt (used or written) lives in prompts/. */
@@ -153,9 +155,13 @@ export function validateCard(
 	const parsed = (stored ? StoredCardSchema : CharacterCardSchema).safeParse(
 		input,
 	);
-	return parsed.success
-		? { ok: true, card: parsed.data }
-		: { ok: false, issues: z.prettifyError(parsed.error) };
+	if (!parsed.success)
+		return { ok: false, issues: z.prettifyError(parsed.error) };
+	// A card keeps the fields this version doesn't know (a newer version, another branch), so rewriting never loses them.
+	return {
+		ok: true,
+		card: keepUnknown(stored ? upgradeLegacy(input) : input, parsed.data),
+	};
 }
 
 /** Reads and validates a card.json from any path (a stored one may predate the DNA layer). Throws with readable issues. */

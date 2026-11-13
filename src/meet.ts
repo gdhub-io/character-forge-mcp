@@ -179,17 +179,12 @@ const at = (o: unknown, p: string): unknown =>
  * too early) and the look (they don't see themselves from outside).
  */
 /**
- * Beyond CARD_USE.author, these also tell a character its own future: how its story ends, how it overcomes its fear,
- * the plot of the logline. Someone living the moment can't know them.
+ * Beyond CARD_USE.author, these also tell a character its own future: the later stages of its story and the twist.
+ * Someone living the moment can't know them.
  */
 const FUTURE = [
-	"meta.logline",
-	"fears.overcoming",
 	"psychology.states.reactive",
 	"psychology.states.active",
-	"psychology.visual_device",
-	"look.signature_item.how_carried",
-	"identification.first_appearance",
 	"uniqueness.twist",
 ];
 
@@ -208,6 +203,11 @@ function without(card: unknown, paths: readonly string[]) {
 
 export function selfSheet(card: CharacterCard): string {
 	const sheet = without(card, FUTURE);
+	const fears = at(sheet, "fears") as
+		| { fears?: { conscious: boolean }[] }
+		| undefined;
+	// A fear they don't admit drives them, but they can't think it.
+	if (fears?.fears) fears.fears = fears.fears.filter((f) => f.conscious);
 	const always = CARD_USE.always
 		.map((p) => [p, at(sheet, p)] as const)
 		.filter(([, v]) => v !== undefined)
