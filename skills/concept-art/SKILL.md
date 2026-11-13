@@ -6,7 +6,7 @@ description: Generate concept art for a saved character-forge character on fal.a
 # Concept art via fal (A-pose model sheet)
 
 Requires the `character-forge` MCP server and `FAL_KEY` (in the environment or in a `.env` in the working directory).
-The tool draws an A-pose figure from `look.body` and gives it to the image model as the pose reference, with the card's full look. It costs **about $0.02 per sheet**, and each retry costs the same.
+The tool draws an A-pose figure from the card's body (the DNA frame, as life events changed it, plus `look.body` posture) and gives it to the image model as the pose reference, with the card's full look. It costs **about $0.02 per sheet**, and each retry costs the same.
 
 1. **Prepare.** Find the id (`character_list`). The card needs a `look` section; if it's weak or missing, suggest the `design-look` skill first.
 2. **Show the prompt.** Call `character_concept` with `dry_run: true` and skim it. Fix anything in the card's look, not by hand in the prompt.

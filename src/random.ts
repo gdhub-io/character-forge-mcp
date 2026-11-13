@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { OCCUPATIONS, VISIBLE_MARKS, WOUNDS } from "./engine.js";
 import * as M from "./methodology.js";
+import { TEMPERAMENT_KEYS, type TemperamentScale } from "./schema.js";
 
 /** Small deterministic PRNG so a seed always reproduces the same roll. */
 export function mulberry32(seed: number): () => number {
@@ -58,8 +59,8 @@ export const RollOptionsSchema = z.object({
 export type RollOptions = Omit<z.infer<typeof RollOptionsSchema>, "variants">;
 
 /**
- * A roll = one coherent ENGINE (wound → lie → fear → defense/gift → truth → arc)
- * plus independent SPARKS that make the result unpredictable.
+ * A roll = innate DNA (temperament) + one coherent ENGINE (wound → lie → fear → defense/gift → truth → arc)
+ * that lands on it, plus independent SPARKS that make the result unpredictable.
  */
 export interface CharacterSeed {
 	seed: number;
@@ -82,7 +83,13 @@ export interface CharacterSeed {
 		occupation: string;
 		visible_mark: string;
 	};
+	/** Born temperament: value and plasticity, 0-100 each. */
+	dna: Record<TemperamentScale, { value: number; plasticity: number }>;
 }
+
+/** Most beings sit near the middle: the mean of three draws makes extremes rare. */
+const bell = (rng: () => number) =>
+	Math.round(((rng() + rng() + rng()) / 3) * 100);
 
 export function roll(opts: RollOptions = {}): CharacterSeed {
 	const seed = opts.seed ?? Math.floor(Math.random() * 2 ** 31);
@@ -108,8 +115,16 @@ export function roll(opts: RollOptions = {}): CharacterSeed {
 		occupation: pick(rng, OCCUPATIONS),
 		visible_mark: pick(rng, VISIBLE_MARKS),
 	};
+	// Rolled last, so seeds from before the DNA layer still give the same engine and sparks.
+	const dna = Object.fromEntries(
+		TEMPERAMENT_KEYS.map((k) => [
+			k,
+			{ value: bell(rng), plasticity: 30 + Math.round(rng() * 40) },
+		]),
+	) as CharacterSeed["dna"];
 	return {
 		seed,
+		dna,
 		engine,
 		sparks: {
 			...rolled,
@@ -178,6 +193,7 @@ export function variantsToText(r: VariantSet): string {
 		``,
 		...r.variants.flatMap((v) => [
 			`VARIANT ${v.label} (seed ${v.seed})`,
+			`  DNA: ${dnaLine(v.dna)}`,
 			`  Wound: ${v.engine.wound}`,
 			`  Lie: "${v.engine.lie}" · Truth: "${v.engine.truth}"`,
 			`  Fear: ${v.engine.fear} · Worst: ${v.engine.worst_trait} · Best: ${v.engine.best_trait}`,
@@ -190,8 +206,17 @@ export function variantsToText(r: VariantSet): string {
 	].join("\n");
 }
 
+/** "extraversion 72 (plasticity 40) · …": born value and how far life can move it. */
+const dnaLine = (dna: CharacterSeed["dna"]) =>
+	TEMPERAMENT_KEYS.map(
+		(k) => `${k} ${dna[k].value} (plasticity ${dna[k].plasticity})`,
+	).join(" · ");
+
 export const BUILD_STEPS = `
 HOW TO BUILD A STRONG CHARACTER FROM THIS ROLL
+0. The DNA is what they were born (or made) with: copy each value and plasticity into core.dna.temperament
+   unless the brief fixes them, and write how each shows. Then give them an innate appearance (species, sex,
+   lineage, body plan, covering, natural colours, face, frame, build) that fits their kind and world.
 1. The ENGINE is the spine and is already coherent: wound → lie they believe → fear → defense (worst trait)
    and the gift the same wound forged (best trait) → the truth they must learn (need) → arc.
    You may sharpen the wording, but keep the causal chain intact.
@@ -202,10 +227,16 @@ HOW TO BUILD A STRONG CHARACTER FROM THIS ROLL
 3. Before writing the card, sketch 3 one-line concepts that differ sharply, then pick the most
    characterful: the one with the clearest want-vs-need conflict, the most visual identity and the most
    playable scenes. Briefly tell the user which you chose.
-4. Derive everything else FROM the core: flaws express the defense; quirks and habits are scars of the
+4. The wound lands on the DNA: the same hurt turns inward in a withdrawn orchid and into bravado in an outgoing
+   dandelion. Write core.self_story: the wound as they tell it to themselves, knowing only what they know.
+   The wound is one of the 3 life events (weight "wound"), and its changes record what it did to
+   the temperament; the others are "major" turning points or "minor" traces.
+   Write core.central_paradox as temperament × wound, and traits.personality as the person they
+   became: mood, energy, how they are with others, social life, what they love.
+5. Derive everything else FROM the core: flaws express the defense; quirks and habits are scars of the
    wound or rituals that protect the lie; the backstory dramatises the wound; secondary characters
    pressure the lie; the climax forces a choice between the lie and the truth.
-5. Call character_check with the draft, fix every weak link, then character_save.
+6. Call character_check with the draft, fix every weak link, then character_save.
 `.trim();
 
 export function seedToText(s: CharacterSeed): string {
@@ -213,6 +244,9 @@ export function seedToText(s: CharacterSeed): string {
 	const k = s.sparks;
 	return [
 		`Seed #${s.seed}`,
+		``,
+		`DNA (born with; the wound lands on this)`,
+		`  ${dnaLine(s.dna)}`,
 		``,
 		`ENGINE (coherent core)`,
 		`  Wound: ${e.wound}`,

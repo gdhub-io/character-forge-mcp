@@ -1,8 +1,8 @@
 import { apiKey, config } from "./config.js";
 import { recordCost } from "./costs.js";
 import { falControlGenerate, falUpload, toImageUrl } from "./fal.js";
-import { type FigureStyle, mannequinPng } from "./pose.js";
-import { type CharacterCard, slugify } from "./schema.js";
+import { type BodyShape, type FigureStyle, mannequinPng } from "./pose.js";
+import { bodyOf, type CharacterCard, slugify } from "./schema.js";
 import { loadCard, pickWinner, saveConcept, writeCard } from "./store.js";
 import { readUserImage } from "./userimage.js";
 
@@ -31,7 +31,7 @@ export interface ConceptOptions {
 }
 
 /** The body's numbers as words an image model follows; only deviations from average are named. */
-export function bodyWords(b: CharacterCard["look"]["body"]): string {
+export function bodyWords(b: BodyShape): string {
 	const side = (v: number) => (v > 0 ? "RIGHT" : "LEFT");
 	const rel = (v: number, lo: string, hi: string, step: number) =>
 		v >= 1 + step ? hi : v <= 1 - step ? lo : "";
@@ -223,13 +223,15 @@ export function perViewPlacement(card: CharacterCard): string {
 export function gptCharacterPrompt(card: CharacterCard, style: string): string {
 	const d = card.description;
 	const lk = card.look;
-	const b = lk.body;
+	const b = bodyOf(card);
+	const born = card.core.dna.born_differences ?? [];
 	const p = pronoun(d.gender);
 	const own = (v: number) => (v > 0 ? "right" : "left");
 	const bl = lk.blocking;
 	return [
-		`CHARACTER: ${card.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${d.species.toLowerCase()}. ${d.physical.height_build}`,
+		`CHARACTER: ${card.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${card.core.dna.species.toLowerCase()}. ${d.physical.height_build}`,
 		`BODY: ${bodyWords(b)}.${Math.abs(b.shoulder_tilt) >= 0.15 ? ` The shoulder line slopes: ${p} ${own(b.shoulder_tilt)} shoulder sits clearly lower than the other, in both views.` : ""}${Math.abs(b.head_tilt) >= 0.15 ? ` ${p[0].toUpperCase() + p.slice(1)} head is canted toward ${p} ${own(b.head_tilt)} shoulder.` : ""} ${b.why}`,
+		born.length ? `BORN WITH: ${born.join("; ")}.` : "",
 		`FACE: ${d.physical.face}`,
 		`HAIR: ${d.physical.hair}`,
 		`OUTFIT (inner to outer): ${lk.outfit.map((o) => o.piece).join("; ")}.`,
@@ -300,7 +302,7 @@ export function buildTposePrompt(
 		: `${VIEW_TEXT[views]}, A-pose, arms angled down. ${facing}. Left/right mean ${pronoun(d.gender)} own sides`;
 	return [
 		`Character model sheet, ${layout}. Style: ${clip(resolveStyle(c, opts.style), 100)}.`,
-		`${c.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${d.species.toLowerCase()}: ${clip(d.physical.height_build, 70)}; ${bodyWords(lk.body)}.`,
+		`${c.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${c.core.dna.species.toLowerCase()}: ${clip(d.physical.height_build, 70)}; ${bodyWords(bodyOf(c))}.`,
 		`Must keep: ${clip(lk.turnaround_notes, 200)}.`,
 		`Face: ${clip(d.physical.face, 100)}. Hair: ${clip(d.physical.hair, 90)}.`,
 		`Marks: ${lk.marks.map((m) => `${clip(m.mark, 55)} (${clip(m.location, 35)})`).join("; ")}.`,
@@ -421,7 +423,7 @@ async function generateImage(
 				: card.look.blocking
 					? "blocking-lit"
 					: "shaded");
-		const mq = mannequinPng(views, card.look.body, figure, card.look.blocking);
+		const mq = mannequinPng(views, bodyOf(card), figure, card.look.blocking);
 		const imageUrl = await falUpload(
 			mq.png,
 			"image/png",

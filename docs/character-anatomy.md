@@ -8,15 +8,16 @@ The running example is **Marta Vell** ([examples/marta-vell.json](../examples/ma
 
 ## 1. The core: one causal chain
 
-A strong character is one system, not a list of traits. Everything grows from a single **wound**.
+A strong character is one system, not a list of traits. They are born with a **DNA** (a temperament of six scales and an innate body) that never changes, and everything else grows from a single **wound** that lands on it. The same wound turns inward in a withdrawn, sensitive child and into bravado in an outgoing, thick-skinned one.
 
 ```mermaid
 flowchart TD
-    W["🩸 WOUND<br/>the formative hurt"] --> L["🗯 LIE<br/>false belief the wound taught"]
+    DNA["🧬 DNA<br/>born temperament & body<br/>never changes"] -->|"the wound lands on it"| W["🩸 WOUND<br/>the formative hurt<br/>one of the life events"]
+    W --> L["🗯 LIE<br/>false belief the wound taught"]
     L --> F["😨 FEAR<br/>what the lie makes them dread"]
     F --> D["🛡 DEFENSE<br/>= WORST trait<br/>how they protect the lie"]
     W --> G["✨ GIFT<br/>= BEST trait<br/>what the same wound forged"]
-    D <-.->|"two faces of one wound<br/>= CENTRAL PARADOX"| G
+    D <-.->|"two faces of one wound,<br/>on this temperament<br/>= CENTRAL PARADOX"| G
 
     L --> WANT["🎯 WANT<br/>external goal, feeds the lie"]
     T["💡 TRUTH<br/>= NEED, never changes"] -.->|"opposes"| L
@@ -28,7 +29,7 @@ flowchart TD
     classDef core fill:#3B4A57,color:#fff,stroke:#3B4A57
     classDef good fill:#7FB7A4,color:#1c1917,stroke:#7FB7A4
     classDef bad fill:#A2532D,color:#fff,stroke:#A2532D
-    class W,L core
+    class DNA,W,L core
     class G,T,TR good
     class F,D,TRAG bad
 ```
@@ -213,7 +214,7 @@ How the card's sections relate to each other. The core feeds everything else.
 
 ```mermaid
 flowchart TB
-    CORE["00 · CORE<br/>wound · lie · truth · paradox · dramatic question"]
+    CORE["00 · CORE<br/>DNA · wound · self-story · lie · truth · paradox · dramatic question"]
     CORE --> G["01 · Goals<br/>want / need / climax"]
     CORE --> P["03 · Psychology<br/>states · inner voice · triggers"]
     CORE --> FE["05 · Fears<br/>fears · mask · courage"]

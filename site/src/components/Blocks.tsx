@@ -208,6 +208,13 @@ function BlockView({ b, downloadLabel }: { b: Block; downloadLabel: string }) {
 					)}
 				</figure>
 			);
+		case "radar":
+			return (
+				<div>
+					{b.title && <Sub>{b.title}</Sub>}
+					<Radar axes={b.axes} legend={b.legend} />
+				</div>
+			);
 		case "palette":
 			return (
 				<div className="flex flex-col gap-3">
@@ -233,4 +240,106 @@ function BlockView({ b, downloadLabel }: { b: Block; downloadLabel: string }) {
 				</div>
 			);
 	}
+}
+
+/** Six scales on a hexagon: the born temperament, and over it what life made of it. */
+function Radar({
+	axes,
+	legend,
+}: Omit<Extract<Block, { type: "radar" }>, "type">) {
+	const R = 92;
+	const at = (i: number, v: number) => {
+		const a = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
+		return [
+			160 + Math.cos(a) * R * (v / 100),
+			128 + Math.sin(a) * R * (v / 100),
+		];
+	};
+	const shape = (vs: number[]) =>
+		vs
+			.map((v, i) =>
+				at(i, v)
+					.map((n) => n.toFixed(1))
+					.join(","),
+			)
+			.join(" ");
+	const born = axes.map((x) => x.born);
+	const changed = axes.some((x) => x.now !== undefined && x.now !== x.born);
+	const now = axes.map((x) => x.now ?? x.born);
+	return (
+		<figure className="flex flex-col items-center gap-3">
+			<svg
+				viewBox="-40 0 400 256"
+				className="w-full max-w-sm"
+				role="img"
+				aria-label={axes
+					.map(
+						(x) =>
+							`${x.label} ${x.born}${changed && x.now !== undefined ? ` → ${x.now}` : ""}`,
+					)
+					.join(", ")}
+			>
+				<g className="text-line" stroke="currentColor" fill="none">
+					{[25, 50, 75, 100].map((v) => (
+						<polygon key={v} points={shape(axes.map(() => v))} />
+					))}
+					{axes.map((x, i) => {
+						const [ex, ey] = at(i, 100);
+						return <line key={x.label} x1={160} y1={128} x2={ex} y2={ey} />;
+					})}
+				</g>
+				<g className="text-accent" stroke="currentColor" fill="currentColor">
+					<polygon points={shape(born)} fillOpacity={0.18} strokeWidth={1.5} />
+					{born.map((v, i) => {
+						const [cx, cy] = at(i, v);
+						// biome-ignore lint/suspicious/noArrayIndexKey: one dot per fixed axis
+						return <circle key={i} cx={cx} cy={cy} r={3} />;
+					})}
+				</g>
+				{changed && (
+					<g className="text-fg" stroke="currentColor" fill="currentColor">
+						<polygon
+							points={shape(now)}
+							fill="none"
+							strokeWidth={1.5}
+							strokeDasharray="4 3"
+						/>
+						{now.map((v, i) => {
+							const [cx, cy] = at(i, v);
+							// biome-ignore lint/suspicious/noArrayIndexKey: one dot per fixed axis
+							return <circle key={i} cx={cx} cy={cy} r={2.5} />;
+						})}
+					</g>
+				)}
+				<g className="fill-dim text-[10px]">
+					{axes.map((x, i) => {
+						const [lx, ly] = at(i, 122);
+						return (
+							<text
+								key={x.label}
+								x={lx}
+								y={ly + 3}
+								textAnchor={
+									Math.abs(lx - 160) < 4 ? "middle" : lx > 160 ? "start" : "end"
+								}
+							>
+								{x.label}
+							</text>
+						);
+					})}
+				</g>
+			</svg>
+			<figcaption className="flex gap-5 text-[11px] text-dim">
+				<span className="flex items-center gap-1.5">
+					<span className="size-2 rounded-full bg-accent" /> {legend.born}
+				</span>
+				{changed && (
+					<span className="flex items-center gap-1.5">
+						<span className="w-4 border-t border-dashed border-fg" />{" "}
+						{legend.now}
+					</span>
+				)}
+			</figcaption>
+		</figure>
+	);
 }

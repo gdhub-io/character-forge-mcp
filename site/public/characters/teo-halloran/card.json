@@ -10,10 +10,74 @@
     "tagline": "Listen first. Then fix."
   },
   "core": {
+    "dna": {
+      "temperament": {
+        "extraversion": {
+          "value": 40,
+          "plasticity": 60,
+          "shows": "Liked showing off a fix, not himself: at five he let the open safe do the talking."
+        },
+        "neuroticism": {
+          "value": 58,
+          "plasticity": 50,
+          "shows": "A worrier from the start: he counted things under his breath long before the talent show."
+        },
+        "agreeableness": {
+          "value": 74,
+          "plasticity": 40,
+          "shows": "Kind and easy-going from the start; he does what grown-ups ask and never argues to their face."
+        },
+        "conscientiousness": {
+          "value": 50,
+          "plasticity": 50,
+          "shows": "Careful with mechanisms, scattered with everything else."
+        },
+        "openness": {
+          "value": 86,
+          "plasticity": 35,
+          "shows": "Endlessly curious: as a toddler he took apart anything that ticked."
+        },
+        "sensitivity": {
+          "value": 80,
+          "plasticity": 60,
+          "shows": "An orchid: praise and mockery both reach him deep."
+        }
+      },
+      "species": "Human",
+      "sex": "Male",
+      "ancestry": "A Brassworks quarter family of tradespeople and machine-theatre performers; the copper-red hair comes from Grandmother Ida's side.",
+      "body_plan": "Biped (human).",
+      "covering": "Warm light-brown skin that freckles in the sun; thick copper-red curls.",
+      "colors": [
+        {
+          "part": "skin",
+          "hex": "#C68E68"
+        },
+        {
+          "part": "hair",
+          "hex": "#B5562A"
+        },
+        {
+          "part": "eyes",
+          "hex": "#5A3A22"
+        }
+      ],
+      "face": "Round cheeks, big brown eyes, a gap between his front teeth and freckles.",
+      "frame": {
+        "head_heights": 4.5,
+        "shoulders": 0.85,
+        "hips": 0.95,
+        "legs": 0.9,
+        "arms": 1.15
+      },
+      "build_tendency": 45,
+      "born_differences": []
+    },
     "wound": "At eight, frozen on stage at the Machine Day talent show, he let out one terrified hiccup that whistled like a kettle; the Tin Chorus, the city's robot choir, sampled it, and for a whole season every new doorbell in the city played it.",
+    "self_story": "At the Machine Day show I froze and hiccupped like a kettle, and the Tin Chorus turned it into the city's doorbell. For a whole season every door laughed at me. Even Mum and Dad laughed. So now Clack does the talking, and I do the fixing.",
     "lie": "If they really hear me, they will laugh.",
     "truth": "Being heard is the price of being known — and people can laugh with you.",
-    "central_paradox": "The best listener in the city won't let anyone listen to him: after the city laughed, he only talked to things, and that is exactly how he learned to hear what they need.",
+    "central_paradox": "The best listener in the city won't let anyone listen to him. He could always hear a little of what machines need; after the city laughed at a born worrier, he listened to nothing else, and that turned a knack into the city's best ear.",
     "dramatic_question": "At the Repair Fair, with Clack working perfectly on his shoulder, will Teo choose to put the puppet down and speak in his own voice?",
     "spark_links": "A boy who stopped talking to people started talking to machines, and in a city where machines answer, that made him a born repairman; the fortune-teller archetype becomes a 'machine whisperer' who reads what a stuck thing wants, not the future; Clack, a puppet made from his grandmother's first padlock, is the borrowed voice that lets him perform without being the one on stage."
   },
@@ -38,7 +102,7 @@
       },
       {
         "method": "Humor",
-        "how": "Recurring spot formula: a thing jams → Clack voices the object's complaint in a ridiculous accent → Teo listens and fixes it with a Fixwell tool → he says one word in his own voice → hiccup (kettle whistle) → tagline 'Listen first. Then fix.'"
+        "how": "Recurring spot formula: a thing jams → Clack voices the object's complaint in a ridiculous accent → Teo listens and fixes it with a Fixwell tool → Clack takes the bow; when Teo opens his mouth to add a word, only a hiccup comes out (kettle whistle) → tagline 'Listen first. Then fix.'"
       }
     ],
     "flaws": [
@@ -83,7 +147,6 @@
     "name_meaning": "Teo, from Teodor, 'gift of god' — a gift he won't unwrap in public; Halloran is his grandmother's family name, painted on the workshop sign for three generations.",
     "age": "10",
     "gender": "Boy",
-    "species": "Human",
     "cultural_background": "Grew up in the Brassworks quarter, where families pass down a trade; dinner talk mixes human and machine slang ('oil your manners', 'don't strip the thread').",
     "physical": {
       "height_build": "Small for his age, round-cheeked and soft, with long arms that seem borrowed from an older kid.",
@@ -94,18 +157,40 @@
     "life_events": [
       {
         "age": "5",
+        "weight": "major",
         "event": "Heard the rattle that told him why grandmother's old safe stuck, while the adults argued over a crowbar.",
         "effect": "Learned he could hear what things needed — and that it impressed people without him having to say much."
       },
       {
         "age": "8",
+        "weight": "wound",
         "event": "Froze at the Machine Day talent show; his kettle-whistle hiccup became the city's doorbell chime for a season.",
-        "effect": "Learned the lie that being heard means being laughed at, and stopped talking to people outside the workshop."
+        "effect": "Learned the lie that being heard means being laughed at, and stopped talking to people outside the workshop.",
+        "changes": [
+          {
+            "characteristic": "temperament.extraversion",
+            "to": 18,
+            "how": "The city laughing at his hiccup turned a shy show-off into a boy who hides from people."
+          },
+          {
+            "characteristic": "temperament.neuroticism",
+            "to": 78,
+            "how": "Since then he braces for laughter before every room."
+          }
+        ]
       },
       {
         "age": "9",
+        "weight": "major",
         "event": "A year of near-silence later, he built Clack from his grandmother's first padlock and threw his voice into it — and the class laughed WITH Clack.",
-        "effect": "Started living through the puppet; his gift for listening grew because he now spent his days talking only to machines."
+        "effect": "Started living through the puppet; his gift for listening grew because he now spent his days talking only to machines.",
+        "changes": [
+          {
+            "characteristic": "temperament.extraversion",
+            "to": 30,
+            "how": "The class laughing with Clack gave him a voice he could hide behind."
+          }
+        ]
       }
     ],
     "hobbies": [
@@ -143,7 +228,7 @@
     "fears": [
       {
         "fear": "Performing in public",
-        "root": "The kettle-whistle hiccup the whole city once used as a doorbell.",
+        "root": "The kettle-whistle hiccup the whole city once used as a doorbell, and his parents, the family's real performers, laughing at it too.",
         "conscious": true
       },
       {
@@ -154,7 +239,7 @@
     ],
     "mask": "Clack — loud, cheeky and fearless, everything Teo isn't; because the voice 'isn't his', the stage fright never reaches it.",
     "courage_source": "Mina, who once said the hiccup was the best note in the whole show.",
-    "overcoming": "Small steps: one word to a machine, then to a pigeon, then to the bakery queue — and at the Fair, a whole sentence for Mina, chosen while Clack is still on his shoulder."
+    "overcoming": "Small steps: one word to a customer at Ida's counter, then to the bakery queue, then to Mina's tram driver — and at the Fair, a whole sentence for Mina, chosen while Clack is still on his shoulder."
   },
   "uniqueness": {
     "archetype": "Fortune teller",
@@ -204,7 +289,7 @@
     "contradictions": [
       {
         "with_whom": "Grandmother Ida, loud repairwoman",
-        "behavior": "Relaxed and chatty in the workshop — the only adult who hears his own voice daily."
+        "behavior": "Ida keeps putting him behind the shop counter to talk to customers. With her alone he argues back in his own voice, the only adult he ever argues with."
       },
       {
         "with_whom": "Mina, tram-mad best friend who wants to drive the night tram",
@@ -217,9 +302,7 @@
     ]
   },
   "traits": {
-    "energy": "Low in public, high in the workshop",
-    "temperament": "Melancholic, with sanguine bursts through Clack",
-    "social": "Introvert",
+    "personality": "Shy and quiet with people, bright and chatty with machines. He was born curious and liked an audience; since the doorbell season he lets Clack do the talking and hides under his grandmother's counter. He is kind and easy-going, does what grown-ups ask and never argues to their face. He follows rather than leads, except at a workbench. His social life is Grandmother Ida, the workshop customers and one friend, Mina. He loves the clatter of the tram depot, old silent comedies, wind-up toys and racing his scooter down the tram slope.",
     "habits": [
       "Knocks twice before touching any machine",
       "Counts to three before entering a room",
@@ -230,7 +313,7 @@
     "other_traits": [
       "Curious",
       "Kind",
-      "Stubborn"
+      "Shy"
     ],
     "reactions": [
       {
@@ -255,25 +338,20 @@
     "ordinary_world": "Workshop, dusk rounds and Clack's jokes in the Brassworks quarter.",
     "void": "Outside the workshop and Mina, nobody has heard the real Teo — and his parents only remember the hiccup.",
     "threshold": "To find the one gear the Town Clock needs, he and Mina cross the canal into the Rusted Field, where the old machines still talk if someone listens.",
-    "ordeal": "At the Repair Fair the clock strikes again, but Mina freezes on stage, the Tin Chorus plays the kettle chime and the crowd laughs at her; Clack is right there, ready to save the moment with a joke.",
+    "ordeal": "At the Repair Fair the clock strikes again, but Mina freezes on stage; Rook, last year's winner, cues the Tin Chorus to play the kettle chime, and the crowd laughs at her. Clack is right there, ready to save the moment with a joke.",
     "transformation": "Teo sets Clack down on the podium and, in his own voice, explains the fix for Mina — then hiccups; this time the square laughs with him, and he laughs too.",
-    "ending": "His name goes on the Town Clock; his parents, watching the broadcast on tour, send a message that isn't about the hiccup. Clack stays on his shoulder for the next spot — but now each spot ends with one more word in Teo's own voice."
+    "ending": "His name goes on the Town Clock; Grandmother Ida, in the front row, is the first to laugh with him, and his parents, watching the broadcast on tour, send a message that isn't about the hiccup. Clack stays on his shoulder for the next spot, but now each spot ends with a word in Teo's own voice instead of a hiccup."
   },
   "look": {
     "shape_language": "Soft and round everywhere a kid is soft: cheeks, curl mop, the bell of the oversized raincoat, sneaker toes. One hard, boxy shape cuts into it: Clack on his left shoulder, all corners, rivets and a hinged jaw. One thin curved line joins the two zones: the stethoscope tubing looped around his neck. Round means the shy boy, square means the loud borrowed voice, and the line means the way he listens.",
     "silhouette": "In black fill: a small round head with a big cloud of curls, a raincoat that flares out like a bell over short legs, long arms with fat rolled cuffs, and one square block on the left shoulder that has a mouth. It avoids the stock 'kid inventor' look (goggles, jumpsuit, wrench in the fist) and the hoodie that hides the face; the hood hangs down his back so the face reads at thumbnail size.",
     "perfection": "Loved but not polished: everything is bought 'to grow into' and slightly too big; knees, fingertips and cuffs show work — patches, oil nicks, chalk dust. The only object he keeps immaculate is Clack, polished bright, because Clack is the part of him that goes on stage.",
     "body": {
-      "head_heights": 4.5,
-      "shoulders": 0.85,
-      "hips": 0.95,
-      "legs": 0.9,
-      "arms": 1.15,
       "shoulder_tilt": 0.15,
       "head_tilt": 0.3,
       "stoop": 0.25,
       "knees": "straight",
-      "why": "Small for ten and round-cheeked, with long arms 'borrowed from an older kid'; he keeps his left shoulder slightly hiked to steady Clack and tilts his head toward the right, the ear he listens with; a light shy hunch from hiding in public."
+      "why": "He keeps his left shoulder slightly hiked to steady Clack on it and tilts his head toward the right, the ear he listens with; a light shy hunch from hiding in public."
     },
     "blocking": {
       "hair": "#B5562A",
@@ -392,6 +470,7 @@
       "The puppet talks for him: Clack's mouth is open on his shoulder while Teo's own mouth is shut.",
       "He's a little working kid: knee patches, rolled cuffs, oil-nicked fingers and a tool pouch on a ten-year-old."
     ],
+    "stranger_view": "A small, round-cheeked boy of about ten with long arms, warm light-brown skin, freckles, big brown eyes that look down first, a gap between his front teeth and a thin pale scar under his chin. Thick copper-red curls that never lie flat. He wears a mustard-yellow raincoat two sizes too big with the sleeves rolled up, a faded teal-and-cream striped T-shirt, teal corduroy shorts, a small leather tool pouch on his right hip and red sneakers with odd laces, one white, one a length of green string. On his left shoulder sits a brass padlock made into a puppet, with a hinged jaw and rivet eyes; his thumb works the jaw from behind. His fingers are dotted with tiny burns and nicks. He keeps close to walls, head tilted to the right as if listening, and stops at every doorway for a beat before slipping through.",
     "art_style": "Stylized 3D animated-film look: soft rounded forms, warm subsurface skin, tactile fabrics (rubberised raincoat sheen, corduroy ridges, scuffed canvas) and dusk lamplight in amber and teal; a face built for camera, with large readable eyes, a visible tooth gap and freckles; Clack is the only metallic object on him.",
     "turnaround_notes": "Clack on his LEFT shoulder in every view, facing forward. Hood DOWN, face fully visible. Stethoscope looped around the neck, earpieces on the right collarbone. Tool pouch on the RIGHT hip. Tram ticket in the LEFT breast pocket. Sleeves rolled four times. Left lace white, right lace green string. Head tilts slightly toward his right shoulder."
   }
