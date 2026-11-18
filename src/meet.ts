@@ -3,7 +3,7 @@
  * character); this module keeps the record, decides who acts next and builds each character's packet, so a character
  * only ever sees its own thoughts and what the others said and did.
  */
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import { type CharacterCard, playerView, SlugSchema } from "./schema.js";
@@ -121,6 +121,15 @@ interface CastMember {
 	self: string;
 }
 
+/** One earlier scene as one character remembers another: where, and how they parted. */
+interface Meeting {
+	scene: string;
+	situation: string;
+	/** Where the feeling ended on the scale, in words ("wary", "close, trusting"…). */
+	parted: string;
+	emotion: string;
+}
+
 interface SceneEvent {
 	round: number;
 	what: string;
@@ -140,6 +149,8 @@ export interface Scene {
 	turns: RecordedTurn[];
 	round: number;
 	done?: string;
+	/** "from>to" → earlier scenes where `from` met `to`; empty = strangers. Missing on scenes saved before this. */
+	met?: Record<string, Meeting[]>;
 }
 
 function lastIndex<T>(xs: T[], pred: (x: T) => boolean): number {
@@ -230,6 +241,37 @@ export const SceneSetupSchema = z.object({
 		),
 });
 
+/** What each character in `ids` remembers of each other from earlier scenes in the library, oldest first. */
+async function pastMeetings(
+	ids: string[],
+	except: string,
+): Promise<Record<string, Meeting[]>> {
+	const met: Record<string, Meeting[]> = {};
+	for (const a of ids) for (const b of ids) if (a !== b) met[`${a}>${b}`] = [];
+	const root = path.join(outputDir(), SCENES_DIR);
+	const dirs = (await readdir(root).catch(() => [] as string[])).sort();
+	for (const dir of dirs) {
+		if (dir === except) continue;
+		const past = await loadScene(dir).catch(() => undefined);
+		if (!past) continue;
+		for (const key of Object.keys(met)) {
+			const [a, b] = key.split(">");
+			const felt = past.turns
+				.filter((t) => t.speaker === a)
+				.flatMap((t) => t.feelings.filter((f) => f.toward === b));
+			const last = felt[felt.length - 1];
+			if (last)
+				met[key].push({
+					scene: past.id,
+					situation: past.situation.split(/(?<=\.)\s/)[0],
+					parted: stance(last.valence),
+					emotion: last.emotion,
+				});
+		}
+	}
+	return met;
+}
+
 export async function startScene(
 	setup: z.input<typeof SceneSetupSchema>,
 	now = new Date(),
@@ -280,6 +322,7 @@ export async function startScene(
 		})),
 		turns: [],
 		round: 1,
+		met: await pastMeetings(ids, id),
 	};
 	stampEvents(scene);
 	return { scene, file: await saveScene(scene) };
@@ -424,7 +467,7 @@ ROLE: YOU ARE THE CHARACTER. Not an actor, not a narrator: you live this moment 
 - WHO YOU ARE is your whole self. ALWAYS IN YOU drives every moment: your temperament, wound, lie, fears, mask, personality, worst and best trait. Let it decide, not politeness and not the plot.
 - You are who you are at the start of your story, before anything has changed you. One night doesn't change a person: warmth has to be earned, can be lost, and you don't become wise or kind because a scene would be nicer. Your worst trait is as real as your best; under threat, above all when someone touches your wound, it wins. If your card says you are cruel, dangerous or cold, be it.
 - The situation sets what your senses get: in the dark you see only what a light falls on, and you hear, smell or feel the rest; noise, distance, fog or a crowd cut it down the same way. Act on what you actually perceive, and let it change as the light or the distance changes.
-- The others are strangers from other places, the way people from different countries or cultures are. You know only what you see and what was said aloud. Their stage ids are not names you know; use a name only once someone has said it. You may discover a link (neighbours, a shared person, a past) only through what is said.
+- The others are strangers from other places, the way people from different countries or cultures are, unless WHO ELSE IS HERE says you have met. Meet a stranger the way your temperament meets strangers: keep the distance a stranger gets, no familiar talk, no name you haven't heard, no questions about their life without a reason. Closeness, or open hostility, has to grow out of what happens here. Someone you have met before you remember as you parted. You know only what you see and what was said aloud. Their stage ids are not names you know; use a name only once someone has said it. You may discover a link (neighbours, a shared person, a past) only through what is said.
 - YOUR TASK is why you are here right now. Pursue it: it may need the others, or put you in their way. The others have reasons of their own that you don't know.
 - Think first, then decide what to show. Say less than you think, hide what your fear tells you to hide, ask what you need to know. What you list in hides stays out of says and action. But hiding everything is its own lie: as trust or pressure grows, things come out. A secret can be told, a feeling confessed, a temper lost.
 - Your feeling for each other character comes from where your card meets what they show and do, and it can go anywhere on one scale: ${SCALE_WORDS}. Threat (they touch your wound or fear, or block your task) pushes it down: you argue, block them, strike, or step away if you feel weaker. Recognition (your gift, empathy, attraction, a shared need) pushes it up: you help, open up, touch, confess. Nothing at stake: you ignore them. Let it move as far as the moment truly takes it, either way, and no further.
@@ -469,11 +512,19 @@ export function packetFor(s: Scene, speaker: string): string {
 				`- thought: ${t.thought} | felt: ${t.feelings.map((f) => `${stage(f.toward)} ${f.emotion} ${f.valence}`).join("; ")}${t.hides.length ? ` | hid: ${t.hides.map((h) => h.what).join("; ")}` : ""}`,
 		);
 	const pending = pendingQuestions(s, speaker);
+	// Whether this character has met each other one before: older scenes have no record, so they say nothing.
+	const history = (id: string) => {
+		const m = s.met?.[`${speaker}>${id}`];
+		if (!m) return "";
+		if (!m.length)
+			return "\n  You have never met: a complete stranger. You don't know their name, their business or their past.";
+		return `\n  You have met before: ${m.map((x) => `${x.situation} You parted ${x.parted} (${x.emotion}).`).join(" Later: ")}`;
+	};
 	return [
 		`You are ${me.name} (${stage(speaker)}).\n\nWHO YOU ARE (your own card, as you know yourself):\n${me.self}`,
 		`SITUATION: ${s.situation}`,
 		s.tasks[speaker] ? `YOUR TASK (only you know it): ${s.tasks[speaker]}` : "",
-		`WHO ELSE IS HERE (how they look in full light, in the author's words. The situation decides how much of it you perceive now; you never know whose a thing is, who issued it or its history):\n${here.map((id) => `- ${stage(id)}: ${seen(id)}`).join("\n")}`,
+		`WHO ELSE IS HERE (how they look in full light, in the author's words. The situation decides how much of it you perceive now; you never know whose a thing is, who issued it or its history):\n${here.map((id) => `- ${stage(id)}: ${seen(id)}${history(id)}`).join("\n")}`,
 		`WHAT HAS HAPPENED (public):\n${publicLog.length ? publicLog.join("\n") : "Nothing yet. This is the first moment."}`,
 		mine.length
 			? `YOUR EARLIER THOUGHTS (only you know):\n${mine.join("\n")}`
@@ -530,6 +581,19 @@ function renderScene(s: Scene): string {
 		out.push(
 			`**Why they are here** (each knows only their own):\n${tasks.map((c) => `- ${c.name}: ${s.tasks[c.id]}`).join("\n")}`,
 		);
+	if (s.met) {
+		const met = Object.entries(s.met)
+			.filter(([, m]) => m.length)
+			.map(([k, m]) => {
+				const [a, b] = k.split(">");
+				return `- ${name(a)} → ${name(b)}: ${m.map((x) => `${x.situation} Parted ${x.parted} (${x.emotion}).`).join(" Later: ")}`;
+			});
+		out.push(
+			met.length
+				? `**Met before:**\n${met.join("\n")}`
+				: "**Strangers:** none of them has met before.",
+		);
+	}
 	const sudden = (i: number) =>
 		eventsAt(s, i).map((what) => `> **Suddenly:** ${what}`);
 	let round = 0;
