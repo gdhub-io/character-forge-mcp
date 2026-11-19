@@ -22,7 +22,7 @@ export function registerConcept(server: McpServer) {
 					.string()
 					.optional()
 					.describe(
-						"Omit for the house style (one look across the library). 'card' = the designer's suggestion in look.art_style; or any style text, e.g. 'anime cel-shaded'. Non-default styles are saved as concept-<style>.png next to concept.png.",
+						"Omit for the library's house style (CHARACTER_FORGE_ART_STYLE if set, else the built-in one; one look across the library). 'card' = the designer's suggestion in look.art_style; or any style text, e.g. 'anime cel-shaded'. Non-default styles are saved as concept-<style>.png next to concept.png.",
 					),
 				views: z
 					.enum(VIEWS)
@@ -31,11 +31,15 @@ export function registerConcept(server: McpServer) {
 				extra: z
 					.string()
 					.optional()
-					.describe("Extra art direction appended to the prompt."),
+					.describe(
+						"Extra art direction appended to the prompt the image model gets, in every mode.",
+					),
 				dry_run: z
 					.boolean()
 					.optional()
-					.describe("Only return the prompt, do not call the image API."),
+					.describe(
+						"Only return the prompt, do not call the image API. It is exactly the prompt the real run would send for the same options.",
+					),
 				pose_image: z
 					.string()
 					.optional()
@@ -101,7 +105,7 @@ export function registerConcept(server: McpServer) {
 			});
 			if (!r.generated) {
 				return reply(
-					`${r.reason} The A-pose prompt for any image model. ${SHOW_PROMPT}\n\n${copyable([{ label: "A-pose concept prompt", text: r.prompt }])}`,
+					`${r.reason} ${SHOW_PROMPT}\n\n${copyable([{ label: dry_run ? "Prompt the real run sends" : "A-pose concept prompt", text: r.prompt }])}`,
 					{ prompt: r.prompt, generated: false },
 				);
 			}

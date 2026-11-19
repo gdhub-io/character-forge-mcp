@@ -86,6 +86,7 @@ You get a full character card. Then ask for more, one step at a time: *"Draw the
 - **Free**: characters, cards, translations, and ready-made prompts you can use in any image, video, voice or music generator.
 - **Paid**: pictures, video, voice and music, made with your own fal.ai key. A whole character costs about $1.50. Nothing paid happens until you ask for it.
 - **Your files**: each character gets a folder in `CHARACTER_FORGE_DIR` (`~/character-forge` if you don't set it), with the card, the pictures, video and sound.
+- **Your art style**: every concept sheet and location is drawn in one house style, a stylized 3D game render. To draw your whole library in another style, add the environment variable `CHARACTER_FORGE_ART_STYLE`, for example `"CHARACTER_FORGE_ART_STYLE": "Painterly gouache illustration, visible brush strokes"` next to `FAL_KEY` above. Describe the look, not the lighting: each picture sets its own light. It applies to pictures made after you set it; existing ones stay as they are, so redraw the concept before the location.
 
 ## How it works
 

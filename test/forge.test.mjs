@@ -28,16 +28,29 @@ const { mannequinPng, poseKeypoints, AVERAGE_BODY } = await import(
 	path.join(root, "dist/pose.js")
 );
 
+/** Runs fn with env vars set (undefined = unset), restoring them afterwards. */
+async function withEnv(vars, fn) {
+	const prev = Object.fromEntries(
+		Object.keys(vars).map((k) => [k, process.env[k]]),
+	);
+	const put = (k, v) => {
+		if (v === undefined) delete process.env[k];
+		else process.env[k] = v;
+	};
+	for (const [k, v] of Object.entries(vars)) put(k, v);
+	try {
+		return await fn();
+	} finally {
+		for (const [k, v] of Object.entries(prev)) put(k, v);
+	}
+}
+
 /** Runs fn with a fresh, temporary library, restoring CHARACTER_FORGE_DIR afterwards. */
 async function withLibrary(fn) {
 	const dir = mkdtempSync(path.join(os.tmpdir(), "cf-lib-"));
-	const prev = process.env.CHARACTER_FORGE_DIR;
-	process.env.CHARACTER_FORGE_DIR = dir;
 	try {
-		return await fn(dir);
+		return await withEnv({ CHARACTER_FORGE_DIR: dir }, () => fn(dir));
 	} finally {
-		if (prev === undefined) delete process.env.CHARACTER_FORGE_DIR;
-		else process.env.CHARACTER_FORGE_DIR = prev;
 		rmSync(dir, { recursive: true, force: true });
 	}
 }
@@ -309,6 +322,111 @@ test("the A-pose prompt carries the look, the body's own sides and the wear, cle
 	assert.doesNotMatch(buildTposePrompt(shouty), /\.\.|!\./);
 	// A custom pose replaces the A-pose wording.
 	assert.doesNotMatch(buildTposePrompt(card, { poseImage: "x.png" }), /A-pose/);
+});
+
+/**
+ * Runs fn with a fake FAL_KEY and fetch: uploads succeed, the first queue submit is captured and then refused,
+ * so nothing paid is ever called. Returns the body the real run would have sent.
+ */
+async function captureFalSubmit(fn) {
+	const realFetch = globalThis.fetch;
+	let sent;
+	globalThis.fetch = async (url, init = {}) => {
+		const u = String(url);
+		if (u.includes("/storage/upload/initiate"))
+			return Response.json({
+				upload_url: "https://fal.media/put",
+				file_url: "https://fal.media/file.png",
+			});
+		if (u === "https://fal.media/put") return new Response("");
+		if (u.startsWith("https://queue.fal.run/")) {
+			sent = JSON.parse(init.body);
+			return Response.json({ detail: "refused in tests" }, { status: 400 });
+		}
+		throw new Error(`unexpected fetch in a test: ${u}`);
+	};
+	try {
+		await withEnv({ FAL_KEY: "test-key-not-real" }, () => fn().catch(() => {}));
+	} finally {
+		globalThis.fetch = realFetch;
+	}
+	assert.ok(sent, "the run reached the image model");
+	return sent;
+}
+
+test("art style: the library's house style, extra in every mode, dry run = the real prompt", async () => {
+	const {
+		generateConcept,
+		conceptPrompt,
+		gptCharacterPrompt,
+		DEFAULT_ART_STYLE,
+		NOT_IDEALIZED,
+	} = await import(path.join(root, "dist/concept.js"));
+	const { defaultScenePrompt, generateScene } = await import(
+		path.join(root, "dist/scene.js")
+	);
+	const card = validateCard(example).card;
+	const HOUSE = /Stylized 3D game character render/;
+	const PAINTED = "Painterly gouache illustration, visible brush strokes";
+	const extra = "warm rim light from the left";
+
+	// Realism is never forced on a style.
+	assert.doesNotMatch(NOT_IDEALIZED, /skin texture|real,/);
+	assert.match(
+		NOT_IDEALIZED,
+		/asymmetries, uneven features, every flaw and mark/,
+	);
+
+	await withEnv({ CHARACTER_FORGE_ART_STYLE: undefined }, async () => {
+		// Unset: the default house style, as before.
+		assert.match(conceptPrompt(card), HOUSE);
+		assert.match(defaultScenePrompt(card), HOUSE);
+		assert.match(gptCharacterPrompt(card, DEFAULT_ART_STYLE), HOUSE);
+	});
+
+	await withEnv({ CHARACTER_FORGE_ART_STYLE: PAINTED }, async () => {
+		for (const p of [conceptPrompt(card), defaultScenePrompt(card)]) {
+			assert.ok(p.includes(PAINTED));
+			assert.doesNotMatch(p, HOUSE);
+		}
+		// An explicit style and "card" still win over the library's.
+		assert.match(
+			conceptPrompt(card, { style: "anime cel-shaded" }),
+			/anime cel-shaded/,
+		);
+		assert.ok(
+			conceptPrompt(card, { style: "card" }).includes(card.look.art_style),
+		);
+		// extra reaches the model in every mode.
+		for (const control of ["gpt", "img2img", "pose"])
+			assert.ok(
+				conceptPrompt(card, { control, extra }).includes(extra),
+				control,
+			);
+		assert.ok(
+			conceptPrompt(card, { figure: "blocking", extra }).includes(extra),
+		);
+
+		await withLibrary(async () => {
+			const { saveCard, saveAsset } = await import(
+				path.join(root, "dist/store.js")
+			);
+			const { slug } = await saveCard(example);
+			const opts = { extra, seed: 7 };
+			const dry = await generateConcept(slug, { ...opts, dryRun: true });
+			assert.equal(dry.generated, false);
+			const sent = await captureFalSubmit(() => generateConcept(slug, opts));
+			assert.equal(sent.prompt, dry.prompt, "dry run = real gpt prompt");
+			assert.ok(sent.prompt.includes(PAINTED) && sent.prompt.includes(extra));
+			assert.match(sent.prompt, /OpenPose skeleton/);
+			assert.doesNotMatch(sent.prompt, HOUSE);
+
+			await saveAsset(slug, "concept.png", Buffer.from("x"));
+			const scene = await captureFalSubmit(() => generateScene(slug));
+			assert.ok(scene.prompt.includes(PAINTED));
+			assert.doesNotMatch(scene.prompt, HOUSE);
+		});
+	});
 });
 
 test("MCP server: tools, roll, save, concept prompt, list", async () => {

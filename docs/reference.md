@@ -101,8 +101,8 @@ Prompts are saved to `<character>/prompts/<kind>.md`. Writing a prompt never cal
 
 Every media step is built from the card and saved in the character's folder: generated files in `assets/`, the prompt behind each one in `prompts/`, and what it cost in `costs.json`.
 
-- **Concept sheet** (`character_concept`): character-forge draws a faceless A-pose figure from the card's body (the proportions they were born with, as life changed them, plus their posture; front and back) and gives it to GPT Image as the pose reference, with the full description of the look. Options: `style` (`card` for the designer's suggestion, or any style text; saved as `concept-<style>.png`), `pose_image` (put the character in the pose of any picture → `concept-pose.png`), `seed`, `dry_run` (prompt only). `mode` switches to the older pipelines (Z-Image image-to-image or ControlNet), kept for experiments. Without `FAL_KEY` you get a ready prompt.
-- **Location** (`character_scene`): the concept placed in a key location from the card, in the character's idle pose. It is the first frame of the video.
+- **Concept sheet** (`character_concept`): character-forge draws a faceless A-pose figure from the card's body (the proportions they were born with, as life changed them, plus their posture; front and back) and gives it to GPT Image as the pose reference, with the full description of the look. Options: `style` (`card` for the designer's suggestion, or any style text; saved as `concept-<style>.png`), `pose_image` (put the character in the pose of any picture → `concept-pose.png`), `extra` (art direction added to the prompt), `seed`, `dry_run` (returns exactly the prompt the real run would send, without generating). `mode` switches to the older pipelines (Z-Image image-to-image or ControlNet), kept for experiments. Without `FAL_KEY` you get a ready prompt.
+- **Location** (`character_scene`): the concept placed in a key location from the card, in the character's idle pose, in the library's house style. It is the first frame of the video.
 - **Idle video** (`character_video`): 8 seconds by default. Kling (silent) or Veo (optional sound); the end is crossfaded into the start so it loops without a seam.
 - **Voice** (`character_voice`): a voice designed from the card (ElevenLabs for adults, Qwen for children), saying a few lines about the moment the video shows. Every language is a fresh performance from a translated script, not a dub.
 - **Theme** (`character_theme`): about 30 seconds of instrumental music from the wound, the paradox and the dramatic question. Needs only the location.
@@ -133,5 +133,6 @@ npx @gdhub/character-forge-mcp --help                                  # every c
 | `FAL_KEY` | fal.ai key for pictures, video, voice and music. Optional: without it you get cards and ready prompts |
 | `CHARACTER_FORGE_DIR` | Where characters are saved (default `~/character-forge`) |
 | `CHARACTER_FORGE_MODELS` | Path to your own `models.json`, to switch models or prices |
+| `CHARACTER_FORGE_ART_STYLE` | The library's house style for concept sheets and location scenes, e.g. `Painterly gouache illustration, visible brush strokes`. Describe the look, not the lighting. Default: `Stylized 3D game character render, hand-painted textures, slightly exaggerated proportions, soft studio light`. Read on every call |
 
 A `.env` file in the folder the server starts from is read too.
