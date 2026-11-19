@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.4...v0.3.5) (2026-11-19)
+
+
+### Features
+
+* an avatar with every concept sheet, face-centred and free ([#48](https://github.com/gdhub-io/character-forge-mcp/issues/48)) ([7d6c4b0](https://github.com/gdhub-io/character-forge-mcp/commit/7d6c4b0ec96a8b28831e10643b978fe912df6ad6))
+
 ## [0.3.4](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.3...v0.3.4) (2026-11-19)
 
 
