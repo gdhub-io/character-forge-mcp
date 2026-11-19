@@ -1,4 +1,4 @@
-import { deflateSync } from "node:zlib";
+import { encodePng } from "./png.js";
 
 /**
  * A shaded, faceless mannequin in an A-pose, built from the character's own proportions and asymmetries
@@ -213,45 +213,17 @@ class Canvas {
 		}
 	}
 	png(): Buffer {
-		const raw = Buffer.alloc((this.w * 3 + 1) * this.h);
-		for (let y = 0; y < this.h; y++)
-			this.px.copy(
-				raw,
-				y * (this.w * 3 + 1) + 1,
-				y * this.w * 3,
-				(y + 1) * this.w * 3,
-			);
-		const ihdr = Buffer.alloc(13);
-		ihdr.writeUInt32BE(this.w, 0);
-		ihdr.writeUInt32BE(this.h, 4);
-		ihdr.set([8, 2, 0, 0, 0], 8); // 8-bit RGB
-		return Buffer.concat([
-			Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-			chunk("IHDR", ihdr),
-			chunk("IDAT", deflateSync(raw)),
-			chunk("IEND", Buffer.alloc(0)),
-		]);
+		return encodePng({
+			width: this.w,
+			height: this.h,
+			channels: 3,
+			data: this.px,
+		});
 	}
 }
 
-const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
-	let c = n;
-	for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-	return c >>> 0;
-});
-function chunk(type: string, data: Buffer): Buffer {
-	const td = Buffer.concat([Buffer.from(type, "ascii"), data]);
-	let crc = 0xffffffff;
-	for (const byte of td) crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-	const out = Buffer.alloc(12 + data.length);
-	out.writeUInt32BE(data.length, 0);
-	td.copy(out, 4);
-	out.writeUInt32BE((crc ^ 0xffffffff) >>> 0, 8 + data.length);
-	return out;
-}
-
 /** Places unit keypoints on the sheet; the back view mirrors left and right. */
-function place(
+export function place(
 	unit: (Pt | null)[],
 	view: "front" | "back",
 	cx: number,
@@ -525,21 +497,12 @@ export type FigureStyle =
 	| "blocking-lit"
 	| "skeleton";
 
-/** PNG of a mannequin sheet in an A-pose for this body: one front figure (2:3) or front + back side by side (3:2). */
-export function mannequinPng(
-	layout: PoseLayout,
-	body: BodyShape = AVERAGE_BODY,
-	style: FigureStyle = "shaded",
-	blocking?: Blocking,
-): { png: Buffer; width: number; height: number } {
-	const colour =
-		style.startsWith("blocking") && blocking ? blocking : undefined;
+/**
+ * Where the figures stand on a sheet of this layout: the body's unit keypoints, figure height and top in pixels,
+ * and each view's centre line. The figure drawing and the avatar box both read it.
+ */
+export function sheetFrame(layout: PoseLayout, body: BodyShape = AVERAGE_BODY) {
 	const [w, h] = layout === "front" ? [1024, 1536] : [1536, 1024];
-	const cv =
-		style === "mask" || style === "skeleton"
-			? new Canvas(w, h, 0, 255)
-			: new Canvas(w, h, 238, style === "flat" ? 40 : null);
-	cv.litPaint = !(style === "blocking" && colour); // without zone colours "blocking" is exactly the grey mannequin
 	const n = layout === "front" ? 1 : 2;
 	const unit = poseKeypoints(body);
 	const span =
@@ -549,7 +512,6 @@ export function mannequinPng(
 			) +
 		0.1;
 	const figH = Math.min(h * 0.84, ((w / n) * 0.8) / span);
-	const top = (h - figH) / 2;
 	const views: ["front" | "back", number][] =
 		n === 1
 			? [["front", w / 2]]
@@ -557,6 +519,31 @@ export function mannequinPng(
 					["front", w * 0.27],
 					["back", w * 0.73],
 				];
+	return { width: w, height: h, unit, figH, top: (h - figH) / 2, views };
+}
+
+/** PNG of a mannequin sheet in an A-pose for this body: one front figure (2:3) or front + back side by side (3:2). */
+export function mannequinPng(
+	layout: PoseLayout,
+	body: BodyShape = AVERAGE_BODY,
+	style: FigureStyle = "shaded",
+	blocking?: Blocking,
+): { png: Buffer; width: number; height: number } {
+	const colour =
+		style.startsWith("blocking") && blocking ? blocking : undefined;
+	const {
+		width: w,
+		height: h,
+		unit,
+		figH,
+		top,
+		views,
+	} = sheetFrame(layout, body);
+	const cv =
+		style === "mask" || style === "skeleton"
+			? new Canvas(w, h, 0, 255)
+			: new Canvas(w, h, 238, style === "flat" ? 40 : null);
+	cv.litPaint = !(style === "blocking" && colour); // without zone colours "blocking" is exactly the grey mannequin
 	for (const [view, cx] of views) {
 		const pts = place(unit, view, cx, top, figH);
 		if (style === "skeleton") drawSkeleton(cv, pts, view, h);

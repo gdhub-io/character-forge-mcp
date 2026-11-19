@@ -18,7 +18,7 @@ export function registerPick(server: McpServer) {
 		async ({ winner }) => {
 			const r = await keepWinner(winner);
 			const imported = r.concept
-				? `\nThe user's image is now the concept: ${r.concept} (do not generate one).`
+				? `\nThe user's image is now the concept: ${r.concept} (do not generate one). It has no avatar: an imported picture has no skeleton to find the head by, so ask for a box and call character_avatar with it.`
 				: "";
 			const message = `Kept ${r.winner} in the library; deleted ${r.deleted.join(", ") || "no other drafts"}.${imported}`;
 			return r.concept

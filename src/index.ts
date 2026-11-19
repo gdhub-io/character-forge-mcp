@@ -3,9 +3,11 @@ import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { parseArgs, parseEnv } from "node:util";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { avatarText, makeAvatar } from "./avatar.js";
 import { checkCard, checkToText } from "./check.js";
 import {
 	buildTposePrompt,
+	conceptFileName,
 	DEFAULT_VIEWS,
 	generateConcept,
 	importConcept,
@@ -61,6 +63,8 @@ Usage:
   character-forge say <id> --text T --name N
                                        speak one line in that voice → assets/voice/lines/N.mp3
   character-forge concept-import <id> <image>   use an existing concept image (path or URL) as concept.png
+  character-forge avatar <id> [--style S] [--pose-sheet] [--box x,y,w]
+                                       crop the avatar (face-centred square) from a concept sheet → avatar.png (free)
   character-forge next <id>            what can be made next for the character, with prices
   character-forge costs <id>           what the character has cost so far (estimates from models.json pricing)
   character-forge list                 list saved characters
@@ -114,6 +118,8 @@ async function main() {
 			audio: { type: "boolean" },
 			model: { type: "string" },
 			pose: { type: "string" },
+			"pose-sheet": { type: "boolean" },
+			box: { type: "string" },
 			mode: { type: "string" },
 			strength: { type: "string" },
 			figure: { type: "string" },
@@ -234,6 +240,18 @@ async function main() {
 		case "prompt":
 			console.log(buildTposePrompt(await loadCard(arg("id")), conceptOpts));
 			return;
+		case "avatar": {
+			const box = values.box?.split(",").map(Number);
+			if (box && (box.length !== 3 || box.some(Number.isNaN)))
+				fail("--box must be x,y,w (fractions of the sheet)");
+			const a = await makeAvatar(
+				arg("id"),
+				conceptFileName(values.style, values["pose-sheet"]),
+				{ box: box && { x: box[0], y: box[1], w: box[2] } },
+			);
+			console.log(avatarText(a));
+			return;
+		}
 		case "concept": {
 			if (values["dry-run"]) {
 				const r = await generateConcept(arg("id"), {
@@ -247,7 +265,7 @@ async function main() {
 			const r = await generateConcept(arg("id"), conceptOpts);
 			if (!r.generated) fail(`${r.reason} Use \`prompt\` to get the text.`);
 			console.log(
-				`Concept (${r.image.provider}/${r.image.model}${r.image.seed !== undefined ? `, seed ${r.image.seed}` : ""})\n  ${r.file}\n  ${r.card}`,
+				`Concept (${r.image.provider}/${r.image.model}${r.image.seed !== undefined ? `, seed ${r.image.seed}` : ""})\n  ${r.file}\n  ${avatarText(r.avatar)}\n  ${r.card}`,
 			);
 			return;
 		}

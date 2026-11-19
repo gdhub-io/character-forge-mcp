@@ -69,7 +69,8 @@ You talk to the chat; it calls these tools. Paid ones run only when you ask for 
 | `character_check` | Coherence check: red flags (generic filler, repeats, want = need) plus questions built from the card's own content | free |
 | `character_save` | Validates the full card and saves JSON + Markdown; returns the `id` | free |
 | `character_pick` | Keeps the tournament winner and deletes the other variants; a picture the user gave becomes its concept | free |
-| `character_concept` | The A-pose concept sheet | ≈ $0.02 |
+| `character_concept` | The A-pose concept sheet, with its avatar | ≈ $0.02 |
+| `character_avatar` | Crops the avatar from a saved concept sheet: remakes it, or crops a box you give | free |
 | `character_scene` | The character in their own place, in their idle pose | ≈ $0.05 |
 | `character_video` | An 8-second looping video of the scene | ≈ $0.67 |
 | `character_voice` | Designs their voice and records a short monologue about the moment the video shows, in every language asked for | ≈ $0.03 a language |
@@ -102,6 +103,7 @@ Prompts are saved to `<character>/prompts/<kind>.md`. Writing a prompt never cal
 Every media step is built from the card and saved in the character's folder: generated files in `assets/`, the prompt behind each one in `prompts/`, and what it cost in `costs.json`.
 
 - **Concept sheet** (`character_concept`): character-forge draws a faceless A-pose figure from the card's body (the proportions they were born with, as life changed them, plus their posture; front and back) and gives it to GPT Image as the pose reference, with the full description of the look. Options: `style` (`card` for the designer's suggestion, or any style text; saved as `concept-<style>.png`), `pose_image` (put the character in the pose of any picture → `concept-pose.png`), `extra` (art direction added to the prompt), `seed`, `dry_run` (returns exactly the prompt the real run would send, without generating). `mode` switches to the older pipelines (Z-Image image-to-image or ControlNet), kept for experiments. Without `FAL_KEY` you get a ready prompt.
+- **Avatar** (free, with every concept sheet; `avatar: false` on `character_concept` skips it): a square crop of the front view's head, with the face in the centre and the hair, neck and tops of the shoulders around it, so it also works cut into a circle. It is saved as `assets/avatar.png` (`avatar-<style>.png` for `concept-<style>.png`), and `card.md` shows it above the concept. The tool also returns the box on the sheet, `{ x, y, w }`: `x` and `w` are fractions of the sheet's width, `y` of its height, and the box is square in pixels. Near the top edge `y` can be negative; that strip is filled with the background colour. The head is found on the picture itself, using the card's figure to know where to look (`method: "silhouette"`). If the background isn't plain, the box comes from the figure alone (`"skeleton"`). `character_avatar { id, style?, pose?, box? }` remakes the avatar for any sheet, including sheets made before avatars existed, or crops a `box` you give (`"box"`). Imported pictures and `pose_image` sheets have no figure to search by, so they need a box. Only PNG sheets can be cropped.
 - **Location** (`character_scene`): the concept placed in a key location from the card, in the character's idle pose, in the library's house style. It is the first frame of the video.
 - **Idle video** (`character_video`): 8 seconds by default. Kling (silent) or Veo (optional sound); the end is crossfaded into the start so it loops without a seam.
 - **Voice** (`character_voice`): a voice designed from the card (ElevenLabs for adults, Qwen for children), saying a few lines about the moment the video shows. Every language is a fresh performance from a translated script, not a dub.
@@ -120,7 +122,8 @@ npx @gdhub/character-forge-mcp roll --variants 3 --anchor fisherman    # roll 3 
 npx @gdhub/character-forge-mcp check card.json                         # red flags + coherence questions
 npx @gdhub/character-forge-mcp save card.json                          # validate and save to the library
 npx @gdhub/character-forge-mcp next marta-vell                         # what can be made next, with prices
-npx @gdhub/character-forge-mcp concept marta-vell                      # concept sheet (needs FAL_KEY)
+npx @gdhub/character-forge-mcp concept marta-vell                      # concept sheet + avatar (needs FAL_KEY)
+npx @gdhub/character-forge-mcp avatar marta-vell                       # remake the avatar (free); --box x,y,w to crop by hand
 npx @gdhub/character-forge-mcp costs marta-vell                        # what it has cost so far
 npx @gdhub/character-forge-mcp list
 npx @gdhub/character-forge-mcp --help                                  # every command
