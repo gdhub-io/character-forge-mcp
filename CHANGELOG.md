@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.4](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.3...v0.3.4) (2026-11-19)
+
+
+### Features
+
+* library-level art style; extra and dry run match the real prompt ([#43](https://github.com/gdhub-io/character-forge-mcp/issues/43)) ([5ba8115](https://github.com/gdhub-io/character-forge-mcp/commit/5ba8115ebef197025c862c10206dac4fd644579d))
+* **meet:** characters remember earlier scenes with each other ([#41](https://github.com/gdhub-io/character-forge-mcp/issues/41)) ([ead7e37](https://github.com/gdhub-io/character-forge-mcp/commit/ead7e37e9978068d8a0c4b92a6851851025a98e7))
+
 ## [0.3.3](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.2...v0.3.3) (2026-11-13)
 
 
