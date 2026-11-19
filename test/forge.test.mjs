@@ -911,6 +911,7 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 		);
 		// Others are strangers: known by stage ids, not by the names in their ids.
 		assert.match(self, /- person-b: /);
+		assert.match(self, /You have never met: a complete stranger/);
 		assert.doesNotMatch(
 			self.split("WHO ELSE IS HERE")[1].split("WHAT HAS HAPPENED")[0],
 			/bo-birch|cy-cole/,
@@ -1048,6 +1049,15 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 			);
 		assert.equal(r.scene.done, "a full round of silence");
 		assert.equal(nextSpeaker(r.scene), undefined);
+		// Meeting again: each remembers where they met and how they parted.
+		const later = await startScene({
+			characters: ["bo-birch", "ann-ash"],
+			situation: "A tram stop.",
+		});
+		assert.match(
+			packetFor(later.scene, "bo-birch"),
+			/You have met before: A lift at night; the light goes out\. You parted wary \(wary\)\./,
+		);
 		const ab = attitudePaths(r.scene).find(
 			(p) => p.from === "ann-ash" && p.to === "bo-birch",
 		);
