@@ -79,7 +79,7 @@ Restart the app and ask in the chat:
 
 > Here's my sketch: hero.png. She's a desert pilot who is afraid of the sea.
 
-You get a full character card. Then ask for more, one step at a time: *"Draw the concept"*, *"Put her in her place"*, *"Bring the picture to life"*, *"Give her a voice"*, *"Write her music"*. Not sure what's next? Ask *"What's next?"*.
+You get a full character card. Then ask for more, one step at a time: *"Draw the concept"* (it comes with a face-centred avatar for free), *"Put her in her place"*, *"Bring the picture to life"*, *"Give her a voice"*, *"Write her music"*. Not sure what's next? Ask *"What's next?"*.
 
 **Experimental: characters meet.** In Claude Code, type `/meet` with 2–5 saved characters and a situation, for example `/meet marta-vell pike-ostrander — stuck in a lift at night, the light goes out`. They meet as strangers and play the scene in turns. You get a script with each one's private thoughts under their lines, and how each one's feelings toward the others changed. Free: the chat plays the characters.
 

@@ -1,3 +1,4 @@
+import { type Avatar, makeAvatar } from "./avatar.js";
 import { apiKey, config } from "./config.js";
 import { recordCost } from "./costs.js";
 import { falControlGenerate, falUpload, toImageUrl } from "./fal.js";
@@ -8,7 +9,13 @@ import {
 	type PoseLayout,
 } from "./pose.js";
 import { bodyOf, type CharacterCard, slugify } from "./schema.js";
-import { loadCard, pickWinner, saveConcept, writeCard } from "./store.js";
+import {
+	IMPORTED,
+	loadCard,
+	pickWinner,
+	saveConcept,
+	writeCard,
+} from "./store.js";
 import { readUserImage } from "./userimage.js";
 
 export const VIEWS = ["front", "front-back", "front-side-back"] as const;
@@ -33,6 +40,8 @@ export interface ConceptOptions {
 	figure?: FigureStyle;
 	/** How strictly to follow the pose, 0-1 (default 0.75). */
 	controlScale?: number;
+	/** Also cut the avatar from the sheet (default true; free). */
+	avatar?: boolean;
 }
 
 /** The body's numbers as words an image model follows; only deviations from average are named. */
@@ -388,9 +397,25 @@ export type ConceptResult =
 			generated: true;
 			prompt: string;
 			file: string;
+			/** The head-and-shoulders crop made from the sheet, or why there is none. */
+			avatar: Avatar | { reason: string };
 			card: string;
 			image: GeneratedImage;
 	  };
+
+/**
+ * The sheet's file in assets/: concept.png is the card's concept; another style or a custom pose is an extra sheet
+ * next to it (concept-<style>.png, concept-pose[-<style>].png).
+ */
+export function conceptFileName(style?: string, pose = false): string {
+	// A style named "pose…" must not take the pose sheet's name.
+	const slug = style
+		? `-${slugify(style === "card" ? "card-style" : style)
+				.replace(/^pose/, "style-pose")
+				.slice(0, 40)}`
+		: "";
+	return `concept${pose ? "-pose" : ""}${slug}.png`;
+}
 
 /** The whole concept pipeline, shared by the MCP tool and the CLI. */
 export async function generateConcept(
@@ -419,25 +444,21 @@ export async function generateConcept(
 		detail: "model sheet",
 		usd: config().pricing.concept.image,
 	});
-	// The A-pose sheet is the card's concept; a custom pose is an extra sheet next to it.
-	const styleSlug = opts.style
-		? `-${slugify(opts.style === "card" ? "card-style" : opts.style).slice(0, 40)}`
-		: "";
-	const file = await saveConcept(
-		id,
-		image.bytes,
-		image.prompt,
-		opts.poseImage
-			? `concept-pose${styleSlug}.png`
-			: styleSlug
-				? `concept${styleSlug}.png`
-				: undefined,
-	);
+	const name = conceptFileName(opts.style, Boolean(opts.poseImage));
+	const file = await saveConcept(id, image.bytes, image.prompt, name);
+	// The avatar is free and never fails the paid sheet.
+	const avatar =
+		opts.avatar === false
+			? { reason: "not asked for (avatar: false)." }
+			: await makeAvatar(id, name, { sheet: image.bytes, card }).catch(
+					(e: Error) => ({ reason: e.message }),
+				);
 	const saved = await writeCard(card);
 	return {
 		generated: true,
 		prompt: image.prompt,
 		file,
+		avatar,
 		card: saved.files.markdown,
 		image,
 	};
@@ -515,7 +536,7 @@ export async function importConcept(
 ): Promise<{ file: string; card: string }> {
 	await loadCard(id); // the character must exist
 	const { bytes } = await readUserImage(image);
-	const file = await saveConcept(id, bytes, `IMPORTED from ${image}`);
+	const file = await saveConcept(id, bytes, `${IMPORTED}${image}`);
 	const saved = await writeCard(await loadCard(id));
 	return { file, card: saved.files.markdown };
 }

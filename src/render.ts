@@ -472,7 +472,7 @@ const mdSection = (s: Section) =>
 
 export function renderMarkdown(
 	c: CharacterCard,
-	opts: { conceptFile?: string } = {},
+	opts: { conceptFile?: string; avatarFile?: string } = {},
 ): string {
 	const { main, visual } = sections(c);
 	return `${[
@@ -482,6 +482,7 @@ export function renderMarkdown(
 		tags(c)
 			.map((t) => `\`${t}\``)
 			.join(" · "),
+		opts.avatarFile ? `![Avatar](${opts.avatarFile})` : "",
 		opts.conceptFile ? `![A-pose concept](${opts.conceptFile})` : "",
 		...main.map(mdSection),
 		mdSection(visual),

@@ -1,4 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { registerAvatar } from "./avatar.js";
 import { registerCheck } from "./check.js";
 import { registerConcept } from "./concept.js";
 import { registerCosts } from "./costs.js";
@@ -23,6 +24,7 @@ export function registerTools(server: McpServer) {
 	registerRole(server);
 	registerSave(server);
 	registerConcept(server);
+	registerAvatar(server);
 	registerLibrary(server);
 	registerMedia(server);
 	registerScene(server);

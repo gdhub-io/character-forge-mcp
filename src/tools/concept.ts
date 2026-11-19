@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { avatarText } from "../avatar.js";
 import { generateConcept, VIEWS } from "../concept.js";
 import { copyable, reply, SHOW_PROMPT, shown } from "./util.js";
 
@@ -10,7 +11,7 @@ export function registerConcept(server: McpServer) {
 		{
 			title: "Generate A-pose concept sheet",
 			description:
-				"Builds an A-pose model-sheet prompt from a saved card's look and, with FAL_KEY set, generates it on fal.ai: a faceless figure built from the card's body (the proportions they were born with, as life events changed them, plus their posture) is drawn front and back and given to GPT Image as the pose reference, with the full look → concept.png (the card is re-rendered with it). pose_image puts the character in the pose of any picture → concept-pose.png. Without FAL_KEY (or with dry_run) returns the prompt only. Paid: tell the user the price from character_next and wait for a yes.",
+				"Builds an A-pose model-sheet prompt from a saved card's look and, with FAL_KEY set, generates it on fal.ai: a faceless figure built from the card's body (the proportions they were born with, as life events changed them, plus their posture) is drawn front and back and given to GPT Image as the pose reference, with the full look → concept.png (the card is re-rendered with it). pose_image puts the character in the pose of any picture → concept-pose.png. Every sheet drawn on the card's figure also gets its avatar for free: a square crop of the front view's head, face in the centre, saved as avatar.png (avatar-<style>.png for a style variant) and returned with its box. Without FAL_KEY (or with dry_run) returns the prompt only. Paid: tell the user the price from character_next and wait for a yes.",
 			annotations: {
 				openWorldHint: true,
 				destructiveHint: false,
@@ -39,6 +40,12 @@ export function registerConcept(server: McpServer) {
 					.optional()
 					.describe(
 						"Only return the prompt, do not call the image API. It is exactly the prompt the real run would send for the same options.",
+					),
+				avatar: z
+					.boolean()
+					.optional()
+					.describe(
+						"Also cut the avatar from the sheet (default true, free): two files come back, the sheet and avatar.png. false = the sheet only.",
 					),
 				pose_image: z
 					.string()
@@ -109,16 +116,17 @@ export function registerConcept(server: McpServer) {
 					{ prompt: r.prompt, generated: false },
 				);
 			}
-			const { image } = r;
+			const { image, avatar } = r;
 			return shown(
 				id,
-				`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${r.card}`,
-				[r.file],
+				`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${avatarText(avatar)}\n- ${r.card}`,
+				"file" in avatar ? [r.file, avatar.file] : [r.file],
 				"For a fix, call character_concept again with extra saying what to change; for a new take, another seed.",
 				{
 					prompt: r.prompt,
 					generated: true,
 					file: r.file,
+					avatar,
 					provider: image.provider,
 					model: image.model,
 					seed: image.seed,

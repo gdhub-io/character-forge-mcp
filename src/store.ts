@@ -28,6 +28,12 @@ import {
 export const ASSETS_DIR = "assets";
 export const PROMPTS_DIR = "prompts";
 const CONCEPT_FILE = `${ASSETS_DIR}/concept.png`;
+/** concept.png → avatar.png, concept-<style>.png → avatar-<style>.png: the head crop that belongs to a sheet. */
+export const avatarName = (conceptFile: string) =>
+	conceptFile.replace(/^concept/, "avatar");
+const AVATAR_FILE = `${ASSETS_DIR}/${avatarName("concept.png")}`;
+/** How an imported concept's prompt file starts: it was not drawn on the card's figure. */
+export const IMPORTED = "IMPORTED from ";
 
 export function outputDir(): string {
 	const dir =
@@ -82,6 +88,10 @@ export async function savePrompt(
 	return file;
 }
 
+/** The prompt behind an asset: prompts/<name>.txt. */
+export const promptName = (fileName: string) =>
+	path.join(path.dirname(fileName), `${path.parse(fileName).name}.txt`);
+
 /** Writes a generated file into assets/ and, if given, the prompt behind it as prompts/<name>.txt. */
 export async function saveAsset(
 	slug: string,
@@ -95,11 +105,7 @@ export async function saveAsset(
 		writeFile(file, bytes),
 		prompt === undefined
 			? null
-			: savePrompt(
-					slug,
-					path.join(path.dirname(fileName), `${path.parse(fileName).name}.txt`),
-					prompt,
-				),
+			: savePrompt(slug, promptName(fileName), prompt),
 	]);
 	return file;
 }
@@ -185,18 +191,23 @@ export async function loadCard(slug: string): Promise<StoredCard> {
 	return { ...card, meta: { ...card.meta, slug } };
 }
 
-/** The concept image file name relative to the card, if it has been generated. */
-async function conceptFileOf(slug: string): Promise<string | undefined> {
-	return (await exists(path.join(characterDir(slug), CONCEPT_FILE)))
-		? CONCEPT_FILE
-		: undefined;
+/** The card's concept sheet and avatar, as paths relative to its folder, if they exist. */
+async function imagesOf(
+	slug: string,
+): Promise<{ conceptFile?: string; avatarFile?: string }> {
+	const dir = characterDir(slug);
+	const [concept, avatar] = await Promise.all(
+		[CONCEPT_FILE, AVATAR_FILE].map((f) => exists(path.join(dir, f))),
+	);
+	return {
+		...(concept ? { conceptFile: CONCEPT_FILE } : {}),
+		...(avatar ? { avatarFile: AVATAR_FILE } : {}),
+	};
 }
 
-/** Markdown of a saved card, without touching disk beyond one existence check. */
+/** Markdown of a saved card, without touching disk beyond two existence checks. */
 export async function cardMarkdown(card: StoredCard): Promise<string> {
-	return renderMarkdown(card, {
-		conceptFile: await conceptFileOf(card.meta.slug),
-	});
+	return renderMarkdown(card, await imagesOf(card.meta.slug));
 }
 
 export interface SavedCharacter {
@@ -325,7 +336,8 @@ export async function pickWinner(
 export async function writeCard(card: StoredCard): Promise<SavedCharacter> {
 	const slug = card.meta.slug;
 	const dir = characterDir(slug);
-	const conceptFile = await conceptFileOf(slug);
+	const images = await imagesOf(slug);
+	const { conceptFile } = images;
 	const files = {
 		json: path.join(dir, "card.json"),
 		markdown: path.join(dir, "card.md"),
@@ -333,7 +345,7 @@ export async function writeCard(card: StoredCard): Promise<SavedCharacter> {
 	};
 	await Promise.all([
 		writeJson(files.json, card),
-		writeFile(files.markdown, renderMarkdown(card, { conceptFile })),
+		writeFile(files.markdown, renderMarkdown(card, images)),
 	]);
 	return { slug, dir, files };
 }
@@ -344,6 +356,8 @@ export async function saveConcept(
 	prompt: string,
 	fileName = "concept.png",
 ): Promise<string> {
+	// A new sheet replaces the picture its old avatar was cut from.
+	await rm(assetFile(slug, avatarName(fileName)), { force: true });
 	return saveAsset(slug, fileName, bytes, prompt);
 }
 

@@ -325,12 +325,11 @@ test("the A-pose prompt carries the look, the body's own sides and the wear, cle
 });
 
 /**
- * Runs fn with a fake FAL_KEY and fetch: uploads succeed, the first queue submit is captured and then refused,
- * so nothing paid is ever called. Returns the body the real run would have sent.
+ * Runs fn with a fake FAL_KEY and a fake fal: uploads succeed and `queue(url, init)` answers the queue, so nothing
+ * paid is ever called.
  */
-async function captureFalSubmit(fn) {
+async function withFakeFal(queue, fn) {
 	const realFetch = globalThis.fetch;
-	let sent;
 	globalThis.fetch = async (url, init = {}) => {
 		const u = String(url);
 		if (u.includes("/storage/upload/initiate"))
@@ -339,17 +338,28 @@ async function captureFalSubmit(fn) {
 				file_url: "https://fal.media/file.png",
 			});
 		if (u === "https://fal.media/put") return new Response("");
-		if (u.startsWith("https://queue.fal.run/")) {
-			sent = JSON.parse(init.body);
-			return Response.json({ detail: "refused in tests" }, { status: 400 });
-		}
+		const answer = await queue(u, init);
+		if (answer) return answer;
 		throw new Error(`unexpected fetch in a test: ${u}`);
 	};
 	try {
-		await withEnv({ FAL_KEY: "test-key-not-real" }, () => fn().catch(() => {}));
+		return await withEnv({ FAL_KEY: "test-key-not-real" }, fn);
 	} finally {
 		globalThis.fetch = realFetch;
 	}
+}
+
+/** The body the real run would send to fal: the first queue submit is captured, then refused. */
+async function captureFalSubmit(fn) {
+	let sent;
+	await withFakeFal(
+		(u, init) => {
+			if (!u.startsWith("https://queue.fal.run/")) return;
+			sent = JSON.parse(init.body);
+			return Response.json({ detail: "refused in tests" }, { status: 400 });
+		},
+		() => fn().catch(() => {}),
+	);
 	assert.ok(sent, "the run reached the image model");
 	return sent;
 }
@@ -429,6 +439,221 @@ test("art style: the library's house style, extra in every mode, dry run = the r
 	});
 });
 
+test("PNG: decodes every row filter and colour type it writes back", async () => {
+	const { decodePng, encodePng } = await import(path.join(root, "dist/png.js"));
+	const { deflateSync } = await import("node:zlib");
+	const [w, h, ch] = [7, 5, 4];
+	const px = Buffer.from(
+		Array.from({ length: w * h * ch }, (_, i) => (i * 37 + 11) % 256),
+	);
+	// Each row with its own filter (None, Sub, Up, Average, Paeth), the way encoders choose them.
+	const paeth = (a, b, c) => {
+		const p = a + b - c;
+		const [pa, pb, pc] = [p - a, p - b, p - c].map(Math.abs);
+		return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+	};
+	const rows = [];
+	for (let y = 0; y < h; y++) {
+		const f = y % 5;
+		const row = [f];
+		for (let i = 0; i < w * ch; i++) {
+			const v = px[y * w * ch + i];
+			const a = i >= ch ? px[y * w * ch + i - ch] : 0;
+			const b = y ? px[(y - 1) * w * ch + i] : 0;
+			const c = y && i >= ch ? px[(y - 1) * w * ch + i - ch] : 0;
+			const pred = [0, a, b, (a + b) >> 1, paeth(a, b, c)][f];
+			row.push((v - pred + 256) % 256);
+		}
+		rows.push(...row);
+	}
+	const plain = encodePng({ width: w, height: h, channels: ch, data: px });
+	// Same header, filtered image data: swap the IDAT chunk.
+	const idatAt = plain.indexOf("IDAT") - 4;
+	const len = plain.readUInt32BE(idatAt);
+	const head = plain.subarray(0, idatAt);
+	const data = deflateSync(Buffer.from(rows));
+	const chunk = Buffer.alloc(12 + data.length);
+	chunk.writeUInt32BE(data.length, 0);
+	chunk.write("IDAT", 4, "ascii");
+	data.copy(chunk, 8);
+	const filtered = Buffer.concat([
+		head,
+		chunk,
+		plain.subarray(idatAt + 12 + len),
+	]);
+	assert.deepEqual(decodePng(filtered).data, px);
+	assert.deepEqual(decodePng(plain).data, px);
+	assert.equal(decodePng(plain).width, w);
+	assert.throws(() => decodePng(Buffer.from("not a png")), /Not a PNG/);
+	// A header that claims a huge picture is refused before anything is allocated.
+	const huge = Buffer.from(plain);
+	huge.writeUInt32BE(100_000, 16);
+	huge.writeUInt32BE(100_000, 20);
+	assert.throws(() => decodePng(huge), /too large/);
+});
+
+/** Nearest-neighbour resize of a raster, standing in for a model that returns another size than the reference. */
+function resized(img, width, height) {
+	const data = Buffer.alloc(width * height * img.channels);
+	for (let y = 0; y < height; y++)
+		for (let x = 0; x < width; x++) {
+			const from =
+				(Math.floor((y * img.height) / height) * img.width +
+					Math.floor((x * img.width) / width)) *
+				img.channels;
+			img.data.copy(
+				data,
+				(y * width + x) * img.channels,
+				from,
+				from + img.channels,
+			);
+		}
+	return { ...img, width, height, data };
+}
+
+test("avatar: the face found on the sheet sits in the centre, for any body and output size", async () => {
+	const { decodePng } = await import(path.join(root, "dist/png.js"));
+	const { findAvatarBox, avatarName } = await import(
+		path.join(root, "dist/avatar.js")
+	);
+	const { conceptFileName } = await import(path.join(root, "dist/concept.js"));
+	const { sheetFrame, place } = await import(path.join(root, "dist/pose.js"));
+	const bodies = {
+		average: AVERAGE_BODY,
+		tilted: { ...AVERAGE_BODY, head_tilt: 0.8, shoulder_tilt: 0.5 },
+		stooped: { ...AVERAGE_BODY, stoop: 0.8 },
+		child: { ...AVERAGE_BODY, head_heights: 4.5 },
+	};
+	for (const [name, body] of Object.entries(bodies)) {
+		// A flat dark figure on light grey: the sheet as the model is asked to draw it.
+		const sheet = decodePng(mannequinPng("front-back", body, "flat").png);
+		const f = sheetFrame("front-back", body);
+		const pts = place(f.unit, "front", f.views[0][1], f.top, f.figH);
+		const face = [0, 14, 15].map((i) => pts[i]);
+		const fx = face.reduce((a, p) => a + p[0], 0) / 3 / f.width;
+		for (const [w, h] of [
+			[1536, 1024],
+			[1152, 768],
+			[1200, 1000],
+		]) {
+			const img = w === 1536 ? sheet : resized(sheet, w, h);
+			const { box, method } = findAvatarBox(img, body);
+			assert.equal(method, "silhouette", `${name} ${w}x${h}`);
+			const side = box.w * w;
+			// Square, centred on the face across, about 1.6 heads of this body tall, and above the waist.
+			assert.ok(Math.abs(box.x + box.w / 2 - fx) < 0.02, `${name} ${w}x${h} x`);
+			const head = (f.figH / body.head_heights) * (h / f.height);
+			assert.ok(
+				side > 1.2 * head && side < 2.2 * head,
+				`${name} ${w}x${h} size`,
+			);
+			const faceY = (face.reduce((a, p) => a + p[1], 0) / 3) * (h / f.height);
+			const centreY = box.y * h + side / 2;
+			assert.ok(Math.abs(centreY - faceY) < 0.35 * head, `${name} ${w}x${h} y`);
+		}
+	}
+	// A busy background: the picture can't be read, so the box falls back to the card's figure.
+	const noisy = decodePng(mannequinPng("front-back", AVERAGE_BODY, "flat").png);
+	// A scene behind the figure: one corner of the sheet is dark.
+	for (let y = 0; y < 100; y++)
+		noisy.data.fill(30, y * noisy.width * 3, (y * noisy.width + 100) * 3);
+	assert.equal(findAvatarBox(noisy, AVERAGE_BODY).method, "skeleton");
+	// Variants keep their suffix.
+	assert.equal(avatarName(conceptFileName()), "avatar.png");
+	assert.equal(
+		avatarName(conceptFileName("Anime cel")),
+		"avatar-anime-cel.png",
+	);
+	assert.equal(avatarName(conceptFileName("card")), "avatar-card-style.png");
+	assert.equal(avatarName(conceptFileName(undefined, true)), "avatar-pose.png");
+	// A style named "pose…" doesn't take the pose sheet's name.
+	assert.equal(conceptFileName("Pose study"), "concept-style-pose-study.png");
+});
+
+test("avatar: made with the concept, remade free, by hand for imported pictures", async () => {
+	const { decodePng } = await import(path.join(root, "dist/png.js"));
+	const { makeAvatar } = await import(path.join(root, "dist/avatar.js"));
+	const { generateConcept, importConcept } = await import(
+		path.join(root, "dist/concept.js")
+	);
+	const sheet = mannequinPng("front-back", AVERAGE_BODY, "flat").png;
+	await withLibrary(async (dir) => {
+		const { saveCard, saveAsset, loadCard, cardMarkdown } = await import(
+			path.join(root, "dist/store.js")
+		);
+		const { slug } = await saveCard(example);
+		// The real run, against a fake fal that returns our flat sheet: the avatar comes with it.
+		const r = await withFakeFal(
+			(u, init) =>
+				u.startsWith("https://queue.fal.run/") && init.method === "POST"
+					? Response.json({
+							status_url: "https://queue.fal.run/x/status",
+							response_url: "https://queue.fal.run/x/result",
+						})
+					: u.endsWith("/status")
+						? Response.json({ status: "COMPLETED" })
+						: u.endsWith("/result")
+							? Response.json({
+									images: [{ url: "https://fal.media/out.png" }],
+								})
+							: u === "https://fal.media/out.png"
+								? new Response(sheet)
+								: undefined,
+			() => generateConcept(slug, { seed: 1 }),
+		);
+		assert.equal(r.generated, true);
+		assert.equal(r.avatar.method, "silhouette");
+		assert.equal(path.basename(r.avatar.file), "avatar.png");
+		const av = decodePng(readFileSync(r.avatar.file));
+		assert.equal(av.width, av.height);
+		assert.match(
+			await cardMarkdown(await loadCard(slug)),
+			/!\[Avatar\]\(assets\/avatar\.png\)/,
+		);
+
+		// Remade free from the saved sheet; an explicit box is cropped as given.
+		assert.deepEqual((await makeAvatar(slug)).box, r.avatar.box);
+		const byHand = await makeAvatar(slug, "concept.png", {
+			box: { x: 0.1, y: -0.05, w: 0.25 },
+		});
+		assert.equal(byHand.method, "box");
+		assert.match(
+			readFileSync(path.join(dir, slug, "card.md"), "utf8"),
+			/!\[Avatar\]/,
+		);
+		assert.equal(
+			decodePng(readFileSync(byHand.file)).width,
+			Math.round(0.25 * 1536),
+		);
+		await assert.rejects(
+			makeAvatar(slug, "concept.png", { box: { x: 0.9, y: 0, w: 0.5 } }),
+			/doesn't fit/,
+		);
+		await assert.rejects(
+			makeAvatar(slug, "concept-anime.png"),
+			/No concept-anime.png/,
+		);
+
+		// An imported picture has no skeleton: no avatar unless a box is given, and the old one is gone.
+		const mine = path.join(dir, "mine.png");
+		writeFileSync(mine, sheet);
+		await importConcept(slug, mine);
+		assert.equal(existsSync(r.avatar.file), false);
+		await assert.rejects(makeAvatar(slug), /imported.*Pass a box/);
+		assert.equal(
+			(await makeAvatar(slug, "concept.png", { box: { x: 0.2, y: 0, w: 0.2 } }))
+				.method,
+			"box",
+		);
+		// Pose sheets too.
+		await saveAsset(slug, "concept-pose.png", sheet, "prompt");
+		await assert.rejects(
+			makeAvatar(slug, "concept-pose.png"),
+			/pose from a picture/,
+		);
+	});
+});
+
 test("MCP server: tools, roll, save, concept prompt, list", async () => {
 	const dir = mkdtempSync(path.join(os.tmpdir(), "cforge-"));
 	const transport = new StdioClientTransport({
@@ -443,6 +668,7 @@ test("MCP server: tools, roll, save, concept prompt, list", async () => {
 	try {
 		const { tools } = await client.listTools();
 		assert.deepEqual(tools.map((t) => t.name).sort(), [
+			"character_avatar",
 			"character_check",
 			"character_concept",
 			"character_costs",
