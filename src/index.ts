@@ -44,9 +44,11 @@ Usage:
                                        save a translation of a saved card as card.<lang>.json
   character-forge render <id>          re-render card.md of a saved character
   character-forge prompt <id> [--style S] [--views ${VIEWS.join("|")}]
-                                       print the A-pose image prompt
-  character-forge concept <id> [--style S] [--views V] [--seed N] [--pose picture]
+                                       print a portable A-pose prompt for any image model
+                                       (concept --dry-run prints what the real run sends)
+  character-forge concept <id> [--style S] [--views V] [--extra E] [--seed N] [--pose picture] [--dry-run]
                                        generate concept.png on fal.ai (needs FAL_KEY);
+                                       --dry-run prints the exact prompt the real run would send;
                                        --pose puts the character in the pose of a picture → concept-pose.png
   character-forge media <id> --kind ${MEDIA_KINDS.join("|")}
                                        print the brief for writing one generation prompt
@@ -99,6 +101,7 @@ async function main() {
 			human: { type: "boolean" },
 			json: { type: "boolean" },
 			overwrite: { type: "boolean" },
+			"dry-run": { type: "boolean" },
 			style: { type: "string" },
 			views: { type: "string" },
 			extra: { type: "string" },
@@ -232,6 +235,14 @@ async function main() {
 			console.log(buildTposePrompt(await loadCard(arg("id")), conceptOpts));
 			return;
 		case "concept": {
+			if (values["dry-run"]) {
+				const r = await generateConcept(arg("id"), {
+					...conceptOpts,
+					dryRun: true,
+				});
+				console.log(r.prompt);
+				return;
+			}
 			console.error("Generating…");
 			const r = await generateConcept(arg("id"), conceptOpts);
 			if (!r.generated) fail(`${r.reason} Use \`prompt\` to get the text.`);

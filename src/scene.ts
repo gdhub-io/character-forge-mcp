@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { DEFAULT_ART_STYLE, pronoun } from "./concept.js";
+import { houseStyle, pronoun } from "./concept.js";
 import { config } from "./config.js";
 import { recordCost, videoUsd } from "./costs.js";
 import { falQueue, falUpload } from "./fal.js";
@@ -54,7 +54,7 @@ export function defaultScenePrompt(c: CharacterCard): string {
 		`Signature item visible: ${lk.signature_item.item.replace(/\.$/, "")}.`,
 		"Restraint: show the character's craft or obsession through one or two details, not by filling the frame with it; the place is lived-in and ordinary, full of things that have nothing to do with their main motif.",
 		"Composition for a full-screen website background: 16:9 wide shot, the character placed in the RIGHT third of the frame, whole figure visible. The LEFT 60% is a calm continuation of the same place — low detail, soft focus, no bright spots, no faces or text — where menus and info cards will sit.",
-		`Static camera at eye level. Light motivated by the place itself. Style: ${DEFAULT_ART_STYLE.replace(/,\s*soft studio light/i, "")}. One single image, no text.`,
+		`Static camera at eye level. Light motivated by the place itself. Style: ${houseStyle().replace(/,\s*soft studio light/i, "")}. One single image, no text.`,
 	]
 		.filter(Boolean)
 		.join("\n");

@@ -1,7 +1,12 @@
 import { apiKey, config } from "./config.js";
 import { recordCost } from "./costs.js";
 import { falControlGenerate, falUpload, toImageUrl } from "./fal.js";
-import { type BodyShape, type FigureStyle, mannequinPng } from "./pose.js";
+import {
+	type BodyShape,
+	type FigureStyle,
+	mannequinPng,
+	type PoseLayout,
+} from "./pose.js";
 import { bodyOf, type CharacterCard, slugify } from "./schema.js";
 import { loadCard, pickWinner, saveConcept, writeCard } from "./store.js";
 import { readUserImage } from "./userimage.js";
@@ -14,7 +19,7 @@ export interface ConceptOptions {
 	/** Overrides visual.art_style from the card. */
 	style?: string;
 	views?: Views;
-	/** Free-form additions appended to the prompt. */
+	/** Free-form art direction appended to the prompt, in every mode. */
 	extra?: string;
 	/** A picture (path, URL or data URI) whose pose the character should take instead of the A-pose. */
 	poseImage?: string;
@@ -60,9 +65,9 @@ export function bodyWords(b: BodyShape): string {
 		.join(", ");
 }
 
-/** Image models beautify by default; the card's flaws only survive if we say so. */
+/** Image models beautify by default; the card's flaws only survive if we say so. Style-neutral: no realism words. */
 export const NOT_IDEALIZED =
-	"Not idealized: a real, specific person with asymmetries, uneven features, real skin texture, every flaw and mark";
+	"Not idealized: a specific person with asymmetries, uneven features, every flaw and mark";
 
 const VIEW_TEXT: Record<Views, string> = {
 	front: "one full-body front view",
@@ -102,19 +107,25 @@ export function clip(text: string, max: number): string {
 }
 
 /**
- * One house style for every concept, so a library reads as one project. Pass `style` to see the same character in
- * another look (`"card"` = the designer's suggestion in look.art_style); those sheets are saved next to concept.png.
+ * One house style for every concept and scene, so a library reads as one project. Pass `style` to see the same
+ * character in another look (`"card"` = the designer's suggestion in look.art_style); those sheets are saved next to
+ * concept.png.
  */
 export const DEFAULT_ART_STYLE =
 	"Stylized 3D game character render, hand-painted textures, slightly exaggerated proportions, soft studio light";
 
-export function resolveStyle(card: CharacterCard, style?: string): string {
-	return !style
-		? DEFAULT_ART_STYLE
-		: style === "card"
-			? card.look.art_style
-			: style;
+/** The library's house style: CHARACTER_FORGE_ART_STYLE (read on every call, like models.json), else the default. */
+export function houseStyle(): string {
+	return process.env.CHARACTER_FORGE_ART_STYLE?.trim() || DEFAULT_ART_STYLE;
 }
+
+export function resolveStyle(card: CharacterCard, style?: string): string {
+	return !style ? houseStyle() : style === "card" ? card.look.art_style : style;
+}
+
+/** The user's own art direction, last in every concept prompt. */
+const alsoLine = (extra?: string) =>
+	extra?.trim() ? `Also: ${extra.trim()}` : "";
 
 /** Possessive pronoun from the card's free-text gender: "her", "his" or "their". */
 export const pronoun = (gender: string) =>
@@ -220,7 +231,11 @@ export function perViewPlacement(card: CharacterCard): string {
  * Full character description for GPT Image (no 512-token encoder limit): nothing clipped, sides unambiguous,
  * worn items and asymmetries listed one by one so both views carry them.
  */
-export function gptCharacterPrompt(card: CharacterCard, style: string): string {
+export function gptCharacterPrompt(
+	card: CharacterCard,
+	style: string,
+	extra?: string,
+): string {
 	const d = card.description;
 	const lk = card.look;
 	const b = bodyOf(card);
@@ -251,6 +266,7 @@ export function gptCharacterPrompt(card: CharacterCard, style: string): string {
 		sideNote(p),
 		perViewPlacement(card),
 		`STYLE: ${style}. Not photorealistic unless the style says so. ${NOT_IDEALIZED}. Plain light-grey background, no text, no labels.`,
+		alsoLine(extra),
 	]
 		.filter(Boolean)
 		.join("\n");
@@ -311,10 +327,59 @@ export function buildTposePrompt(
 		`Signature item: ${clip(lk.signature_item.item, 80)}${opts.poseImage ? "" : ", also drawn beside the figure"}.`,
 		`Colours: ${lk.palette.map((p) => p.name).join(", ")}.`,
 		`${NOT_IDEALIZED}. Plain light-grey background, no text.`,
-		opts.extra ? `Also: ${opts.extra.trim()}` : "",
+		alsoLine(opts.extra),
 	]
 		.filter(Boolean)
 		.join("\n");
+}
+
+const GPT_SKELETON_LAYOUT =
+	"The reference image is an OpenPose skeleton (coloured stick figures on black): use it for the exact poses, positions and proportions. Do not draw the skeleton itself. Character model sheet: two full-body views of the SAME person side by side, same scale, A-pose with arms angled down — LEFT figure = front view, face looking straight at the camera, eyes forward; RIGHT figure = seen squarely from behind. Identical outfit, items and asymmetries in both views.";
+
+/**
+ * The exact text the image model gets for these options. The real run and the dry run both use it, so a dry run
+ * shows what will be sent. GPT Image (the default) gets the full description; the other modes the compact prompt.
+ */
+export function conceptPrompt(
+	card: CharacterCard,
+	opts: ConceptOptions = {},
+	plan = conceptPlan(card, opts),
+): string {
+	if ("poseImage" in plan || plan.mode !== "gpt")
+		return buildTposePrompt(card, opts);
+	const style = resolveStyle(card, opts.style);
+	// The GPT editor takes the reference as a guide, so it gets an explicit instruction about what to keep.
+	return plan.figure === "skeleton"
+		? `${GPT_SKELETON_LAYOUT}\n${gptCharacterPrompt(card, style, opts.extra)}`
+		: gptBlockInPrompt(card, buildTposePrompt(card, opts), style);
+}
+
+/** Which pipeline and figure these options pick; the prompt and the real run both read it, so they never disagree. */
+type ConceptPlan =
+	| { poseImage: string }
+	| {
+			views: PoseLayout;
+			mode: NonNullable<ConceptOptions["control"]>;
+			figure: FigureStyle;
+	  };
+
+function conceptPlan(card: CharacterCard, opts: ConceptOptions): ConceptPlan {
+	if (opts.poseImage) return { poseImage: opts.poseImage };
+	const views = opts.views ?? DEFAULT_VIEWS;
+	if (views === "front-side-back")
+		throw new Error(
+			"Pose-controlled sheets support views 'front' or 'front-back'.",
+		);
+	// Default (best in tests): our skeleton as the pose reference for GPT Image + the full, unclipped description.
+	const mode = opts.control ?? "gpt";
+	const figure =
+		opts.figure ??
+		(mode === "gpt"
+			? "skeleton"
+			: card.look.blocking
+				? "blocking-lit"
+				: "shaded");
+	return { views, mode, figure };
 }
 
 export type ConceptResult =
@@ -333,22 +398,21 @@ export async function generateConcept(
 	opts: ConceptOptions & { dryRun?: boolean } = {},
 ): Promise<ConceptResult> {
 	const card = await loadCard(id);
-	const prompt = buildTposePrompt(card, opts);
-	if (opts.dryRun || !apiKey()) {
+	if (opts.dryRun)
 		return {
 			generated: false,
-			prompt,
-			reason: opts.dryRun
-				? "Dry run."
-				: "No fal API key is set, so only the prompt was built.",
+			prompt: conceptPrompt(card, opts),
+			reason:
+				"Dry run: this is the exact prompt the real run would send. It goes with a pose reference image built from the card (not uploaded in a dry run), so it is for checking, not for another generator.",
 		};
-	}
-	const image = await generateImage(
-		prompt,
-		card,
-		opts.views ?? DEFAULT_VIEWS,
-		opts,
-	);
+	if (!apiKey())
+		return {
+			generated: false,
+			prompt: buildTposePrompt(card, opts),
+			reason:
+				"No fal API key is set, so only the prompt was built: the A-pose prompt for any image model.",
+		};
+	const image = await generateImage(card, opts);
 	await recordCost(id, {
 		kind: "concept",
 		model: image.model,
@@ -391,38 +455,25 @@ export interface GeneratedImage {
 
 /** Our own A-pose figure as the reference (GPT Image by default), or the pose taken from a picture the user gives. */
 async function generateImage(
-	prompt: string,
 	card: CharacterCard,
-	views: Views,
 	opts: ConceptOptions,
 ): Promise<GeneratedImage> {
+	const plan = conceptPlan(card, opts);
 	let control: {
 		imageUrl: string;
 		width: number;
 		height: number;
 		preprocess: "pose" | "depth" | "canny" | "img2img" | "gpt";
 	};
-	if (opts.poseImage) {
+	if ("poseImage" in plan) {
 		control = {
-			imageUrl: await toImageUrl(opts.poseImage),
+			imageUrl: await toImageUrl(plan.poseImage),
 			width: 1024,
 			height: 1536,
 			preprocess: "pose",
 		};
 	} else {
-		if (views === "front-side-back")
-			throw new Error(
-				"Pose-controlled sheets support views 'front' or 'front-back'.",
-			);
-		// Default (best in tests): our skeleton as the pose reference for GPT Image + the full, unclipped description.
-		const mode = opts.control ?? "gpt";
-		const figure =
-			opts.figure ??
-			(mode === "gpt"
-				? "skeleton"
-				: card.look.blocking
-					? "blocking-lit"
-					: "shaded");
+		const { views, mode, figure } = plan;
 		const mq = mannequinPng(views, bodyOf(card), figure, card.look.blocking);
 		const imageUrl = await falUpload(
 			mq.png,
@@ -436,16 +487,7 @@ async function generateImage(
 			preprocess: mode,
 		};
 	}
-	const style = resolveStyle(card, opts.style);
-	const layout =
-		"Character model sheet: two full-body views of the SAME person side by side, same scale, A-pose with arms angled down — LEFT figure = front view, face looking straight at the camera, eyes forward; RIGHT figure = seen squarely from behind. Identical outfit, items and asymmetries in both views.";
-	// The GPT editor takes the reference as a guide, so it gets an explicit instruction about what to keep.
-	const finalPrompt =
-		control.preprocess === "gpt"
-			? (opts.figure ?? "skeleton") === "skeleton"
-				? `The reference image is an OpenPose skeleton (coloured stick figures on black): use it for the exact poses, positions and proportions. Do not draw the skeleton itself. ${layout}\n${gptCharacterPrompt(card, style)}`
-				: gptBlockInPrompt(card, prompt, style)
-			: prompt;
+	const finalPrompt = conceptPrompt(card, opts, plan);
 	const r = await falControlGenerate({
 		prompt: finalPrompt,
 		...control,
