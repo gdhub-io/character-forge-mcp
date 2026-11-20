@@ -391,6 +391,11 @@ test("art style: the library's house style, extra in every mode, dry run = the r
 		// Unset: the default house style, as before.
 		assert.match(conceptPrompt(card), HOUSE);
 		assert.match(defaultScenePrompt(card), HOUSE);
+		// Air above the head and below the feet, for page headers and bars over a full-screen background.
+		assert.match(
+			defaultScenePrompt(card),
+			/about 60% of the frame height.*above the head.*below the feet/,
+		);
 		assert.match(gptCharacterPrompt(card, DEFAULT_ART_STYLE), HOUSE);
 	});
 
