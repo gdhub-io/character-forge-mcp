@@ -7,6 +7,7 @@ import { avatarText, makeAvatar } from "./avatar.js";
 import { checkCard, checkToText } from "./check.js";
 import {
 	buildTposePrompt,
+	checkText,
 	conceptFileName,
 	DEFAULT_VIEWS,
 	generateConcept,
@@ -271,7 +272,7 @@ async function main() {
 			const r = await generateConcept(arg("id"), conceptOpts);
 			if (!r.generated) fail(`${r.reason} Use \`prompt\` to get the text.`);
 			console.log(
-				`Concept (${r.image.provider}/${r.image.model}${r.image.seed !== undefined ? `, seed ${r.image.seed}` : ""})\n  ${r.file}\n  ${avatarText(r.avatar)}\n  ${r.card}`,
+				`Concept (${r.image.provider}/${r.image.model}${r.image.seed !== undefined ? `, seed ${r.image.seed}` : ""})\n  ${r.file}\n  ${checkText(r.check)}\n  ${avatarText(r.avatar)}\n  ${r.card}`,
 			);
 			return;
 		}

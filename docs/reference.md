@@ -69,10 +69,10 @@ You talk to the chat; it calls these tools. Paid ones run only when you ask for 
 | `character_check` | Coherence check: red flags (generic filler, repeats, want = need) plus questions built from the card's own content | free |
 | `character_save` | Validates the full card and saves JSON + Markdown; returns the `id` | free |
 | `character_pick` | Keeps the tournament winner and deletes the other variants; a picture the user gave becomes its concept | free |
-| `character_concept` | The A-pose concept sheet, with its avatar | ≈ $0.02 |
+| `character_concept` | The A-pose concept sheet, with its avatar, checked against the card's marks (one retake if a defining mark is lost) | ≈ $0.05, ≈ $0.10 with a retake |
 | `character_avatar` | Crops the avatar from a saved concept sheet: remakes it, or crops a box you give | free |
 | `character_scene` | The character in their own place, in their idle pose | ≈ $0.05 |
-| `character_video` | An 8-second looping video of the scene | ≈ $0.67 |
+| `character_video` | An 8-second looping video of the scene | ≈ $0.80 |
 | `character_voice` | Designs their voice and records a short monologue about the moment the video shows, in every language asked for | ≈ $0.03 a language |
 | `character_voice_translation` / `character_voice_line` | The monologue in one more language / any single line in that voice | ≈ $0.03 |
 | `character_theme` | A short theme of their own | ≈ $0.60 |

@@ -12,7 +12,7 @@ export const RUBRIC = [
 	{
 		key: "conflict",
 		weight: 20,
-		q: "Is the want-vs-need engine strong? Does the climax force an impossible, character-defining choice?",
+		q: "Is the want-vs-need conflict causally clear? Are the actions and consequences of each option explicit, and does the situation explain why they cannot do both?",
 	},
 	{
 		key: "specificity",
@@ -133,18 +133,29 @@ and tie every visible element to the story instead of inventing a different look
 - silhouette: readable in black fill; name the genre-stock look it avoids (no default undercut-and-duster).
 - perfection: how polished vs. flawed, and why — neglect, pride, poverty, discipline, vanity.
 - body: the posture life gave them (shoulder and head tilt, stoop, knees) on top of the innate frame in
-  core.dna.frame — together they build the concept's pose skeleton. Not idealized: symmetry is rare, upright is
-  fine; every deviation comes from work, injury, age or habit in the story (why). If a life event changed the
+  core.dna.frame — together they build the concept's pose skeleton. Level and straight (all 0) is the default:
+  give a tilt or a stoop only when an event in the story bends the body (an injury, a trade, age, a habit tied to
+  the wound), say which in why, and prefer one strong deviation to several weak ones. A sad or tired character
+  is not a bent one. If a life event changed the
   proportions themselves (a growth trial, a lost limb), add the new ones to that event's changes
   (frame.legs, frame.head_heights...). Don't change core.dna; if it
   can't carry the story, say so in the rationale.
+- face: give description.physical.face its own shape first (face shape, jaw, nose, brows, how the eyes are set,
+  mouth), then eyes and skin. Skin and mood alone come out as the image model's default face, the same for
+  everyone.
 - signature_item: one object from the backstory, tied to the wound or the truth; how it is carried and
-  how it changes over the arc. This is the character's attribute.
+  how it changes over the arc. This is the character's attribute. Carry it the way this person really would, in
+  the hand, a pocket, a belt, the work itself; not by habit on a cord or chain round the neck.
 - marks: scars, tattoos, prosthetics, wear — each with an origin in the biography or life events, and an exact
-  side/location. No mark without an event. Innate differences stay in core.dna.born_differences.
+  side/location. No mark without an event. Innate differences stay in core.dna.born_differences. Image models
+  "repair" a body: write a mark that changes its shape (a missing limb or fingers, an eye patch, a prosthetic) as
+  a picture shows it ("a left hand with only the thumb and little finger, the gap healed over", not "three missing
+  fingers") and set defining: true on it.
 - movement: gait, idle pose, signature gesture, under stress — from psychology, traits and habits.
 - outfit: inner to outer; each piece says something (sociology, world, defense, history).
-- palette: 3-6 colours, each with a meaning in the story.
+- palette: 3-6 colours, each with a meaning in the story. Clear colours that read at a glance: even a drab, worn
+  person gets one or two clean, saturated accents, and wear is shown by shape (patches, frays), not by greying
+  every colour toward mud.
 - story_reads: exactly 3 things a stranger understands in 3 seconds. If the character is a villain or a threat, one of
   them must be "this person is dangerous", carried by stance, gaze, expression and silhouette, never by ugliness alone:
   a strange body reads as pitiable unless the face and posture are in control.
@@ -169,6 +180,10 @@ ROLE: EDITOR. The story is finished and approved; you make it readable. Your rea
 heard of this character or their world and reads each field on its own, in any order, once.
 
 Test every field: would that reader understand it on the first read, without the rest of the card? Fix what fails.
+- Check meaning before wording. For every choice, motive or consequence, find the causal link in the card
+  and state it plainly. Specify who acts on whom, what each option requires and costs, and why both cannot
+  happen. If the card does not establish the link, flag it for the author; do not invent it or conceal the gap
+  with smoother prose. A logline may omit background, but must retain the reason its central conflict exists.
 - Plain narrative prose: who did what, when, why. Short sentences, concrete nouns and verbs, one idea per sentence.
 - Who and why: every person a field mentions is identified ("a child" → which child, who she is to them), and every
   claim that something follows ("so the town will believe her") shows the reason inside the same field.
@@ -176,15 +191,19 @@ Test every field: would that reader understand it on the first read, without the
   ("the Rising, the flood that drowned half the coast"); never assume the reader saw another field.
 - No telegraphese, no chains of semicolons or em-dashes, no stacked metaphors, no riddles, no writerly flourish.
   A striking image stays only if it is also clear.
-- Narrating voice: tune it to the character so the telling itself carries depth (a spare, salt-dry character gets
-  short, plain, weathered sentences; a playful child gets warm, light ones). Voice never costs clarity.
-- The character's own words (inner_monologue, speech.pet_words, speech.sample_lines, others_say, quoted lines)
-  stay in their voice: fix only what a stranger can't follow.
-- Change no facts, names, numbers, sides or causal links; add nothing new. Same length or shorter.
+- Authorial voice: describe the character in clear, natural prose. Do not imitate their speech or thought
+  patterns in explanatory fields, including logline, tagline and stranger_view.
+- Use character voice only in core.self_story, core.lie, inner_monologue, speech.pet_words, speech.sample_lines
+  and explicitly quoted thoughts or dialogue. In others_say, preserve each speaker's voice.
+- The author may describe feelings and motives the character does not recognize. Keep that knowledge out of
+  the character's own thoughts and words; do not rewrite authorial observations as self-awareness.
+- Change no facts, names, numbers, sides or causal links; add nothing new. Remove redundancy, but allow extra words when an established causal link needs explaining.
 - Do not touch ids, slugs, enums, numbers, hex colours, core.dna's numbers and frame, look.body, look.blocking or
   meta.seed/variant/verdict.
 
 Output: the complete revised card JSON, then up to 10 lines "field: what was unclear → what you did".
+List every unresolved causal gap separately as "NEEDS AUTHOR: field — missing link"; leave its facts unchanged.
+A card with unresolved gaps is not ready to ship.
 `.trim();
 
 export const ROLE_GUIDES = {
@@ -216,7 +235,8 @@ VARIANT TOURNAMENT — produce N competing variants of one concept and ship the 
    Author merges it, saves with overwrite, then generates the A-pose concept — for the winner only, and not
    when the user gave their own image (character_pick has already made it the concept).
 8b. EDIT: an independent editor (role "editor") rewrites the winner's text for a reader who knows nothing of
-   the world: plain, clear narration in a voice tuned to the character; no facts change. Save with overwrite.
+   the world: clear authorial narration, with character voice only in explicit thoughts and dialogue; no facts change. The author resolves any NEEDS AUTHOR gaps, re-checks the affected causal links and
+   returns the revised card to the editor. Save with overwrite only when no gaps remain.
 9. SHOW the winner's card with character_get (a Markdown document the app can display), then REPORT: why it won, plus one line per losing variant (who they were, why they lost).
 
 Best results: run each reviewer as a separate agent with fresh context (Claude Code: the forge-character

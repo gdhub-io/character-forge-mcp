@@ -32,7 +32,7 @@ const CARD = [
 /** One price list for the steps and the commands (estimates from models.json pricing). Paid steps need a fal.ai key. */
 const FREE = "Free";
 const PRICE = {
-	concept: "≈ $0.02",
+	concept: "≈ $0.05",
 	scene: "≈ $0.05",
 	video: "≈ $0.80",
 	voice: "≈ $0.03",
