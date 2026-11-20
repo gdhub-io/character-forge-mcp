@@ -53,7 +53,7 @@ export function defaultScenePrompt(c: CharacterCard): string {
 		"Physical sense: every worn item hangs freely and clear of the arms and hands (a coil on a shoulder hangs behind or beside the arm, never over the chest where the arms rest); nothing passes through a limb or the body.",
 		`Signature item visible: ${lk.signature_item.item.replace(/\.$/, "")}.`,
 		"Restraint: show the character's craft or obsession through one or two details, not by filling the frame with it; the place is lived-in and ordinary, full of things that have nothing to do with their main motif.",
-		"Composition for a full-screen website background: 16:9 wide shot, the character placed in the RIGHT third of the frame, whole figure visible. The LEFT 60% is a calm continuation of the same place — low detail, soft focus, no bright spots, no faces or text — where menus and info cards will sit.",
+		"Composition for a full-screen website background: 16:9 wide shot, the character placed in the RIGHT third of the frame, whole figure visible and small enough to leave air around it: the figure takes about 60% of the frame height, with clear empty space above the head (about a fifth of the frame) and below the feet (about a tenth); the head and the feet never touch the top or bottom edge, where page headers and bars will sit. The LEFT 60% is a calm continuation of the same place — low detail, soft focus, no bright spots, no faces or text — where menus and info cards will sit.",
 		`Static camera at eye level. Light motivated by the place itself. Style: ${houseStyle().replace(/,\s*soft studio light/i, "")}. One single image, no text.`,
 	]
 		.filter(Boolean)
@@ -74,8 +74,8 @@ export function defaultLoopPrompt(
 	const his = pronoun(c.description.gender);
 	return [
 		loop === "frame" || model === "veo"
-			? "Seamless idle loop, static locked-off camera, no cuts. The clip starts and ends on the exact first frame. The character stays in the right third of the frame and never walks."
-			: "Calm idle moment, static locked-off camera, no cuts. The character stays in the right third of the frame and never walks, and ends in nearly the same pose as the first frame.",
+			? "Seamless idle loop, static locked-off camera, no cuts. The clip starts and ends on the exact first frame. The character stays in the right third of the frame at the same size, with the same space above the head and below the feet, and never walks."
+			: "Calm idle moment, static locked-off camera, no cuts. The character stays in the right third of the frame at the same size, with the same space above the head and below the feet, and never walks, and ends in nearly the same pose as the first frame.",
 		// Kling with first = last frame tends to freeze everything; the background has to be told to live the whole time.
 		"The world keeps moving for the WHOLE clip, never frozen: whatever in this scene naturally moves — water and waves, clouds, rain, smoke, flames, lamplight, foliage, hanging cloth or rope — moves continuously and visibly, in slow even cycles.",
 		`The character breathes, blinks and shifts weight slightly, in the spirit of ${his} idle habit (${mv.idle_pose})`,
