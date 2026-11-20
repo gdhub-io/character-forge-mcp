@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
 	existsSync,
 	mkdtempSync,
@@ -364,69 +364,412 @@ async function captureFalSubmit(fn) {
 	return sent;
 }
 
-test("idle video: only what the first frame shows moves, the same face, notes win", async () => {
-	const { defaultLoopPrompt, defaultScenePrompt, withNotes } = await import(
+/** Every string in a card replaced by one neutral word: what is left of a prompt is its own default text. */
+const neutral = (v) =>
+	typeof v === "string"
+		? "Thing"
+		: Array.isArray(v)
+			? v.map(neutral)
+			: v && typeof v === "object"
+				? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, neutral(x)]))
+				: v;
+
+/** Things a scene may or may not hold: the default video prompt names none of them, as motion or as a ban. */
+const ELEMENTS =
+	/\b(smoke|steam|fog|mist|fire|flames?|sparks?|dust|particles?|ropes?|cords?|clouds?|water|waves?|rain|snow|leaves|foliage|cloth|curtains?|lanterns?|lamps?|lens|candles?|sky|ceiling|birds?|trees?|grass|sea)\b/i;
+
+test("idle video: the default prompt names nothing, motion comes from the first frame, loop rules, notes win", async () => {
+	const { defaultLoopPrompt, withNotes, LOOP_MODES } = await import(
 		path.join(root, "dist/scene.js")
 	);
 	const card = validateCard(example).card;
-	for (const [loop, model] of [
-		["frame", "kling"],
-		["crossfade", "kling"],
-		["frame", "veo"],
-	]) {
-		const p = defaultLoopPrompt(card, model === "veo", loop, model);
-		// A list of things that move reads as things to add (Marenka grew smoke and burning ropes).
-		assert.doesNotMatch(p, /smoke, flames|cloth or rope/);
-		assert.match(p, /only what the first frame already shows moves/);
-		assert.match(p, /Nothing new appears: no smoke, steam, fog/);
-		assert.match(p, /the same face, age, body and outfit/);
-		assert.match(p, /Feelings may show[^.]*true to the first frame.s mood/);
+	const blank = neutral(card);
+	for (const loop of LOOP_MODES) {
+		{
+			const p = defaultLoopPrompt(blank, loop);
+			const named = p.match(ELEMENTS);
+			assert.equal(named, null, `${loop}: names "${named?.[0]}"`);
+			assert.match(p, /The first frame shows everything there is/);
+			assert.match(p, /The place lives for the whole clip/);
+			assert.match(p, /The light stays exactly as in the first frame/);
+			assert.match(p, /already runs at full, even speed in the first frame/);
+			assert.match(p, /makes whole cycles.*Nothing moves backward/);
+			assert.match(p, /The same person throughout/);
+			assert.doesNotMatch(p, /\bsound\b/i, "idle videos are silent");
+		}
 	}
-	// A correction comes first and is repeated last; the default never asks for what it forbids.
-	const p = withNotes(defaultLoopPrompt(card), "No smoke, no ropes.");
+	// What moves is told only when the first frame was read, in its own words.
+	const motion = "the lighthouse lens turns slowly, repeats";
+	assert.ok(defaultLoopPrompt(card, "chain", "kling", motion).includes(motion));
+	assert.match(
+		defaultLoopPrompt(card),
+		/Whatever in the first frame naturally moves/,
+	);
+	// The card's posture is held: a canted head doesn't straighten.
+	const bent = structuredClone(card);
+	bent.look.body = {
+		...bent.look.body,
+		head_tilt: -0.4,
+		shoulder_tilt: 0.3,
+		stoop: 0.3,
+	};
+	assert.match(
+		defaultLoopPrompt(bent),
+		/body keeps its own shape through every move: \w+ head canted toward \w+ left shoulder, \w+ right shoulder lower, \w+ back rounded; however \w+ head and arms move, this never straightens\./,
+	);
+	const straight = structuredClone(card);
+	straight.look.body = {
+		...straight.look.body,
+		head_tilt: 0,
+		shoulder_tilt: 0,
+		stoop: 0,
+	};
+	assert.doesNotMatch(defaultLoopPrompt(straight), /keeps its own shape/);
+	// What the body is made of holds in every part (Veo turned metal robot hands into human ones).
+	const robot = structuredClone(card);
+	robot.core.dna = {
+		...robot.core.dna,
+		species: "Robot",
+		covering: "Brass plating",
+	};
+	robot.core.dna.face = "Long gentle face with lens eyes";
+	assert.match(
+		defaultLoopPrompt(robot, "chain", "kling"),
+		/The same nature in every part of the body, hands and face included: Robot; Brass plating\./,
+	);
+	// Veo's long prompt also gets the face.
+	assert.match(
+		defaultLoopPrompt(robot, "frame", "veo"),
+		/hands and face included: Robot; Brass plating; Long gentle face with lens eyes\./,
+	);
+	// What stays still isn't named at all.
+	const { movingOnly } = await import(path.join(root, "dist/scene.js"));
+	assert.equal(
+		movingOnly(
+			"The flame in the lantern flickers softly, repeats; The lens rotates slowly in place, repeats; Clouds drift slowly outside, stays still",
+		),
+		"The flame in the lantern flickers softly; The lens rotates slowly in place",
+	);
+	assert.equal(movingOnly("Clouds drift outside, stays still."), undefined);
+	assert.equal(movingOnly("Nothing would move."), undefined);
+	// A correction comes first, with a reminder last.
+	const p = withNotes(defaultLoopPrompt(card), "Hands stay on the rail.");
 	assert.ok(p.startsWith("Binding corrections"));
 	assert.match(p, /The corrections at the top win/);
-	for (const m of p.matchAll(/[^.:;]*\b(smoke|ropes?)\b/gi))
-		assert.match(m[0], /\bno\b/i, `"${m[0].trim()}" asks for ${m[1]}`);
 	assert.equal(withNotes("base", "  "), "base");
-	// What each family is sent: Kling 3.0 and Veo also get the negative prompt; lengths stay in each model's range.
-	const { generateIdleVideo, VIDEO_NEGATIVE } = await import(
+});
+
+test("idle video: the Veo prompt follows Google's guide, for any card; the negative prompt fits the scene", async () => {
+	const { veoLoopPrompt, videoNegative, VIDEO_NEGATIVE } = await import(
 		path.join(root, "dist/scene.js")
 	);
+	const card = validateCard(example).card;
+	const blank = neutral(card);
+	for (const loop of ["frame", "chain"]) {
+		const p = veoLoopPrompt(blank, loop);
+		// Motion only, positive wording, the subject, a static shot: nothing named, no "no" or "never", no sound.
+		const named = p.match(ELEMENTS);
+		assert.equal(named, null, `${loop}: names "${named?.[0]}"`);
+		assert.doesNotMatch(p, /\b(no|not|never|don't|nothing)\b/i);
+		assert.doesNotMatch(p, /\bsound\b/i);
+		assert.match(p, /^Static shot: the camera remains completely still/);
+		assert.match(p, /The subject keeps the pose of the frame/);
+	}
+	const motion = "The flame inside the lantern flickers softly";
+	assert.ok(
+		veoLoopPrompt(card, "frame", motion).includes(
+			`only this moves, gently and evenly from the first moment to the last: ${motion}.`,
+		),
+	);
+	// Any pose, not only standing; the card's posture and nature in positive words.
+	const robot = structuredClone(card);
+	robot.look.body = {
+		...robot.look.body,
+		head_tilt: -0.4,
+		shoulder_tilt: 0,
+		stoop: 0,
+	};
+	robot.core.dna = {
+		...robot.core.dna,
+		species: "Robot",
+		covering: "Brass plating",
+		face: "Lens eyes",
+	};
+	const rp = veoLoopPrompt(robot, "frame");
+	assert.match(
+		rp,
+		/keeps the pose of the frame, \w+ head canted toward \w+ left shoulder, and breathes/,
+	);
+	assert.match(
+		rp,
+		/in every part of the body, hands and face included: Robot; Brass plating; Lens eyes\./,
+	);
+
+	// Negative prompt: plain nouns; what the scene already holds stays allowed; non-humans keep their own body.
+	const neg = videoNegative(robot, motion);
+	assert.ok(neg.startsWith(VIDEO_NEGATIVE));
+	assert.doesNotMatch(neg, /\bfire\b/, "a lantern keeps its fire");
+	assert.match(neg, /\bsmoke\b/);
+	assert.match(neg, /human skin, human hands, human face$/);
+	const person = structuredClone(card);
+	person.core.dna = { ...person.core.dna, species: "Human" };
+	assert.doesNotMatch(videoNegative(person), /human hands/);
+});
+
+test("idle video: Veo one piece by default, Kling two; motion read once from the scene, dry run, start frame", async () => {
+	const { generateIdleVideo, idleVideoUsd, VIDEO_NEGATIVE, MOTION_FILE } =
+		await import(path.join(root, "dist/scene.js"));
 	await withLibrary(async () => {
-		const { saveCard, saveAsset } = await import(
+		const { saveCard, saveAsset, promptFile } = await import(
 			path.join(root, "dist/store.js")
 		);
+		const { readCosts } = await import(path.join(root, "dist/costs.js"));
 		const { slug } = await saveCard(example);
 		await saveAsset(slug, "scene.png", Buffer.from("x"));
-		const sent = (model) =>
-			captureFalSubmit(() =>
-				generateIdleVideo(slug, { model, seconds: 20, notes: "No smoke." }),
+		const motion = "a lens turns slowly, repeats";
+
+		// A dry run calls nothing: no key, no fetch.
+		await withEnv({ FAL_KEY: undefined }, async () => {
+			// The default: Veo, one 8 s piece that ends on its first frame.
+			const veoDry = await generateIdleVideo(slug, { dryRun: true, motion });
+			assert.deepEqual(veoDry.pieces, [{ seconds: 8, end: true }]);
+			assert.ok(Math.abs(veoDry.usd - 0.8) < 1e-9);
+			const dry = await generateIdleVideo(slug, {
+				model: "kling",
+				dryRun: true,
+				motion,
+			});
+			assert.equal(dry.file, undefined);
+			assert.ok(dry.prompt.includes(motion));
+			assert.deepEqual(dry.pieces, [
+				{ seconds: 5, end: false },
+				{ seconds: 5, end: true },
+			]);
+			// Two pieces, and one reading of how the first piece moved.
+			assert.ok(
+				Math.abs(dry.usd - (idleVideoUsd("kling", "chain", 10) + 0.004)) < 1e-9,
 			);
-		const k3 = await sent("kling3");
-		assert.equal(k3.duration, "15");
-		assert.equal(k3.generate_audio, false);
-		assert.equal(k3.negative_prompt, VIDEO_NEGATIVE);
-		assert.equal(k3.start_image_url, k3.end_image_url);
-		assert.ok(k3.prompt.startsWith("Binding corrections"));
-		const o1 = await sent("kling");
-		assert.equal(o1.duration, "10");
-		assert.equal(o1.negative_prompt, undefined);
-		const veo = await sent("veo");
-		assert.equal(veo.duration, "8s");
-		assert.equal(veo.negative_prompt, VIDEO_NEGATIVE);
-		// A scene may already show smoke or fire: only new things are negatives.
-		assert.doesNotMatch(VIDEO_NEGATIVE, /smoke|fire|fog/);
-		// Too long for Kling: refused before anything is uploaded or paid for.
+			assert.ok(Math.abs(dry.usd - (0.084 * 10 + 0.004)) < 1e-9);
+			// No key and nothing read yet: the general line, and still a dry run.
+			const unread = await generateIdleVideo(slug, {
+				model: "kling",
+				dryRun: true,
+			});
+			assert.equal(unread.motion, undefined);
+			assert.equal(unread.motionPending, true);
+			assert.ok(Math.abs(unread.usd - (0.084 * 10 + 0.008)) < 1e-9);
+			assert.match(
+				unread.prompt,
+				/Whatever in the first frame naturally moves/,
+			);
+		});
+
+		// With a key, a dry run still calls nothing (any fetch would throw).
+		await withFakeFal(
+			() => undefined,
+			async () => {
+				const dry = await generateIdleVideo(slug, {
+					model: "kling",
+					dryRun: true,
+				});
+				assert.equal(dry.motionPending, true);
+			},
+		);
+		// A failed reading doesn't stop the video: it gets the general line.
+		const failed = [];
+		await withFakeFal(
+			(u, init) => {
+				if (u === "https://queue.fal.run/openrouter/router/vision")
+					return Response.json({ detail: "down" }, { status: 500 });
+				if (u.startsWith("https://queue.fal.run/")) {
+					failed.push(JSON.parse(init.body));
+					return Response.json({ detail: "refused in tests" }, { status: 400 });
+				}
+			},
+			() => generateIdleVideo(slug, { model: "kling" }).catch(() => {}),
+		);
+		assert.match(
+			failed[0].prompt,
+			/Whatever in the first frame naturally moves/,
+		);
+
+		// The vision model reads the scene once; its answer goes into the prompt and is kept.
+		const submits = [];
+		await withFakeFal(
+			(u, init) => {
+				if (u === "https://queue.fal.run/openrouter/router/vision") {
+					submits.push(JSON.parse(init.body));
+					return Response.json({
+						status_url: "https://queue.fal.run/vision/status",
+						response_url: "https://queue.fal.run/vision/result",
+					});
+				}
+				if (u === "https://queue.fal.run/vision/status")
+					return Response.json({ status: "COMPLETED" });
+				if (u === "https://queue.fal.run/vision/result")
+					return Response.json({
+						output:
+							"- The lamp lens turns slowly, repeats\n- A flag sways, repeats",
+						usage: { cost: 0.0013 },
+					});
+				if (u.startsWith("https://queue.fal.run/")) {
+					submits.push(JSON.parse(init.body));
+					return Response.json({ detail: "refused in tests" }, { status: 400 });
+				}
+			},
+			() => generateIdleVideo(slug, { model: "kling" }).catch(() => {}),
+		);
+		const [vision, piece1] = submits;
+		assert.equal(vision.image_urls.length, 1);
+		assert.match(piece1.prompt, /The lamp lens turns slowly; A flag sways\./);
+		// The chain's first piece is free: no end frame.
+		assert.equal(piece1.end_image_url, undefined);
+		assert.equal(piece1.duration, "5");
+		const { readFile } = await import("node:fs/promises");
+		assert.match(
+			await readFile(promptFile(slug, MOTION_FILE), "utf8"),
+			/lamp lens/,
+		);
+		const costs = await readCosts(slug);
+		assert.ok(
+			costs.entries.some((e) => e.usd === 0.001 && /what moves/.test(e.detail)),
+		);
+
+		// Kept: the next run asks nothing, and the vision model isn't called again.
+		const again = await captureFalSubmit(() =>
+			generateIdleVideo(slug, { model: "kling3", loop: "frame", seconds: 20 }),
+		);
+		assert.match(again.prompt, /lamp lens/);
+		assert.equal(again.duration, "15");
+		assert.ok(again.negative_prompt.startsWith(VIDEO_NEGATIVE));
+		assert.equal(again.start_image_url, again.end_image_url);
+		// Veo by default: one 8 s piece from scene.png back to scene.png.
+		const veoOne = await captureFalSubmit(() =>
+			generateIdleVideo(slug, { model: "veo", motion }),
+		);
+		assert.equal(veoOne.duration, "8s");
+		assert.equal(veoOne.first_frame_url, veoOne.last_frame_url);
+		const veo = await captureFalSubmit(() =>
+			generateIdleVideo(slug, { model: "veo", loop: "chain", motion }),
+		);
+		assert.equal(veo.duration, "6s");
+		assert.equal(
+			veo.last_frame_url,
+			undefined,
+			"the chain's first Veo piece is free",
+		);
+
+		// A start frame: one piece, from that file, ending on scene.png.
+		const PNG = Buffer.from([
+			0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1,
+		]);
+		await saveAsset(slug, "piece-1-last.png", PNG);
+		// Not a picture: refused before anything goes to fal.
+		await saveAsset(slug, "notes.png", Buffer.from("secret"));
 		await assert.rejects(
-			generateIdleVideo(slug, { model: "kling3", notes: "x".repeat(2000) }),
-			/Kling takes at most 2500/,
+			generateIdleVideo(slug, { model: "kling", start: "notes.png", motion }),
+			/Not a PNG, JPEG or WebP image/,
+		);
+		const one = await captureFalSubmit(() =>
+			generateIdleVideo(slug, {
+				model: "kling",
+				start: "piece-1-last.png",
+				motion,
+			}),
+		);
+		assert.ok(one.end_image_url);
+		const own = await captureFalSubmit(() =>
+			generateIdleVideo(slug, { model: "kling", start: "piece-1-last.png" }),
+		);
+		assert.doesNotMatch(own.prompt, /lamp lens/);
+		assert.match(own.prompt, /Whatever in the first frame naturally moves/);
+		await assert.rejects(
+			generateIdleVideo(slug, {
+				model: "kling",
+				start: "piece.png",
+				loop: "chain",
+				motion,
+			}),
+			/start is for a single piece/,
+		);
+		await assert.rejects(
+			generateIdleVideo(slug, {
+				model: "kling",
+				start: "../../secret.png",
+				motion,
+			}),
+			/file name in/,
+		);
+		// Too long for Kling: refused before the video model is paid for.
+		await withEnv({ FAL_KEY: undefined }, () =>
+			assert.rejects(
+				generateIdleVideo(slug, {
+					model: "kling",
+					motion,
+					notes: "x".repeat(2000),
+				}),
+				/Kling takes at most 2500/,
+			),
 		);
 	});
-	// The scene leaves a visible ceiling and floor, and keeps the left side calm.
-	const s = defaultScenePrompt(card);
-	assert.match(s, /ceiling or sky visible[^;]*floor or ground visible/);
-	assert.match(s, /no large or glowing objects/);
+});
+
+const hasFfmpeg = spawnSync("ffmpeg", ["-version"]).status === 0;
+
+test("idle video: the two pieces join without their duplicated frames", {
+	skip: !hasFfmpeg && "no ffmpeg",
+}, async () => {
+	const { joinLoop } = await import(path.join(root, "dist/scene.js"));
+	const clip = (filter) =>
+		execFileSync("ffmpeg", [
+			"-v",
+			"error",
+			"-f",
+			"lavfi",
+			"-i",
+			filter,
+			"-c:v",
+			"libx264",
+			"-pix_fmt",
+			"yuv420p",
+			"-f",
+			"mp4",
+			"-movflags",
+			"frag_keyframe+empty_moov",
+			"-",
+		]);
+	const color = (c, n) => `color=c=${c}:s=64x36:r=24:d=${n / 24}`;
+	// Piece one: 10 grey frames. Piece two: its first frame (red) repeats piece one's last, its last (blue) repeats
+	// piece one's first; 10 green frames between.
+	const a = clip(color("gray", 10));
+	const b = clip(
+		`${color("red", 1)}[r];${color("green", 10)}[g];${color("blue", 1)}[b];[r][g][b]concat=n=3`,
+	);
+	const joined = joinLoop(a, b);
+	const raw = execFileSync(
+		"ffmpeg",
+		[
+			"-v",
+			"error",
+			"-i",
+			"pipe:0",
+			"-vf",
+			"scale=4:4",
+			"-f",
+			"rawvideo",
+			"-pix_fmt",
+			"rgb24",
+			"-",
+		],
+		{ input: await joined },
+	);
+	const frames = raw.length / (4 * 4 * 3);
+	assert.equal(frames, 20, "10 + 12 - 2 frames");
+	for (let f = 0; f < frames; f++) {
+		const [r, g, bl] = [0, 1, 2].map((c) => raw[f * 48 + c]);
+		assert.ok(!(r > 150 && g < 100), `frame ${f} is the duplicated red one`);
+		assert.ok(!(bl > 150 && g < 100), `frame ${f} is the duplicated blue one`);
+	}
 });
 
 test("art style: the library's house style, extra in every mode, dry run = the real prompt", async () => {
@@ -1099,7 +1442,7 @@ test("the cost ledger adds up per character, priced from models.json", async () 
 		assert.equal(l.byKind.video, 0.672);
 		const { videoUsd } = await import(path.join(root, "dist/costs.js"));
 		assert.equal(Math.round(videoUsd("kling", 8) * 1000), 672);
-		assert.ok(videoUsd("veo", 8, true) > videoUsd("veo", 8, false));
+		assert.equal(Math.round(videoUsd("veo", 8) * 1000), 800); // silent Veo
 	});
 });
 
@@ -1484,5 +1827,224 @@ test("a scene: everyone acts each round, a question jumps the queue, and no one 
 		assert.match(md, /Suddenly:\*\* The cable groans/);
 		assert.match(md, /ends \*\*wary\*\*/);
 		assert.match(md, /a full round of silence/);
+	});
+});
+
+test("idle video: every frame is held to the first frame's light, and the loop is silent", {
+	skip: !hasFfmpeg && "no ffmpeg",
+}, async () => {
+	const { lockExposure, joinLoop } = await import(
+		path.join(root, "dist/scene.js")
+	);
+	const clip = (filter) =>
+		execFileSync("ffmpeg", [
+			"-v",
+			"error",
+			"-f",
+			"lavfi",
+			"-i",
+			filter,
+			"-c:v",
+			"libx264",
+			"-pix_fmt",
+			"yuv420p",
+			"-f",
+			"mp4",
+			"-movflags",
+			"frag_keyframe+empty_moov",
+			"-",
+		]);
+	// A grey clip that dims to half in its second half, the way Kling dimmed Marenka's pieces.
+	const dimming = clip(
+		"color=c=0x909090:s=64x36:r=24:d=1[a];color=c=0x484848:s=64x36:r=24:d=1[b];[a][b]concat=n=2",
+	);
+	const sound = clip("color=c=gray:s=64x36:r=24:d=0.5");
+	const held = await lockExposure(await joinLoop(dimming, sound));
+	const raw = execFileSync(
+		"ffmpeg",
+		[
+			"-v",
+			"error",
+			"-i",
+			"pipe:0",
+			"-vf",
+			"scale=1:1",
+			"-f",
+			"rawvideo",
+			"-pix_fmt",
+			"gray",
+			"-",
+		],
+		{ input: held },
+	);
+	// The first piece is cut where its light still matches the first frame: 36 bright frames, then 12 dim ones.
+	const { lastSteadyFrame } = await import(path.join(root, "dist/scene.js"));
+	assert.equal(
+		await lastSteadyFrame(
+			clip(
+				"color=c=0x909090:s=64x36:r=24:d=1.5[a];color=c=0x484848:s=64x36:r=24:d=0.5[b];[a][b]concat=n=2",
+			),
+		),
+		35,
+	);
+	assert.equal(
+		await lastSteadyFrame(sound),
+		11,
+		"steady all through: the last frame",
+	);
+	const first = raw[0];
+	for (const [i, v] of [...raw].entries())
+		assert.ok(Math.abs(v - first) <= 6, `frame ${i}: ${v} against ${first}`);
+	const streams = execFileSync(
+		"ffprobe",
+		[
+			"-v",
+			"error",
+			"-show_entries",
+			"stream=codec_type",
+			"-of",
+			"csv=p=0",
+			"-i",
+			"pipe:0",
+		],
+		{ input: held },
+	)
+		.toString()
+		.trim();
+	assert.equal(streams, "video");
+});
+
+test("idle video: the second piece hears how the first one moved, and the loop is joined", {
+	skip: !hasFfmpeg && "no ffmpeg",
+}, async () => {
+	const { generateIdleVideo, frameSheet } = await import(
+		path.join(root, "dist/scene.js")
+	);
+	const clip = (c, frames) =>
+		execFileSync("ffmpeg", [
+			"-v",
+			"error",
+			"-f",
+			"lavfi",
+			"-i",
+			`color=c=${c}:s=64x36:r=24:d=${frames / 24}`,
+			"-c:v",
+			"libx264",
+			"-pix_fmt",
+			"yuv420p",
+			"-f",
+			"mp4",
+			"-movflags",
+			"frag_keyframe+empty_moov",
+			"-",
+		]);
+	// Four frames of a piece, in a 2×2 sheet.
+	const sheet = await frameSheet(clip("gray", 12));
+	const size = execFileSync(
+		"ffprobe",
+		[
+			"-v",
+			"error",
+			"-show_entries",
+			"stream=width,height",
+			"-of",
+			"csv=p=0",
+			"-i",
+			"pipe:0",
+		],
+		{ input: sheet },
+	)
+		.toString()
+		.trim();
+	assert.equal(size, "1280,720");
+
+	await withLibrary(async () => {
+		const { saveCard, saveAsset, assetFile } = await import(
+			path.join(root, "dist/store.js")
+		);
+		const { readCosts } = await import(path.join(root, "dist/costs.js"));
+		const { slug } = await saveCard(example);
+		await saveAsset(slug, "scene.png", Buffer.from("x"));
+		const pieces = [clip("gray", 120), clip("green", 98)];
+		const videoBodies = [];
+		const job = (name) => ({
+			status_url: `https://queue.fal.run/${name}/status`,
+			response_url: `https://queue.fal.run/${name}/result`,
+		});
+		await withFakeFal(
+			(u, init) => {
+				if (u === "https://queue.fal.run/openrouter/router/vision") {
+					const asked = JSON.parse(init.body).prompt;
+					return Response.json(
+						job(/four pictures/.test(asked) ? "carry" : "motion"),
+					);
+				}
+				if (u.endsWith("/status"))
+					return Response.json({ status: "COMPLETED" });
+				if (u === "https://queue.fal.run/motion/result")
+					return Response.json({ output: "The lens turns slowly, repeats" });
+				if (u === "https://queue.fal.run/carry/result")
+					return Response.json({
+						output: "The lens turned a tenth of a turn clockwise, steadily",
+					});
+				const piece = u.match(/^https:\/\/queue\.fal\.run\/piece(\d)\/result$/);
+				if (piece)
+					return Response.json({
+						video: { url: `https://fal.media/piece${piece[1]}.mp4` },
+					});
+				const file = u.match(/^https:\/\/fal\.media\/piece(\d)\.mp4$/);
+				if (file) return new Response(pieces[Number(file[1])]);
+				if (u.startsWith("https://queue.fal.run/fal-ai/kling-video/")) {
+					videoBodies.push(JSON.parse(init.body));
+					return Response.json(job(`piece${videoBodies.length - 1}`));
+				}
+			},
+			() => generateIdleVideo(slug, { model: "kling" }),
+		);
+		const [one, two] = videoBodies;
+		assert.doesNotMatch(one.prompt, /This piece continues/);
+		assert.match(
+			two.prompt,
+			/This piece continues a clip that moved like this[^:]*: The lens turned a tenth of a turn clockwise, steadily\./,
+		);
+		assert.ok(two.end_image_url, "the second piece ends on the scene");
+		assert.match(
+			two.prompt,
+			/never turns back, not even to meet the last frame/,
+		);
+		const { promptFile } = await import(path.join(root, "dist/store.js"));
+		assert.equal(
+			(await import("node:fs"))
+				.readFileSync(promptFile(slug, "idle-piece-2.txt"), "utf8")
+				.trim(),
+			two.prompt,
+		);
+		assert.ok(two.prompt.length <= 2500);
+		// Joined without the two duplicated frames; the pieces kept on disk only until then.
+		const frames = execFileSync("ffprobe", [
+			"-v",
+			"error",
+			"-count_frames",
+			"-show_entries",
+			"stream=nb_read_frames",
+			"-of",
+			"csv=p=0",
+			assetFile(slug, "idle.mp4"),
+		])
+			.toString()
+			.trim();
+		assert.equal(frames, "216");
+		const { existsSync } = await import("node:fs");
+		assert.equal(existsSync(assetFile(slug, "idle-piece-1.mp4")), false);
+		const details = (await readCosts(slug)).entries.map((e) => e.detail);
+		assert.deepEqual(
+			details.filter((d) => /piece|moved|moves/.test(d)),
+			[
+				"what moves in scene.png",
+				"loop piece 1 of 2, 5 s",
+				"how loop piece 1 moved",
+				"loop piece 2 of 2, 5 s",
+			],
+		);
 	});
 });

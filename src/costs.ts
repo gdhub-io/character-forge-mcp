@@ -67,22 +67,10 @@ export function costsToText(slug: string, l: CostLedger): string {
 	);
 }
 
-/** What an idle video costs, from models.json pricing: the one place that knows how video is billed. */
+/** What a silent idle video piece costs, from models.json pricing: the one place that knows how video is billed. */
 export function videoUsd(
 	model: "kling" | "kling3" | "veo",
 	seconds: number,
-	audio = false,
 ): number {
-	const p = config().pricing.video;
-	const perSecond =
-		model === "veo"
-			? audio
-				? p.veo.second
-				: p.veo.secondSilent
-			: model === "kling3"
-				? audio
-					? p.kling3.secondAudio
-					: p.kling3.second
-				: p.kling.second;
-	return perSecond * seconds;
+	return config().pricing.video[model].second * seconds;
 }

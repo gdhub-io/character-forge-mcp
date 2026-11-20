@@ -31,6 +31,8 @@ export interface ModelsConfig {
 			veo: string;
 			veoStartOnly: string;
 		};
+		/** Reads what moves in a scene before its video: a fal vision router and the model behind it. */
+		vision: { model: string; llm: string };
 		/** Theme music from a composition plan. */
 		music: { model: string };
 		/** Adults: ElevenLabs design + speech; minors: Qwen design, clone and speech. */
@@ -48,9 +50,10 @@ export interface ModelsConfig {
 		scene: { image: number };
 		video: {
 			kling: { second: number };
-			kling3: { second: number; secondAudio: number };
-			veo: { second: number; secondSilent: number };
+			kling3: { second: number };
+			veo: { second: number };
 		};
+		vision: { call: number };
 		music: { startedMinute: number };
 		voice: { adult: { per1000Chars: number }; child: { per1000Chars: number } };
 	};
@@ -75,11 +78,15 @@ const DEFAULTS: ModelsConfig = {
 		},
 		scene: { model: "openai/gpt-image-2.6/flare/edit", quality: "medium" },
 		video: {
-			default: "kling",
+			default: "veo",
 			kling: "fal-ai/kling-video/o1/standard/image-to-video",
 			kling3: "fal-ai/kling-video/v3/standard/image-to-video",
 			veo: "fal-ai/veo3.1/fast/first-last-frame-to-video",
 			veoStartOnly: "fal-ai/veo3.1/fast/image-to-video",
+		},
+		vision: {
+			model: "openrouter/router/vision",
+			llm: "google/gemini-3.8-flash",
 		},
 		music: { model: "elevenlabs/music/v2.5" },
 		voice: {
@@ -95,9 +102,10 @@ const DEFAULTS: ModelsConfig = {
 		scene: { image: 0.05 },
 		video: {
 			kling: { second: 0.084 },
-			kling3: { second: 0.084, secondAudio: 0.126 },
-			veo: { second: 0.15, secondSilent: 0.1 },
+			kling3: { second: 0.084 },
+			veo: { second: 0.1 },
 		},
+		vision: { call: 0.004 },
 		music: { startedMinute: 0.6 },
 		voice: { adult: { per1000Chars: 0.1 }, child: { per1000Chars: 0.09 } },
 	},

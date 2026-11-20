@@ -19,7 +19,12 @@ import { costsToText, readCosts } from "./costs.js";
 import { MEDIA_KINDS, type MediaKind, mediaBriefFor } from "./media.js";
 import { nextToText } from "./next.js";
 import { RollOptionsSchema, rollToText } from "./random.js";
-import { generateIdleVideo, generateScene, type VideoModel } from "./scene.js";
+import {
+	generateIdleVideo,
+	generateScene,
+	type LoopMode,
+	type VideoModel,
+} from "./scene.js";
 import { createServer, VERSION } from "./server.js";
 import {
 	listCards,
@@ -56,8 +61,8 @@ Usage:
                                        print the brief for writing one generation prompt
   character-forge scene <id> [--prompt P] [--notes N] [--quality low|medium|high]
                                        the character in their environment (scene.png)
-  character-forge video <id> [--prompt P] [--notes N] [--seconds 8] [--model kling|kling3|veo] [--loop frame|crossfade|off] [--audio]
-                                       looping idle clip from scene.png (Kling O1 silent; kling3 and Veo can add sound)
+  character-forge video <id> [--prompt P] [--notes N] [--seconds 10] [--model kling|kling3|veo] [--loop chain|frame|crossfade|off] [--motion M] [--start NAME|URL] [--dry-run]
+                                       looping idle clip from scene.png, silent, one Veo piece by default (two pieces on Kling)
   character-forge voice <id> --description D --text T [--pitch -2]
                                        design the character's own voice (ElevenLabs for adults, Qwen + pitch for minors)
   character-forge say <id> --text T --name N
@@ -115,8 +120,9 @@ async function main() {
 			quality: { type: "string" },
 			seconds: { type: "string" },
 			loop: { type: "string" },
-			audio: { type: "boolean" },
 			model: { type: "string" },
+			motion: { type: "string" },
+			start: { type: "string" },
 			pose: { type: "string" },
 			"pose-sheet": { type: "boolean" },
 			box: { type: "string" },
@@ -290,10 +296,19 @@ async function main() {
 				prompt: values.prompt,
 				notes: values.notes,
 				seconds: values.seconds ? Number(values.seconds) : undefined,
-				loop: values.loop as "frame" | "crossfade" | "off" | undefined,
-				audio: values.audio,
+				loop: values.loop as LoopMode | undefined,
 				model: values.model as VideoModel | undefined,
+				motion: values.motion,
+				start: values.start,
+				dryRun: values["dry-run"],
 			});
+			if (!r.file) {
+				console.log(r.prompt);
+				console.log(
+					`\nDry run: ${r.pieces.map((p) => `${p.seconds} s`).join(" + ")}, about $${r.usd.toFixed(2)}.`,
+				);
+				return;
+			}
 			console.log(`Video (${r.seconds}s): ${r.file}`);
 			return;
 		}

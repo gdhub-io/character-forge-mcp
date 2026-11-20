@@ -1,7 +1,12 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { generateIdleVideo, generateScene, VIDEO_FAMILIES } from "../scene.js";
-import { shown } from "./util.js";
+import {
+	generateIdleVideo,
+	generateScene,
+	LOOP_MODES,
+	VIDEO_FAMILIES,
+} from "../scene.js";
+import { copyable, reply, shown } from "./util.js";
 
 // Corrections for one take, in plain words, on top of the default prompt: no code change and no restart.
 const NOTES = z
@@ -55,7 +60,7 @@ export function registerScene(server: McpServer) {
 		{
 			title: "Looping idle video",
 			description:
-				"ONLY on request, after character_scene. Animates scene.png into a looping idle clip (Kling O1 by default, silent; Kling 3.0 and Veo can add sound). See loop for how the clip is closed into a loop. Paid: tell the user the price from character_next and wait for a yes.",
+				"ONLY on request, after character_scene. Animates scene.png into a silent looping idle clip: Veo 3.1 Fast by default, one 8 s piece that ends on its first frame; Kling makes it from two pieces (see loop), billed as two clips. Before the first video of a scene, a vision model reads what moves in scene.png (about $0.004, kept until the scene is redrawn), unless motion is given. dry_run returns the exact prompt and the price without making the video. Paid: tell the user the price from character_next and wait for a yes.",
 			annotations: {
 				openWorldHint: true,
 				destructiveHint: false,
@@ -67,7 +72,7 @@ export function registerScene(server: McpServer) {
 					.string()
 					.optional()
 					.describe(
-						"Small cyclical motions only: breathing, blinking, a habitual gesture, motion of things already in the scene (nothing new appears); the same person throughout (feelings may show, true to the scene's mood); static camera; returns to the start pose.",
+						"Replaces the default prompt. Name nothing that isn't in the scene, and nothing as a ban: the model draws whatever is named. Breathing, blinking, a habitual gesture; things in the scene move at a steady speed in whole cycles, never backward; the same person throughout; static camera.",
 					),
 				notes: NOTES,
 				seconds: z
@@ -77,40 +82,51 @@ export function registerScene(server: McpServer) {
 					.max(15)
 					.optional()
 					.describe(
-						"Default 8: room for one characteristic gesture and a return to the first-frame pose. Kling O1 takes 3–10 (5 or 10 without the end frame), Kling 3.0 3–15, Veo 4, 6 or 8; other values are rounded into range.",
+						"About how long the loop runs; default 10. A chain splits it into two pieces, each rounded into the model's range (Kling O1 3–10 s, 5 or 10 without an end frame; Kling 3.0 3–15; Veo 4, 6 or 8), so 10 is 5 + 5 s on Kling O1. dry_run shows the pieces and the price.",
 					),
 				loop: z
-					.enum(["frame", "crossfade", "off"])
+					.enum(LOOP_MODES)
 					.optional()
 					.describe(
-						"frame (Kling default): last frame = first frame, but the background tends to freeze and the motion can jerk at the seam. crossfade (Veo default; Veo also keeps the first = last frame): the last second is blended into the first, picture and sound, so the seam never jerks. off: plain clip.",
+						"frame (Veo default): one piece whose last frame = first frame; Veo keeps the character moving, Kling freezes everything. chain (Kling default): a free piece from scene.png, then a piece from its last frame back to scene.png, joined without the duplicated frames; two clips of about seconds/2 each, and the second can drift. crossfade: the last second is blended into the first; the seam shows. off: a plain clip. Default frame when start is given.",
 					),
-				audio: z
+				motion: z
+					.string()
+					.optional()
+					.describe(
+						"What in scene.png moves and how, if you can see the picture: one short line per thing, only what is visible, each 'repeats' (turns, sways, flickers) or 'stays still' (could only change one way). Replaces the vision model's reading, free.",
+					),
+				start: z
+					.string()
+					.optional()
+					.describe(
+						"A first frame instead of scene.png, for one piece (loop frame, crossfade or off): a file name in the character's assets folder or an https URL. With loop frame the piece ends on scene.png.",
+					),
+				dry_run: z
 					.boolean()
 					.optional()
 					.describe(
-						"Veo: default true (sound costs more). Kling 3.0: default false ($0.126/s with sound instead of $0.084). Kling O1 has no sound.",
+						"Return the exact prompt, the pieces and the price without making the video.",
 					),
 				model: z
 					.enum(VIDEO_FAMILIES)
 					.optional()
 					.describe(
-						"Default from models.json. kling: Kling O1 (no sound; 3–10 s) · kling3: Kling 3.0 (optional sound; 3–15 s; also told what must never appear) · veo: Veo 3.1 Fast (optional native sound; 4/6/8 s).",
+						"Default from models.json (veo). veo: Veo 3.1 Fast (4/6/8 s; prompt up to 20 000 characters) · kling: Kling O1 (3–10 s; prompt up to 2500) · kling3: Kling 3.0 (3–15 s; also told what must never appear). Veo and Kling 3.0 are also told what must never appear. All silent.",
 					),
 			},
 		},
-		async ({ id, prompt, notes, seconds, loop, audio, model }) => {
-			const r = await generateIdleVideo(id, {
-				prompt,
-				notes,
-				seconds,
-				loop,
-				audio,
-				model,
-			});
+		async ({ id, dry_run, ...opts }) => {
+			const r = await generateIdleVideo(id, { ...opts, dryRun: dry_run });
+			const plan = `${r.pieces.map((p) => `${p.seconds} s`).join(" + ")}, about $${r.usd.toFixed(2)}`;
+			if (!r.file)
+				return reply(
+					`Dry run: no video made. It would take ${plan}.${r.motionPending ? " What moves in the scene isn't read yet: the real run reads it first (included in the price), so the prompt below has the general line in its place." : ""}\n\n${copyable([{ label: "Prompt the real run sends", text: r.prompt }])}`,
+					{ ...r },
+				);
 			return shown(
 				id,
-				`Video saved: ${r.file} (${r.seconds}s)`,
+				`Video saved: ${r.file} (${r.seconds}s: ${plan})`,
 				[r.file],
 				"For a fix or a new take, call character_video again with notes saying what to change.",
 				{ ...r },

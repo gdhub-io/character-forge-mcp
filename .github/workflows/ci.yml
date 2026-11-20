@@ -25,6 +25,8 @@ jobs:
       - run: npm run lint
       # Known vulnerabilities in what ships (not dev tools) fail the build.
       - run: npm audit --omit=dev --audit-level=high
+      # The idle-loop join is tested on real clips; skipped where ffmpeg is missing, so make sure it's there.
+      - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
       # Builds, then runs the unit tests and an end-to-end MCP client/server test. Never calls paid APIs.
       - run: npm test
 
