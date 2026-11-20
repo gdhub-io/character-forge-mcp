@@ -34,7 +34,7 @@ const FREE = "Free";
 const PRICE = {
 	concept: "≈ $0.02",
 	scene: "≈ $0.05",
-	video: "≈ $0.67",
+	video: "≈ $0.80",
 	voice: "≈ $0.03",
 	music: "≈ $0.60",
 };

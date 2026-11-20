@@ -19,11 +19,15 @@
       "quality": "medium"
     },
     "video": {
-      "default": "kling",
+      "default": "veo",
       "kling": "fal-ai/kling-video/o1/standard/image-to-video",
       "kling3": "fal-ai/kling-video/v3/standard/image-to-video",
       "veo": "fal-ai/veo3.1/fast/first-last-frame-to-video",
       "veoStartOnly": "fal-ai/veo3.1/fast/image-to-video"
+    },
+    "vision": {
+      "model": "openrouter/router/vision",
+      "llm": "google/gemini-3.8-flash"
     },
     "music": {
       "model": "elevenlabs/music/v2.5"
@@ -49,13 +53,14 @@
         "second": 0.084
       },
       "kling3": {
-        "second": 0.084,
-        "secondAudio": 0.126
+        "second": 0.084
       },
       "veo": {
-        "second": 0.15,
-        "secondSilent": 0.1
+        "second": 0.1
       }
+    },
+    "vision": {
+      "call": 0.004
     },
     "music": {
       "startedMinute": 0.6

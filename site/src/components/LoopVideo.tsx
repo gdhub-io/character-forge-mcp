@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-/** Switch to the twin this long before the end, so the handover lands inside the clip's crossfaded last second. */
+/** Switch to the twin this long before the end, so the handover lands inside the clip's last second. */
 const LEAD_S = 0.3;
 const FADE_MS = 1200;
 

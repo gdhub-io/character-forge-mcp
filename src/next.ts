@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { config } from "./config.js";
-import { videoUsd } from "./costs.js";
-import { assetFile, isDraft, translationFile } from "./store.js";
+import { defaultLoop, idleVideoUsd, MOTION_FILE, videoPlan } from "./scene.js";
+import { assetFile, isDraft, promptFile, translationFile } from "./store.js";
 import {
 	OTHER_VOICE_LANGUAGES,
 	PROFILE,
@@ -23,7 +23,7 @@ export interface NextStep {
 
 /** A voice monologue runs about this long; voices are priced per 1000 characters. */
 const TYPICAL_SCRIPT_CHARS = 300;
-const VIDEO_SECONDS = 8;
+const VIDEO_SECONDS = 10;
 
 export function nextSteps(id: string): { done: string[]; next: NextStep[] } {
 	if (isDraft(id)) {
@@ -66,15 +66,19 @@ export function nextSteps(id: string): { done: string[]; next: NextStep[] } {
 	else {
 		done.push("location");
 		if (!has("idle.mp4")) {
+			const model = models.video.default;
+			const loop = defaultLoop(model);
+			const plan = videoPlan(model, loop, VIDEO_SECONDS);
 			offer({
-				step: `Idle video (${VIDEO_SECONDS} s loop)`,
+				step: `Idle video (${plan.map((x) => `${x.seconds} s`).join(" + ")} loop)`,
 				tool: "character_video",
 				why: "The voice comes after it.",
-				usd: videoUsd(
-					models.video.default,
-					VIDEO_SECONDS,
-					models.video.default === "veo", // Veo makes sound unless told not to
-				),
+				usd:
+					idleVideoUsd(model, loop, VIDEO_SECONDS) +
+					// Before its first video, what moves in the scene is read once,
+					(existsSync(promptFile(id, MOTION_FILE)) ? 0 : p.vision.call) +
+					// and a chain reads how its first piece moved, for the second.
+					(loop === "chain" ? p.vision.call : 0),
 			});
 		} else if ((done.push("video"), !has(PROFILE))) {
 			offer({
