@@ -14,11 +14,12 @@ import { assetFile, loadCard, saveAsset } from "./store.js";
  */
 
 /**
- * Video families (endpoints in models.json): Kling O1 Standard (≈$0.084/s, first+last frame, no audio) and Veo 3.1
- * Fast (720p, $0.15/s with sound, $0.10 without; 4, 6 or 8 s). Seedance was dropped: its partner moderation rejects
- * any realistic face it didn't generate itself, which is every scene we make.
+ * Video families (endpoints in models.json): Kling O1 Standard (≈$0.084/s, first+last frame, 3–10 s, no audio),
+ * Kling 3.0 Standard (first+last frame, 3–15 s, $0.084/s silent, $0.126 with sound, takes a negative prompt) and
+ * Veo 3.1 Fast (720p, $0.15/s with sound, $0.10 without; 4, 6 or 8 s). Seedance was dropped: its partner moderation
+ * rejects any realistic face it didn't generate itself, which is every scene we make; 2.0 also costs ~3× more.
  */
-export const VIDEO_FAMILIES = ["kling", "veo"] as const;
+export const VIDEO_FAMILIES = ["kling", "kling3", "veo"] as const;
 export type VideoModel = (typeof VIDEO_FAMILIES)[number];
 
 /** Everything the scene needs comes from the card: place, idle pose, habit, look, worn items and their sides. */
@@ -53,7 +54,7 @@ export function defaultScenePrompt(c: CharacterCard): string {
 		"Physical sense: every worn item hangs freely and clear of the arms and hands (a coil on a shoulder hangs behind or beside the arm, never over the chest where the arms rest); nothing passes through a limb or the body.",
 		`Signature item visible: ${lk.signature_item.item.replace(/\.$/, "")}.`,
 		"Restraint: show the character's craft or obsession through one or two details, not by filling the frame with it; the place is lived-in and ordinary, full of things that have nothing to do with their main motif.",
-		"Composition for a full-screen website background: 16:9 wide shot, the character placed in the RIGHT third of the frame, whole figure visible and small enough to leave air around it: the figure takes about 60% of the frame height, with clear empty space above the head (about a fifth of the frame) and below the feet (about a tenth); the head and the feet never touch the top or bottom edge, where page headers and bars will sit. The LEFT 60% is a calm continuation of the same place — low detail, soft focus, no bright spots, no faces or text — where menus and info cards will sit.",
+		"Composition for a full-screen website background: 16:9 wide shot, the character placed in the RIGHT third of the frame, whole figure visible and small enough to leave air around it: the figure takes about 60% of the frame height, with clear empty space above the head (about a fifth of the frame, the ceiling or sky visible) and below the feet (about a tenth, the floor or ground visible); the head and the feet never touch the top or bottom edge, where page headers and bars will sit. The LEFT 60% is a calm continuation of the same place — low detail, soft focus, no bright spots, no large or glowing objects (no big lenses, lit lanterns or lamps), no faces or text — where menus and info cards will sit.",
 		`Static camera at eye level. Light motivated by the place itself. Style: ${houseStyle().replace(/,\s*soft studio light/i, "")}. One single image, no text.`,
 	]
 		.filter(Boolean)
@@ -74,14 +75,18 @@ export function defaultLoopPrompt(
 	const his = pronoun(c.description.gender);
 	return [
 		loop === "frame" || model === "veo"
-			? "Seamless idle loop, static locked-off camera, no cuts. The clip starts and ends on the exact first frame. The character stays in the right third of the frame at the same size, with the same space above the head and below the feet, and never walks."
-			: "Calm idle moment, static locked-off camera, no cuts. The character stays in the right third of the frame at the same size, with the same space above the head and below the feet, and never walks, and ends in nearly the same pose as the first frame.",
+			? "Seamless idle loop, static locked-off camera, no cuts. The clip starts and ends on the exact first frame. The character stays in the right third at the same size, with the same space above the head and below the feet, and never walks."
+			: "Calm idle moment, static locked-off camera, no cuts. The character stays in the right third at the same size, with the same space above the head and below the feet, never walks, and ends in nearly the same pose as the first frame.",
 		// Kling with first = last frame tends to freeze everything; the background has to be told to live the whole time.
-		"The world keeps moving for the WHOLE clip, never frozen: whatever in this scene naturally moves — water and waves, clouds, rain, smoke, flames, lamplight, foliage, hanging cloth or rope — moves continuously and visibly, in slow even cycles.",
+		// A list of things that move ("smoke, flames, rope…") was read as things to add: Marenka's clips grew smoke at her
+		// feet and burning ropes. So only what the first frame shows may move, and nothing may appear.
+		"The world keeps moving for the WHOLE clip, never frozen, but only what the first frame already shows moves, in slow even cycles (a flame there flickers, clouds there drift, water there ripples).",
+		"Nothing new appears: no smoke, steam, fog, mist, fire, sparks, dust, ropes, cords, people or objects that the first frame doesn't show.",
+		// Marenka, a sad elderly robot keeper, turned younger and cheerful mid-clip: the person must stay, feelings may move.
+		"The same person throughout: the same face, age, body and outfit, never younger or older. Feelings may show in the character's own way, true to the first frame's mood (a sad character doesn't turn cheerful), back to the first-frame expression by the end.",
 		`The character breathes, blinks and shifts weight slightly, in the spirit of ${his} idle habit (${mv.idle_pose})`,
 		`Once in the middle, one small, clearly readable beat in the spirit of that habit, carried by the head, shoulders or a whole arm (a look up at the sky, a turn of the head, a shift of weight), then back to exactly the first-frame pose. ${his[0].toUpperCase() + his.slice(1)} hands stay away from ${his} face and mouth, and do not tap, pick up or touch small objects: the hand misses and it reads as a glitch.`,
 		`${c.look.signature_item.item.split(/[:,]/)[0]} stays still in its place.`,
-		"No new people or objects appear.",
 		// Video moderation has rejected stylized characters as "likenesses of real people"; say it plainly.
 		"The character is entirely fictional, an original stylized game character; any resemblance to a real person is coincidental.",
 		// Breaths at the start and end pile up at the loop seam; contact sounds rarely match what the hands do.
@@ -93,11 +98,16 @@ export function defaultLoopPrompt(
 		.join(" ");
 }
 
-/** The user's corrections for this one take go last, where they override anything above them; no code change needed. */
-const withNotes = (prompt: string, notes?: string) =>
-	notes?.trim()
-		? `${prompt}\nCorrections for this take (they override anything above): ${notes.trim()}`
+/**
+ * The user's corrections for this one take, no code change needed. Appended last they lost to the default text
+ * ("No smoke" still got smoke), so they come first as binding rules, with a reminder at the end.
+ */
+export const withNotes = (prompt: string, notes?: string) => {
+	const n = notes?.trim();
+	return n
+		? `Binding corrections for this take; they override anything below that conflicts with them: ${n}\n${prompt}\n(The corrections at the top win.)`
 		: prompt;
+};
 
 export interface SceneResult {
 	file: string;
@@ -153,7 +163,16 @@ export interface VideoResult {
 	seconds: number;
 }
 
-/** Idle clip from scene.png (Kling ≈$0.084/s silent, Veo 3.1 Fast $0.15/s with sound), looped per LoopMode. */
+/**
+ * For models that take one: what is never right in an idle clip. Not smoke or fire: a scene may already show them,
+ * and the prompt only forbids new ones.
+ */
+export const VIDEO_NEGATIVE =
+	"new people, new objects, a different face, a younger or older face, camera movement, zoom, cuts, blur, distortion, low quality";
+/** Kling's prompt limit (fal schema); Veo takes 20 000. */
+const KLING_PROMPT_MAX = 2500;
+
+/** Idle clip from scene.png (Kling O1 or 3.0 ≈$0.084/s silent, Veo 3.1 Fast $0.15/s with sound), looped per LoopMode. */
 export async function generateIdleVideo(
 	id: string,
 	opts: {
@@ -169,45 +188,71 @@ export async function generateIdleVideo(
 	const scene = await readFile(assetFile(id, "scene.png")).catch(() => {
 		throw new Error(`No scene.png for "${id}" yet: generate the scene first.`);
 	});
-	const url = await falUpload(scene, "image/png", "scene.png");
 	const video = config().models.video;
 	const model = opts.model ?? video.default;
+	if (!VIDEO_FAMILIES.includes(model))
+		throw new Error(
+			`Unknown video model "${model}": use ${VIDEO_FAMILIES.join(", ")}.`,
+		);
 	// Veo matches the first and last frame but not the motion through them, so its seam jerks; it gets both.
-	const loop = opts.loop ?? (model === "kling" ? "frame" : "crossfade");
-	const asked = opts.seconds ?? 8;
-	// Kling takes any length with an end frame, but only 5 or 10 s from a start frame alone; Veo takes 4, 6 or 8 s.
+	const loop = opts.loop ?? (model === "veo" ? "crossfade" : "frame");
+	const asked = Math.round(opts.seconds ?? 8);
+	if (!Number.isFinite(asked))
+		throw new Error(`seconds must be a number, got ${opts.seconds}.`);
+	const clamp = (lo: number, hi: number) => Math.min(hi, Math.max(lo, asked));
+	// Kling O1: 3–10 s with an end frame, only 5 or 10 s from a start frame alone; Kling 3.0: 3–15 s; Veo: 4, 6 or 8 s.
 	const seconds =
-		model === "kling" && loop !== "frame"
-			? asked > 7
-				? 10
-				: 5
-			: model === "veo"
-				? asked >= 7
-					? 8
-					: asked >= 5
-						? 6
-						: 4
-				: asked;
-	// Kling O1 has no sound; Veo makes it by default.
-	const audio = model === "veo" && (opts.audio ?? true);
+		model === "veo"
+			? asked >= 7
+				? 8
+				: asked >= 5
+					? 6
+					: 4
+			: model === "kling3"
+				? clamp(3, 15)
+				: loop === "frame"
+					? clamp(3, 10)
+					: asked > 7
+						? 10
+						: 5;
+	// Kling O1 has no sound; Veo makes it by default; Kling 3.0 can, but stays silent unless asked (it costs half more).
+	const audio =
+		(model === "veo" && (opts.audio ?? true)) ||
+		(model === "kling3" && (opts.audio ?? false));
 	const prompt = withNotes(
 		opts.prompt ?? defaultLoopPrompt(card, audio, loop, model),
 		opts.notes,
 	);
+	// Checked before anything is uploaded or paid for.
+	if (model !== "veo" && prompt.length > KLING_PROMPT_MAX)
+		throw new Error(
+			`The video prompt is ${prompt.length} characters; Kling takes at most ${KLING_PROMPT_MAX}. Shorten the notes or the prompt, or use model veo.`,
+		);
+	const url = await falUpload(scene, "image/png", "scene.png");
 	const end = loop === "frame" ? { end_image_url: url } : {};
 	const body =
 		model === "kling"
 			? { prompt, start_image_url: url, ...end, duration: String(seconds) }
-			: {
-					prompt,
-					...(loop === "off"
-						? { image_url: url }
-						: { first_frame_url: url, last_frame_url: url }),
-					duration: `${seconds}s`,
-					aspect_ratio: "16:9",
-					resolution: "720p",
-					generate_audio: audio,
-				};
+			: model === "kling3"
+				? {
+						prompt,
+						start_image_url: url,
+						...end,
+						duration: String(seconds),
+						generate_audio: audio,
+						negative_prompt: VIDEO_NEGATIVE,
+					}
+				: {
+						prompt,
+						negative_prompt: VIDEO_NEGATIVE,
+						...(loop === "off"
+							? { image_url: url }
+							: { first_frame_url: url, last_frame_url: url }),
+						duration: `${seconds}s`,
+						aspect_ratio: "16:9",
+						resolution: "720p",
+						generate_audio: audio,
+					};
 	const endpoint =
 		model === "veo" && loop === "off" ? video.veoStartOnly : video[model];
 	const out = await falQueue(endpoint, body, "video", 10 * 60_000); // video renders take minutes

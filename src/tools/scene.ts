@@ -8,7 +8,7 @@ const NOTES = z
 	.string()
 	.optional()
 	.describe(
-		"Corrections on top of the default prompt for this take, in plain words (e.g. 'his height must read against the ceiling', 'hands stay off the barometer'). Use this to fix a result instead of rewriting the whole prompt.",
+		"Corrections for this take, in plain words (e.g. 'his height must read against the ceiling', 'hands stay off the barometer', 'no smoke'). They go first as binding rules and win over the default prompt. Use this to fix a result instead of rewriting the whole prompt.",
 	);
 
 export function registerScene(server: McpServer) {
@@ -55,7 +55,7 @@ export function registerScene(server: McpServer) {
 		{
 			title: "Looping idle video",
 			description:
-				"ONLY on request, after character_scene. Animates scene.png into a looping idle clip (Kling by default, silent; Veo can add sound). See loop for how the clip is closed into a loop. Paid: tell the user the price from character_next and wait for a yes.",
+				"ONLY on request, after character_scene. Animates scene.png into a looping idle clip (Kling O1 by default, silent; Kling 3.0 and Veo can add sound). See loop for how the clip is closed into a loop. Paid: tell the user the price from character_next and wait for a yes.",
 			annotations: {
 				openWorldHint: true,
 				destructiveHint: false,
@@ -67,17 +67,17 @@ export function registerScene(server: McpServer) {
 					.string()
 					.optional()
 					.describe(
-						"Small cyclical motions only: breathing, blinking, a habitual gesture, ambient motion; static camera; returns to the start pose.",
+						"Small cyclical motions only: breathing, blinking, a habitual gesture, motion of things already in the scene (nothing new appears); the same person throughout (feelings may show, true to the scene's mood); static camera; returns to the start pose.",
 					),
 				notes: NOTES,
 				seconds: z
 					.number()
 					.int()
-					.min(4)
-					.max(30)
+					.min(3)
+					.max(15)
 					.optional()
 					.describe(
-						"Default 8: room for one characteristic gesture and a return to the first-frame pose.",
+						"Default 8: room for one characteristic gesture and a return to the first-frame pose. Kling O1 takes 3–10 (5 or 10 without the end frame), Kling 3.0 3–15, Veo 4, 6 or 8; other values are rounded into range.",
 					),
 				loop: z
 					.enum(["frame", "crossfade", "off"])
@@ -89,13 +89,13 @@ export function registerScene(server: McpServer) {
 					.boolean()
 					.optional()
 					.describe(
-						"Veo only: default true (sound costs more). Kling has no sound.",
+						"Veo: default true (sound costs more). Kling 3.0: default false ($0.126/s with sound instead of $0.084). Kling O1 has no sound.",
 					),
 				model: z
 					.enum(VIDEO_FAMILIES)
 					.optional()
 					.describe(
-						"Default from models.json. kling (no sound) · veo (optional native sound; 4/6/8 s).",
+						"Default from models.json. kling: Kling O1 (no sound; 3–10 s) · kling3: Kling 3.0 (optional sound; 3–15 s; also told what must never appear) · veo: Veo 3.1 Fast (optional native sound; 4/6/8 s).",
 					),
 			},
 		},

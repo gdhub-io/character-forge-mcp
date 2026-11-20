@@ -56,8 +56,8 @@ Usage:
                                        print the brief for writing one generation prompt
   character-forge scene <id> [--prompt P] [--notes N] [--quality low|medium|high]
                                        the character in their environment (scene.png)
-  character-forge video <id> [--prompt P] [--notes N] [--seconds 8] [--model kling|veo] [--loop frame|crossfade|off] [--audio]
-                                       looping idle clip from scene.png (Kling silent; Veo can add sound)
+  character-forge video <id> [--prompt P] [--notes N] [--seconds 8] [--model kling|kling3|veo] [--loop frame|crossfade|off] [--audio]
+                                       looping idle clip from scene.png (Kling O1 silent; kling3 and Veo can add sound)
   character-forge voice <id> --description D --text T [--pitch -2]
                                        design the character's own voice (ElevenLabs for adults, Qwen + pitch for minors)
   character-forge say <id> --text T --name N

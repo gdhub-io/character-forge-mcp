@@ -21,6 +21,7 @@
     "video": {
       "default": "kling",
       "kling": "fal-ai/kling-video/o1/standard/image-to-video",
+      "kling3": "fal-ai/kling-video/v3/standard/image-to-video",
       "veo": "fal-ai/veo3.1/fast/first-last-frame-to-video",
       "veoStartOnly": "fal-ai/veo3.1/fast/image-to-video"
     },
@@ -46,6 +47,10 @@
     "video": {
       "kling": {
         "second": 0.084
+      },
+      "kling3": {
+        "second": 0.084,
+        "secondAudio": 0.126
       },
       "veo": {
         "second": 0.15,

@@ -23,10 +23,11 @@ export interface ModelsConfig {
 		/** The character in their own place (idle still), referenced from concept.png. */
 		scene: { model: string; quality: string };
 		/** Idle loop: which family is the default, and the endpoints. The request body differs per family, so the
-		 * families themselves (kling, veo) are fixed in code; their endpoints are not. */
+		 * families themselves (kling, kling3, veo) are fixed in code; their endpoints are not. */
 		video: {
-			default: "kling" | "veo";
+			default: "kling" | "kling3" | "veo";
 			kling: string;
+			kling3: string;
 			veo: string;
 			veoStartOnly: string;
 		};
@@ -47,6 +48,7 @@ export interface ModelsConfig {
 		scene: { image: number };
 		video: {
 			kling: { second: number };
+			kling3: { second: number; secondAudio: number };
 			veo: { second: number; secondSilent: number };
 		};
 		music: { startedMinute: number };
@@ -75,6 +77,7 @@ const DEFAULTS: ModelsConfig = {
 		video: {
 			default: "kling",
 			kling: "fal-ai/kling-video/o1/standard/image-to-video",
+			kling3: "fal-ai/kling-video/v3/standard/image-to-video",
 			veo: "fal-ai/veo3.1/fast/first-last-frame-to-video",
 			veoStartOnly: "fal-ai/veo3.1/fast/image-to-video",
 		},
@@ -92,6 +95,7 @@ const DEFAULTS: ModelsConfig = {
 		scene: { image: 0.05 },
 		video: {
 			kling: { second: 0.084 },
+			kling3: { second: 0.084, secondAudio: 0.126 },
 			veo: { second: 0.15, secondSilent: 0.1 },
 		},
 		music: { startedMinute: 0.6 },
