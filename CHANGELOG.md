@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.6...v0.3.7) (2026-11-20)
+
+
+### Features
+
+* idle videos true to the scene: Veo by default, motion read from the scene, prompts that name nothing ([#56](https://github.com/gdhub-io/character-forge-mcp/issues/56)) ([18a903d](https://github.com/gdhub-io/character-forge-mcp/commit/18a903d94ede7fb6f399d823db3f2adc166446ea))
+
 ## [0.3.6](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.5...v0.3.6) (2026-11-20)
 
 
