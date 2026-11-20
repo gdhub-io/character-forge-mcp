@@ -10,13 +10,16 @@ import {
 } from "./pose.js";
 import { bodyOf, type CharacterCard, slugify } from "./schema.js";
 import {
+	checkName,
 	IMPORTED,
 	loadCard,
 	pickWinner,
 	saveConcept,
+	savePrompt,
 	writeCard,
 } from "./store.js";
 import { readUserImage } from "./userimage.js";
+import { askVision } from "./vision.js";
 
 export const VIEWS = ["front", "front-back", "front-side-back"] as const;
 export type Views = (typeof VIEWS)[number];
@@ -42,6 +45,8 @@ export interface ConceptOptions {
 	controlScale?: number;
 	/** Also cut the avatar from the sheet (default true; free). */
 	avatar?: boolean;
+	/** Marks the last take lost: put first, as a binding correction (the check's one retake). */
+	retake?: string[];
 }
 
 /** The body's numbers as words an image model follows; only deviations from average are named. */
@@ -77,6 +82,92 @@ export function bodyWords(b: BodyShape): string {
 /** Image models beautify by default; the card's flaws only survive if we say so. Style-neutral: no realism words. */
 export const NOT_IDEALIZED =
 	"Not idealized: a specific person with asymmetries, uneven features, every flaw and mark";
+
+/**
+ * Muddy sheets came from wear painted as dirt over every plane (and a grey backdrop greying it all); the card's
+ * wear still shows, as shapes.
+ */
+export const CLEAN_COLOUR =
+	"Clean, clear colour: each material one clear local colour, light and shadow as clean shapes of that colour; wear shows as shape (patches, frays, creases, worn edges), not as grime, smudges, stains or a muddy wash over the colours";
+
+/** Sunburst drew Gennady's cape knit cable by cable and its fringe thread by thread: busy, and off the house style. */
+export const FEW_DETAILS =
+	"Few, large shapes: knit, weave, fringe and stitching suggested by a few planes, never drawn thread by thread; small detail only on the face, the hands and the signature item";
+
+/**
+ * Gennady's headset band began in the middle of his head. No example names a thing here: a named thing gets drawn.
+ */
+export const WHOLE_ITEMS =
+	"Every piece of clothing and footwear and every worn or carried item is whole and sits on the body as it would in life; nothing starts or ends inside the head or the body, or in mid-air";
+
+/** The sheet holds the views and nothing else: a lone signature item drawn beside them was on every sheet. */
+const ONLY_FIGURES =
+	"Only the character on the sheet: every item is worn or carried on the body, nothing drawn on its own beside the figures";
+
+const BACKGROUND = "Plain, flat, very light neutral background";
+
+type Mark = CharacterCard["look"]["marks"][number];
+
+/**
+ * Marks that change the body's shape, which image models quietly repair: Gennady's left hand with only the thumb and
+ * little finger was drawn whole in every view (#61). The card's `defining` flag decides; without it, the wording.
+ */
+const DEFINING =
+	/\b(missing|lost (\w+ )?(fingers?|hand|arm|leg|foot|eye|ear|toes?)|amputat\w*|severed|stump|prosthe\w*|artificial|(glass|false) (eye|leg|arm|hand)|eye ?patch|peg leg|only (the )?thumb|no (left|right) (hand|arm|leg|foot|eye|ear))/i;
+
+export const definingMarks = (card: CharacterCard): Mark[] =>
+	card.look.marks.filter((m) => m.defining ?? DEFINING.test(m.mark));
+
+export const markText = (m: Mark, max = 300) =>
+	`${clip(m.mark, max)} (${clip(m.location, max)})`;
+
+/**
+ * How an old loss looks: "smooth shiny scar tissue" came out as a glossy pink lump stuck on Gennady's hand, like
+ * plasticine. The hand simply ends there, in its own skin.
+ */
+export const HEALED =
+	"An old, healed loss is matte skin in the skin's own colour, with at most a faint pale seam: not pink, glossy, raw or lumpy, unless the mark says the wound is fresh.";
+
+/** A hand hanging edge-on hides its fingers, and the model filled the gap back in; palm to the viewer it reads. */
+const handShown = (ms: Mark[]) =>
+	ms.some((m) =>
+		/\b(hand|fingers?|thumb|palm|knuckles?)\b/i.test(`${m.mark} ${m.location}`),
+	)
+		? " The hand that carries it hangs a little open, palm turned slightly toward the viewer in the front view, so the gap reads in both views; the arm stays down in the A-pose."
+		: "";
+
+/**
+ * Image models pull every character toward an average person: they straighten a stoop, fill in lost fingers, even
+ * out proportions. Pushing what is distinct a notch past life keeps the character their own.
+ */
+function pushedLine(card: CharacterCard): string {
+	const b = bodyOf(card);
+	const body = bodyWords(b)
+		.split(", ")
+		.filter((w) => !/heads tall/.test(w));
+	const items = [
+		clip(card.look.silhouette, 160),
+		// The face's own shape: without it every face came out as the model's default one.
+		`face: ${clip(card.description.physical.face, 140)}`,
+		...body,
+		...definingMarks(card).map((m) => clip(m.mark, 80)),
+	].filter(Boolean);
+	return `PUSH WHAT MAKES THEM DISTINCT, a notch past life, never caricature, the face stays believable: ${items.join("; ")}.`;
+}
+
+/** The defining marks as one binding rule, first in every picture prompt; "" when there are none. */
+export function bindingMarks(card: CharacterCard, max = 300): string {
+	const ms = definingMarks(card);
+	return ms.length
+		? `BINDING, above everything else: the body exactly as written, in every view, never repaired or drawn whole: ${ms.map((m) => markText(m, max)).join("; ")}. Count fingers and limbs exactly; the A-pose stays, and the mark shows in it.${handShown(ms)} ${HEALED}`
+		: "";
+}
+
+/** The retake's correction: what the last take lost, first and binding. */
+const retakeLine = (lost?: string[]) =>
+	lost?.length
+		? `Binding correction for this take; it overrides anything below: the last take lost ${lost.join("; ")}. Draw it exactly as written, clearly visible in every view.`
+		: "";
 
 const VIEW_TEXT: Record<Views, string> = {
 	front: "one full-body front view",
@@ -135,6 +226,14 @@ export function resolveStyle(card: CharacterCard, style?: string): string {
 /** The user's own art direction, last in every concept prompt. */
 const alsoLine = (extra?: string) =>
 	extra?.trim() ? `Also: ${extra.trim()}` : "";
+
+/** "34-year-old"; a free-text age ("Looks about 27; is 1,000 years old") is given as it is. */
+const ageWords = (age: string | number) =>
+	/^\d+$/.test(String(age).trim())
+		? `${String(age).trim()}-year-old`
+		: `(age: ${String(age)
+				.trim()
+				.replace(/[.\s]+$/, "")})`;
 
 /** Possessive pronoun from the card's free-text gender: "her", "his" or "their". */
 export const pronoun = (gender: string) =>
@@ -253,7 +352,7 @@ export function gptCharacterPrompt(
 	const own = (v: number) => (v > 0 ? "right" : "left");
 	const bl = lk.blocking;
 	return [
-		`CHARACTER: ${card.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${card.core.dna.species.toLowerCase()}. ${d.physical.height_build}`,
+		`CHARACTER: ${card.meta.name}, ${ageWords(d.age)} ${d.gender.toLowerCase()}, ${card.core.dna.species.toLowerCase()}. ${d.physical.height_build}`,
 		`BODY: ${bodyWords(b)}.${Math.abs(b.shoulder_tilt) >= 0.15 ? ` The shoulder line slopes: ${p} ${own(b.shoulder_tilt)} shoulder sits clearly lower than the other, in both views.` : ""}${Math.abs(b.head_tilt) >= 0.15 ? ` ${p[0].toUpperCase() + p.slice(1)} head is canted toward ${p} ${own(b.head_tilt)} shoulder.` : ""} ${b.why}`,
 		born.length ? `BORN WITH: ${born.join("; ")}.` : "",
 		`FACE: ${d.physical.face}`,
@@ -266,15 +365,16 @@ export function gptCharacterPrompt(
 			? `WORN ITEMS: ${bl.accessories.map((a) => `${a.item ?? "item"} on ${p} ${a.where.replace("_", " ")}`).join("; ")}.`
 			: "",
 		`MARKS: ${lk.marks.map((m) => `${m.mark} — ${m.location}`).join("; ")}.`,
-		`SIGNATURE ITEM, also drawn on its own beside the figures: ${lk.signature_item.item}.`,
+		`SIGNATURE ITEM, worn or carried on the body: ${lk.signature_item.item}.`,
 		`WEAR AND CARE: ${lk.perfection}`,
 		// What a stranger must read in 3 seconds steers the face and stance (a villain must look dangerous, not pitiable).
 		`READS AT A GLANCE (show it in the face, gaze and stance): ${lk.story_reads.join(" ")}`,
-		`COLOURS: ${lk.palette.map((c) => `${c.name} ${c.hex}`).join(", ")}.`,
+		pushedLine(card),
+		`COLOURS: ${lk.palette.map((c) => `${c.name} ${c.hex}`).join(", ")}. ${CLEAN_COLOUR}.`,
 		`MUST KEEP: ${lk.turnaround_notes}`,
 		sideNote(p),
 		perViewPlacement(card),
-		`STYLE: ${style}. Not photorealistic unless the style says so. ${NOT_IDEALIZED}. Plain light-grey background, no text, no labels.`,
+		`STYLE: ${style}. Not photorealistic unless the style says so. ${FEW_DETAILS}. ${WHOLE_ITEMS}. ${NOT_IDEALIZED}. ${ONLY_FIGURES}. ${BACKGROUND}, no text, no labels.`,
 		alsoLine(extra),
 	]
 		.filter(Boolean)
@@ -326,24 +426,26 @@ export function buildTposePrompt(
 		? "one full-body figure in exactly the pose of the control image"
 		: `${VIEW_TEXT[views]}, A-pose, arms angled down. ${facing}. Left/right mean ${pronoun(d.gender)} own sides`;
 	return [
+		bindingMarks(c, 90),
 		`Character model sheet, ${layout}. Style: ${clip(resolveStyle(c, opts.style), 100)}.`,
-		`${c.meta.name}, ${d.age}-year-old ${d.gender.toLowerCase()}, ${c.core.dna.species.toLowerCase()}: ${clip(d.physical.height_build, 70)}; ${bodyWords(bodyOf(c))}.`,
+		`${c.meta.name}, ${ageWords(d.age)} ${d.gender.toLowerCase()}, ${c.core.dna.species.toLowerCase()}: ${clip(d.physical.height_build, 70)}; ${bodyWords(bodyOf(c))}.`,
 		`Must keep: ${clip(lk.turnaround_notes, 200)}.`,
 		`Face: ${clip(d.physical.face, 100)}. Hair: ${clip(d.physical.hair, 90)}.`,
 		`Marks: ${lk.marks.map((m) => `${clip(m.mark, 55)} (${clip(m.location, 35)})`).join("; ")}.`,
 		`Wear and care: ${clip(lk.perfection, 90)}.`,
 		`Wearing: ${lk.outfit.map((o) => clip(o.piece, 60)).join("; ")}.`,
-		`Signature item: ${clip(lk.signature_item.item, 80)}${opts.poseImage ? "" : ", also drawn beside the figure"}.`,
-		`Colours: ${lk.palette.map((p) => p.name).join(", ")}.`,
-		`${NOT_IDEALIZED}. Plain light-grey background, no text.`,
+		`Signature item, worn or carried: ${clip(lk.signature_item.item, 80)}.`,
+		`Colours: ${lk.palette.map((p) => p.name).join(", ")}; clean, clear colour, wear as shape, not grime.`,
+		`${NOT_IDEALIZED}. ${ONLY_FIGURES}. ${BACKGROUND}, no text.`,
 		alsoLine(opts.extra),
 	]
 		.filter(Boolean)
 		.join("\n");
 }
 
+// Hands empty and still: Gennady's sheet raised a hand to show its mark and held a controller from his story.
 const GPT_SKELETON_LAYOUT =
-	"The reference image is an OpenPose skeleton (coloured stick figures on black): use it for the exact poses, positions and proportions. Do not draw the skeleton itself. Character model sheet: two full-body views of the SAME person side by side, same scale, A-pose with arms angled down — LEFT figure = front view, face looking straight at the camera, eyes forward; RIGHT figure = seen squarely from behind. Identical outfit, items and asymmetries in both views.";
+	"The reference image is an OpenPose skeleton (coloured stick figures on black): use it for the exact poses, positions and proportions. Do not draw the skeleton itself. Character model sheet: two full-body views of the SAME person side by side, same scale, A-pose with both arms angled down and away from the body, hands empty, open and relaxed, fingers slightly apart so each one reads; nothing held, no gesture — LEFT figure = front view, face looking straight at the camera, eyes forward; RIGHT figure = seen squarely from behind. Identical outfit, items and asymmetries in both views.";
 
 /**
  * The exact text the image model gets for these options. The real run and the dry run both use it, so a dry run
@@ -354,13 +456,21 @@ export function conceptPrompt(
 	opts: ConceptOptions = {},
 	plan = conceptPlan(card, opts),
 ): string {
-	if ("poseImage" in plan || plan.mode !== "gpt")
-		return buildTposePrompt(card, opts);
 	const style = resolveStyle(card, opts.style);
-	// The GPT editor takes the reference as a guide, so it gets an explicit instruction about what to keep.
-	return plan.figure === "skeleton"
-		? `${GPT_SKELETON_LAYOUT}\n${gptCharacterPrompt(card, style, opts.extra)}`
-		: gptBlockInPrompt(card, buildTposePrompt(card, opts), style);
+	// The compact prompt opens with the binding marks itself; the GPT prompts get them first, before the layout.
+	const prompt =
+		"poseImage" in plan || plan.mode !== "gpt"
+			? buildTposePrompt(card, opts)
+			: [
+					bindingMarks(card),
+					// The GPT editor takes the reference as a guide, so it gets an explicit instruction about what to keep.
+					plan.figure === "skeleton"
+						? `${GPT_SKELETON_LAYOUT}\n${gptCharacterPrompt(card, style, opts.extra)}`
+						: gptBlockInPrompt(card, buildTposePrompt(card, opts), style),
+				]
+					.filter(Boolean)
+					.join("\n");
+	return [retakeLine(opts.retake), prompt].filter(Boolean).join("\n");
 }
 
 /** Which pipeline and figure these options pick; the prompt and the real run both read it, so they never disagree. */
@@ -391,12 +501,112 @@ function conceptPlan(card: CharacterCard, opts: ConceptOptions): ConceptPlan {
 	return { views, mode, figure };
 }
 
+/** One thing the card says the sheet must show, and whether the vision model saw it. */
+export interface CheckedItem {
+	item: string;
+	/** A defining mark (see definingMarks): missing, it costs one retake. */
+	defining: boolean;
+	visible: boolean;
+	/** What the vision model saw there, in a few words. */
+	seen: string;
+}
+
+/** The sheet checked against its card (#61): saved as prompts/<sheet>-check.json, read by character_next. */
+export interface ConceptCheck {
+	items: CheckedItem[];
+	/** What the kept sheet doesn't show, defining marks first; empty when everything is there. */
+	missing: string[];
+	/** True when a defining mark was missing, so a second sheet was made and the better one kept. */
+	retaken: boolean;
+}
+
+/** What to look for: the defining marks first, then the other marks, then each MUST KEEP sentence. */
+export function checkItems(
+	card: CharacterCard,
+): Omit<CheckedItem, "visible" | "seen">[] {
+	const defining = definingMarks(card);
+	return [
+		...defining.map((m) => ({ item: markText(m), defining: true })),
+		...card.look.marks
+			.filter((m) => !defining.includes(m))
+			.map((m) => ({ item: markText(m), defining: false })),
+		// Not from the card: a glitch any sheet can have, reported like a missing mark.
+		{ item: `${WHOLE_ITEMS}.`, defining: false },
+		...card.look.turnaround_notes
+			.split(/(?<=[.!?])\s+/)
+			.map((t) => t.trim())
+			.filter(Boolean)
+			.map((item) => ({ item, defining: false })),
+	];
+}
+
+export const checkQuestion = (items: { item: string }[]) =>
+	[
+		"This picture is a character model sheet: a front view and a back view of one character. For each numbered item below, does the picture show it as written?",
+		"Answer one line per item, in order: the number, then yes or no, then at most twelve words on what you actually see there. Judge the main fact of each item, not its finish: a loss counts as shown when the part clearly lacks what the item says is gone, even if the exact count or a described shine or scar texture is hard to read; a hand drawn whole, with all five fingers, where the item says some are missing is a no. If an item needs a view the sheet doesn't have, or is hidden by design (under clothing), answer yes.",
+		...items.map((x, i) => `${i + 1}. ${x.item}`),
+	].join("\n");
+
+/** The vision model's lines matched back to the items; an item it skipped counts as seen (only a clear no is missing). */
+export function parseCheck(
+	answer: string,
+	items: Omit<CheckedItem, "visible" | "seen">[],
+): CheckedItem[] {
+	const said = new Map<number, { yes: boolean; seen: string }>();
+	for (const line of answer.split("\n")) {
+		const m = /^\W*(\d+)\W+(yes|no)\b\W*(.*)$/i.exec(line);
+		if (m)
+			said.set(Number(m[1]) - 1, {
+				yes: m[2].toLowerCase() === "yes",
+				seen: m[3].trim(),
+			});
+	}
+	return items.map((x, i) => ({
+		...x,
+		visible: said.get(i)?.yes ?? true,
+		seen: said.get(i)?.seen ?? "",
+	}));
+}
+
+const lostDefining = (c: CheckedItem[]) =>
+	c.filter((x) => x.defining && !x.visible);
+const lost = (c: CheckedItem[]) => c.filter((x) => !x.visible);
+
+/** One vision request: the sheet against the card. Its cost goes to the ledger as part of the concept. */
+async function checkSheet(
+	id: string,
+	card: CharacterCard,
+	bytes: Buffer,
+): Promise<CheckedItem[]> {
+	const items = checkItems(card);
+	const url = await falUpload(bytes, "image/png", "concept-check.png");
+	const answer = await askVision(
+		id,
+		checkQuestion(items),
+		url,
+		"concept checked against the card",
+		"concept",
+	);
+	return parseCheck(answer, items);
+}
+
+/** The check in one line for the tool and the CLI: a missing mark is said plainly, never passed over. */
+export function checkText(check: ConceptCheck | { reason: string }): string {
+	if (!("items" in check)) return check.reason;
+	const after = check.retaken ? ", after one retake for a lost mark" : "";
+	return check.missing.length
+		? `Checked against the card${after}: the sheet does NOT show ${check.missing.join("; ")}. Tell the user; fix it with another take (extra saying what to change) or by hand.`
+		: `Checked against the card${after}: every mark and must-keep item is there.`;
+}
+
 export type ConceptResult =
 	| { generated: false; prompt: string; reason: string }
 	| {
 			generated: true;
 			prompt: string;
 			file: string;
+			/** The sheet checked against the card, or why it couldn't be. */
+			check: ConceptCheck | { reason: string };
 			/** The head-and-shoulders crop made from the sheet, or why there is none. */
 			avatar: Avatar | { reason: string };
 			card: string;
@@ -437,15 +647,51 @@ export async function generateConcept(
 			reason:
 				"No fal API key is set, so only the prompt was built: the A-pose prompt for any image model.",
 		};
-	const image = await generateImage(card, opts);
-	await recordCost(id, {
-		kind: "concept",
-		model: image.model,
-		detail: "model sheet",
-		usd: config().pricing.concept.image,
-	});
+	const draw = async (o: ConceptOptions) => {
+		const image = await generateImage(card, o);
+		await recordCost(id, {
+			kind: "concept",
+			model: image.model,
+			detail: o.retake ? "model sheet, retake for a lost mark" : "model sheet",
+			usd: config().pricing.concept.image,
+		});
+		// A failed check never fails the paid sheet.
+		const checked = await checkSheet(id, card, image.bytes).catch(
+			(e: Error) => ({ reason: e.message }),
+		);
+		return { image, checked };
+	};
+	let { image, checked } = await draw(opts);
+	let retaken = false;
+	if (Array.isArray(checked) && lostDefining(checked).length) {
+		// One retake, with what was lost first and binding; the better sheet is kept.
+		const again = await draw({
+			...opts,
+			retake: lostDefining(checked).map((x) => x.item),
+		});
+		retaken = true;
+		const score = (c: typeof checked) =>
+			Array.isArray(c)
+				? lostDefining(c).length * 100 + lost(c).length
+				: Number.POSITIVE_INFINITY;
+		if (score(again.checked) <= score(checked)) ({ image, checked } = again);
+	}
+	const check: ConceptCheck | { reason: string } = Array.isArray(checked)
+		? {
+				items: checked,
+				missing: [
+					...lostDefining(checked),
+					...lost(checked).filter((x) => !x.defining),
+				].map((x) => x.item),
+				retaken,
+			}
+		: {
+				reason: `The sheet wasn't checked against the card: ${checked.reason}`,
+			};
 	const name = conceptFileName(opts.style, Boolean(opts.poseImage));
 	const file = await saveConcept(id, image.bytes, image.prompt, name);
+	if ("items" in check)
+		await savePrompt(id, checkName(name), JSON.stringify(check, null, 2));
 	// The avatar is free and never fails the paid sheet.
 	const avatar =
 		opts.avatar === false
@@ -458,6 +704,7 @@ export async function generateConcept(
 		generated: true,
 		prompt: image.prompt,
 		file,
+		check,
 		avatar,
 		card: saved.files.markdown,
 		image,
@@ -515,6 +762,7 @@ async function generateImage(
 		seed: opts.seed,
 		controlScale: opts.controlScale,
 		strength: opts.strength,
+		retake: Boolean(opts.retake?.length),
 	});
 	return {
 		bytes: r.bytes,

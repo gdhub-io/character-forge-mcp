@@ -1,5 +1,12 @@
 import { readFile, rm, writeFile } from "node:fs/promises";
-import { clip, houseStyle, pronoun } from "./concept.js";
+import {
+	clip,
+	definingMarks,
+	HEALED,
+	houseStyle,
+	markText,
+	pronoun,
+} from "./concept.js";
 import { apiKey, config } from "./config.js";
 import { recordCost, videoUsd } from "./costs.js";
 import { falQueue, falQueueJson, falUpload, isUrl } from "./fal.js";
@@ -13,6 +20,7 @@ import {
 	savePrompt,
 } from "./store.js";
 import { assertPublicUrl, readUserImage } from "./userimage.js";
+import { askVision as ask, oneLine } from "./vision.js";
 
 /**
  * A living portrait: the character in their own place, doing what they usually do (an "idle" moment),
@@ -46,7 +54,12 @@ export function defaultScenePrompt(c: CharacterCard): string {
 				m.location,
 			),
 	);
+	// A scene drawn from a good concept still "fixed" a hand with missing fingers unless told first (#61).
+	const defining = definingMarks(c).filter((m) => marks.includes(m));
 	return [
+		defining.length
+			? `BINDING, above everything else: the character's body exactly as on the reference sheet, never repaired or drawn whole: ${defining.map((m) => markText(m)).join("; ")}. Count fingers and limbs exactly, and keep that part in clear sight. ${HEALED}`
+			: "",
 		`A cinematic still of ${c.meta.name} (${d.age}, ${d.gender.toLowerCase()}) — the character from the reference sheet — in their own place: ${c.backstory.key_locations[0]}.`,
 		`An ordinary idle moment: ${lk.movement.idle_pose} Doing what they usually do: ${c.backstory.daily_life}`,
 		// The idle text mentions occasional habits ("every hour she taps it"); drawn literally they invent props and
@@ -303,42 +316,14 @@ async function readMotion(
 	return text;
 }
 
-/** One question about one picture to the vision model; the answer as one line, its cost in the ledger. */
-async function askVision(
+/** A vision answer about the video, as one line. */
+const askVision = async (
 	id: string,
 	question: string,
 	imageUrl: string,
 	what: string,
 	max: number,
-): Promise<string> {
-	const vision = config().models.vision;
-	const out = await falQueueJson<{
-		output?: string;
-		usage?: { cost?: number };
-	}>(vision.model, {
-		model: vision.llm,
-		prompt: question,
-		image_urls: [imageUrl],
-		// The router's default model refuses requests with reasoning off ("Reasoning is mandatory").
-		reasoning: true,
-		max_tokens: 2000,
-		temperature: 0,
-	});
-	const text = (out.output ?? "")
-		.split("\n")
-		.map((l) => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
-		.filter(Boolean)
-		.join("; ")
-		.slice(0, max);
-	if (!text) throw new Error(`The vision model said nothing (${what}).`);
-	await recordCost(id, {
-		kind: "video",
-		model: `${vision.model} (${vision.llm})`,
-		detail: what,
-		usd: out.usage?.cost ?? config().pricing.vision.call,
-	});
-	return text;
-}
+) => oneLine(await ask(id, question, imageUrl, what, "video"), max);
 
 const CARRY_QUESTION =
 	"These four pictures are frames of one short clip, in order: top left, top right, bottom left, bottom right. Apart from the main character, say how each thing that moved across them moved: which way as the viewer sees it (for a turning thing, whether its front moves left or right), and how fast (for example a tenth of a turn over the clip). One line each, under twenty words, at most four lines. Leave out the light, and leave out anything that is not already in the first picture (top left): it should not be there. If nothing moved, answer 'nothing'.";
@@ -452,7 +437,7 @@ export async function generateScene(
 		image_urls: [ref],
 		image_size: { width: 1536, height: 864 }, // 16:9, for full-screen backgrounds
 		quality: opts.quality ?? sceneModel.quality, // the first and last frame of the video: worth a bit more than "low"
-		reasoning_effort: "low",
+		reasoning_effort: sceneModel.reasoning,
 		output_format: "png",
 	});
 	const file = await saveAsset(id, "scene.png", out.bytes, prompt);

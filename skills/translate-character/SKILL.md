@@ -9,7 +9,7 @@ English is always the source. A translation is an extra layer next to it: `card.
 
 ## 1. Card — free
 1. `character_get` the character and read the whole card.
-2. Translate every free-text field into the target language. Write it as the editor would in that language: plain, clear narration a stranger understands on first read, in a voice tuned to the character, not a word-for-word copy. The character's own lines (pet words, sample lines, inner monologue, what others say) keep their manner: slang stays slang, a stammer stays a stammer, broken grammar stays broken.
+2. Translate every free-text field into the target language. Write it as the editor would in that language: plain, clear narration a stranger understands on first read, in an authorial voice, not a word-for-word copy. Self-story, beliefs in their own words, inner monologue and dialogue keep the character's manner; what others say keeps each speaker's manner: slang stays slang, a stammer stays a stammer, broken grammar stays broken.
 3. Keep exactly: the structure and every list's length, numbers, `#colours`, lowercase ids and enums (`film`, `left_shoulder`, `knock`…), names of people and places unless the language has a settled form.
 4. `character_translate` with `id`, `lang` and the translated card. It rejects any change to the structure or fixed values; fix and resend.
    - The card is long: in Claude Code, hand the translation to a subagent with the card path and these rules, have it write the JSON to a file, then save it with `character_translate` (or the CLI: `character-forge translate <id> <file> --lang ru`).

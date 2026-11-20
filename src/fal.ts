@@ -18,6 +18,8 @@ export interface FalControlInput {
 	preprocess: "pose" | "depth" | "canny" | "img2img" | "gpt";
 	/** img2img only: how much to repaint the starting image, 0-1. */
 	strength?: number;
+	/** gpt only: the retake for a lost mark goes to models.json concept.retake. */
+	retake?: boolean;
 	controlScale?: number;
 	seed?: number;
 }
@@ -44,7 +46,13 @@ export async function falControlGenerate(
 	const img2img = input.preprocess === "img2img";
 	const gpt = input.preprocess === "gpt";
 	const m = config().models.concept;
-	const model = gpt ? m.model : img2img ? m.img2img : m.controlnet;
+	const model = gpt
+		? input.retake
+			? m.retake
+			: m.model
+		: img2img
+			? m.img2img
+			: m.controlnet;
 	const common = {
 		prompt: input.prompt,
 		image_url: input.imageUrl,
@@ -67,8 +75,8 @@ export async function falControlGenerate(
 				prompt: input.prompt,
 				image_urls: [input.imageUrl],
 				image_size: "auto",
-				quality: m.quality, // the endpoint defaults to high (~10x the cost)
-				reasoning_effort: "low",
+				quality: m.quality, // the endpoint defaults to high (pricier)
+				reasoning_effort: m.reasoning,
 				output_format: "png",
 				enable_safety_checker: true,
 			}

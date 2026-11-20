@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { avatarText } from "../avatar.js";
-import { generateConcept, VIEWS } from "../concept.js";
+import { checkText, generateConcept, VIEWS } from "../concept.js";
 import { copyable, reply, SHOW_PROMPT, shown } from "./util.js";
 
 export function registerConcept(server: McpServer) {
@@ -116,16 +116,17 @@ export function registerConcept(server: McpServer) {
 					{ prompt: r.prompt, generated: false },
 				);
 			}
-			const { image, avatar } = r;
+			const { image, avatar, check } = r;
 			return shown(
 				id,
-				`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${avatarText(avatar)}\n- ${r.card}`,
+				`Concept generated with ${image.provider}/${image.model}${image.seed !== undefined ? ` (seed ${image.seed})` : ""}.\n- ${r.file}\n- ${checkText(check)}\n- ${avatarText(avatar)}\n- ${r.card}`,
 				"file" in avatar ? [r.file, avatar.file] : [r.file],
 				"For a fix, call character_concept again with extra saying what to change; for a new take, another seed.",
 				{
 					prompt: r.prompt,
 					generated: true,
 					file: r.file,
+					check,
 					avatar,
 					provider: image.provider,
 					model: image.model,

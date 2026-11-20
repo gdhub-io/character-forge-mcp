@@ -17,11 +17,15 @@ export interface ModelsConfig {
 		concept: {
 			model: string;
 			quality: string;
+			/** GPT Image's planning before it draws: low, medium or high (fal's default is high). */
+			reasoning: string;
+			/** The one retake after a lost defining mark: Sunburst, the larger GPT Image 2.6, holds small detail better. */
+			retake: string;
 			img2img: string;
 			controlnet: string;
 		};
 		/** The character in their own place (idle still), referenced from concept.png. */
-		scene: { model: string; quality: string };
+		scene: { model: string; quality: string; reasoning: string };
 		/** Idle loop: which family is the default, and the endpoints. The request body differs per family, so the
 		 * families themselves (kling, kling3, veo) are fixed in code; their endpoints are not. */
 		video: {
@@ -71,12 +75,18 @@ const DEFAULTS: ModelsConfig = {
 	},
 	models: {
 		concept: {
-			model: "openai/gpt-image-2.6/flare/edit",
-			quality: "low",
+			model: "openai/gpt-image-2.6/sunburst/edit",
+			quality: "medium",
+			reasoning: "medium",
+			retake: "openai/gpt-image-2.6/sunburst/edit",
 			img2img: "fal-ai/z-image/turbo/image-to-image",
 			controlnet: "fal-ai/z-image/turbo/controlnet",
 		},
-		scene: { model: "openai/gpt-image-2.6/flare/edit", quality: "medium" },
+		scene: {
+			model: "openai/gpt-image-2.6/flare/edit",
+			quality: "medium",
+			reasoning: "medium",
+		},
 		video: {
 			default: "veo",
 			kling: "fal-ai/kling-video/o1/standard/image-to-video",
@@ -98,7 +108,7 @@ const DEFAULTS: ModelsConfig = {
 		},
 	},
 	pricing: {
-		concept: { image: 0.02 },
+		concept: { image: 0.04 },
 		scene: { image: 0.05 },
 		video: {
 			kling: { second: 0.084 },

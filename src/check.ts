@@ -157,7 +157,7 @@ export function checkCard(c: CharacterCard): CheckResult {
 		temperament
 			? `DNA × WOUND: The wound "${c.core.wound}" lands on a born temperament of ${temperament}. Does the card show HOW it landed on THIS temperament (inward or outward, hard or soft) — in core.central_paradox, the life events and traits.personality?`
 			: `DNA × WOUND: Which temperament did the wound "${c.core.wound}" land on? The card doesn't say yet.`,
-		`SELF-KNOWLEDGE: Read what a playing character always keeps in mind (core.self_story, core.lie, traits.personality, the conscious fears, the mask) as the character. Does any of it know what only the author knows — the truth, the future, that the title was a joke, how the story ends? "${c.core.self_story ?? "(no self_story yet)"}"`,
+		`SELF-KNOWLEDGE: Read core.self_story, core.lie, inner_monologue and explicit character quotations as the character. Do they reveal knowledge the character lacks — the truth, the future, that the title was a joke, how the story ends? Authorial descriptions such as traits.personality and fears.mask may explain unrecognized motives; do not rewrite those as conscious self-knowledge. "${c.core.self_story ?? "(no self_story yet)"}"`,
 		`PERSON: From traits.personality alone, can a stranger say whether they are withdrawn or outgoing, gloomy or cheerful, a rebel or a conformist, a leader or not, what their social life is like and what they love? "${c.traits.personality}"`,
 		`BORN vs LIFE: Is everything they were born with in core.dna (species, sex, lineage, body plan, covering, natural colours, face, frame, born differences), and everything life did (scars, posture, weight, dye) in description.physical and look? Does every trait trace to the DNA, the wound, or both?`,
 		`WOUND → LIE: Does "${c.core.lie}" follow inevitably from "${c.core.wound}"?`,
@@ -165,6 +165,7 @@ export function checkCard(c: CharacterCard): CheckResult {
 		`DEFENSE: Is the worst trait "${c.traits.worst_trait}" the way they defend the lie — and the thing that could destroy them in the climax?`,
 		`GIFT: Is the best trait "${c.traits.best_trait}" forged by the same wound? Does core.central_paradox make that visible?`,
 		`WANT vs NEED: Does the want "${c.goals.want}" feed the lie, while the need "${c.goals.need}" equals the truth "${c.core.truth}"? Does the climax "${c.goals.goal_climax}" force a choice between them?`,
+		`CAUSAL CLARITY: Read the logline on its own: "${c.meta.logline}". Can a new reader identify the concrete goal and obstacle? If it presents a choice, does it explain why both options cannot happen? Compare goals.conflicting_goals, goals.goal_climax and destiny: what action does each option require, what does it cost, and which established fact makes them incompatible? Flag missing links and unclear actors or referents; do not fill gaps with assumptions.`,
 		`FLAWS: Do the flaws (${c.identification.flaws.map((f) => f.flaw).join("; ")}) express the defense or the wound rather than being random decoration?`,
 		`QUIRKS: For each quirk, is it a scar of the wound, a ritual protecting the lie, or pure texture? At least 3 of ${c.uniqueness.quirks.length} should connect to the core.`,
 		`BACKSTORY: Does the biography dramatise the wound "${c.core.wound}" as lived, specific experience? Do the 3 formative events appear in it and escalate?`,

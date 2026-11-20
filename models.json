@@ -9,14 +9,17 @@
   },
   "models": {
     "concept": {
-      "model": "openai/gpt-image-2.6/flare/edit",
-      "quality": "low",
+      "model": "openai/gpt-image-2.6/sunburst/edit",
+      "quality": "medium",
+      "reasoning": "medium",
+      "retake": "openai/gpt-image-2.6/sunburst/edit",
       "img2img": "fal-ai/z-image/turbo/image-to-image",
       "controlnet": "fal-ai/z-image/turbo/controlnet"
     },
     "scene": {
       "model": "openai/gpt-image-2.6/flare/edit",
-      "quality": "medium"
+      "quality": "medium",
+      "reasoning": "medium"
     },
     "video": {
       "default": "veo",
@@ -43,7 +46,7 @@
   "pricing": {
     "_note": "USD estimates from the fal.ai model pages, used for the per-character cost ledger (costs.json). Update them when fal changes prices.",
     "concept": {
-      "image": 0.02
+      "image": 0.04
     },
     "scene": {
       "image": 0.05

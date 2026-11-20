@@ -990,6 +990,183 @@ test("avatar: the face found on the sheet sits in the centre, for any body and o
 	assert.equal(conceptFileName("Pose study"), "concept-style-pose-study.png");
 });
 
+/** Marta with a hand that lost three fingers: a mark image models repair (#61). */
+const withLostFingers = () => {
+	const card = structuredClone(example);
+	card.look.marks.push({
+		mark: "A left hand with only the thumb and little finger, the gap healed over",
+		location: "Left hand",
+		origin: "The winch caught it in the third storm.",
+	});
+	return card;
+};
+
+test("concept and scene prompts: defining marks lead, as binding rules; one figure sheet, clean colour", async () => {
+	const { conceptPrompt, definingMarks, checkItems } = await import(
+		path.join(root, "dist/concept.js")
+	);
+	const { defaultScenePrompt } = await import(path.join(root, "dist/scene.js"));
+	const plain = validateCard(example).card;
+	assert.equal(definingMarks(plain).length, 0);
+	assert.doesNotMatch(conceptPrompt(plain), /BINDING/);
+
+	const card = validateCard(withLostFingers()).card;
+	assert.equal(definingMarks(card).length, 1);
+	for (const prompt of [
+		conceptPrompt(card),
+		conceptPrompt(card, { control: "img2img" }),
+		defaultScenePrompt(card),
+	]) {
+		const first = prompt.split("\n")[0];
+		assert.match(first, /^BINDING, above everything else/);
+		assert.match(first, /only the thumb and little finger.*\(Left hand\)/);
+	}
+	// The flag decides over the wording.
+	const flagged = structuredClone(card);
+	flagged.look.marks[0].defining = true;
+	flagged.look.marks.at(-1).defining = false;
+	assert.match(definingMarks(flagged)[0].mark, /crescent scar/);
+	// Nothing drawn beside the figures; clean colour; no grey backdrop.
+	const gpt = conceptPrompt(card);
+	assert.doesNotMatch(gpt, /beside the figures?:|also drawn/i);
+	assert.match(gpt, /nothing drawn on its own beside the figures/);
+	assert.match(gpt, /Clean, clear colour/);
+	assert.match(gpt, /Few, large shapes/);
+	assert.match(
+		gpt,
+		/Every piece of clothing and footwear and every worn or carried item is whole/,
+	);
+	assert.match(
+		gpt,
+		/^PUSH WHAT MAKES THEM DISTINCT.*face: .*only the thumb and little finger/m,
+	);
+	// A hand mark turns that hand a little toward the viewer; healed skin stays matte.
+	assert.match(
+		gpt.split("\n")[0],
+		/palm turned slightly toward the viewer.*matte skin/,
+	);
+	assert.doesNotMatch(gpt, /light-grey/);
+	// A retake puts what was lost before everything else.
+	const retake = conceptPrompt(card, { retake: ["the hand"] });
+	assert.match(
+		retake.split("\n")[0],
+		/^Binding correction for this take.*the hand/,
+	);
+	// The check asks about the defining mark first, then the other marks, then each MUST KEEP sentence.
+	const items = checkItems(card);
+	assert.deepEqual(
+		items.map((x) => x.defining),
+		[true, ...items.slice(1).map(() => false)],
+	);
+	assert.ok(items.length > card.look.marks.length);
+});
+
+test("concept check: a lost defining mark costs exactly one retake; still lost, the result and character_next say so", async () => {
+	const { generateConcept } = await import(path.join(root, "dist/concept.js"));
+	const { nextSteps } = await import(path.join(root, "dist/next.js"));
+	const { readCosts } = await import(path.join(root, "dist/costs.js"));
+	const { promptFile } = await import(path.join(root, "dist/store.js"));
+	const sheet = mannequinPng("front-back", AVERAGE_BODY, "flat").png;
+	/** A fake fal: every sheet is our flat figure; the vision model answers from `answers`, in order. */
+	const run = (slug, answers) => {
+		const sent = [];
+		let n = 0;
+		return withFakeFal(
+			(u, init) => {
+				if (u.startsWith("https://queue.fal.run/") && init.method === "POST") {
+					const body = JSON.parse(init.body);
+					const vision = u.endsWith("/openrouter/router/vision");
+					sent.push({ vision, body, url: u });
+					const id = `${vision ? "v" : "i"}${n++}`;
+					return Response.json({
+						status_url: `https://queue.fal.run/${id}/status`,
+						response_url: `https://queue.fal.run/${id}/result`,
+					});
+				}
+				if (u.endsWith("/status"))
+					return Response.json({ status: "COMPLETED" });
+				if (/\/v\d+\/result$/.test(u))
+					return Response.json({
+						output: answers.shift(),
+						usage: { cost: 0.003 },
+					});
+				if (u.endsWith("/result"))
+					return Response.json({
+						images: [{ url: "https://fal.media/out.png" }],
+					});
+				if (u === "https://fal.media/out.png") return new Response(sheet);
+			},
+			async () => ({ r: await generateConcept(slug, { avatar: false }), sent }),
+		);
+	};
+	await withLibrary(async () => {
+		const { saveCard } = await import(path.join(root, "dist/store.js"));
+		const { slug } = await saveCard(withLostFingers());
+
+		// Lost, then found by the retake: two sheets, two checks, the retake kept.
+		const fixed = await run(slug, [
+			"1. no — the left hand has five fingers\n2. yes",
+			"1. yes — thumb and little finger only\n2. yes",
+		]);
+		const images = fixed.sent.filter((x) => !x.vision);
+		assert.equal(images.length, 2);
+		assert.equal(fixed.sent.filter((x) => x.vision).length, 2);
+		assert.match(
+			fixed.sent[1].body.prompt,
+			/^This picture is a character model sheet/,
+		);
+		assert.match(
+			fixed.sent[1].body.prompt,
+			/\n1\. A left hand with only the thumb/,
+		);
+		assert.doesNotMatch(images[0].body.prompt, /^Binding correction/);
+		assert.match(
+			images[1].body.prompt,
+			/^Binding correction for this take.*only the thumb/,
+		);
+		// Both sheets go to Sunburst, which keeps small body detail.
+		assert.match(images[0].url, /sunburst\/edit$/);
+		assert.match(images[1].url, /sunburst\/edit$/);
+		assert.equal(fixed.r.check.retaken, true);
+		assert.deepEqual(fixed.r.check.missing, []);
+		assert.equal(fixed.r.prompt, images[1].body.prompt);
+		assert.equal(nextSteps(slug).next[0].tool, "character_scene");
+		const costs = await readCosts(slug);
+		assert.equal(costs.entries.filter((e) => e.kind === "concept").length, 4);
+		assert.ok(
+			costs.entries.some((e) => /checked against the card/.test(e.detail)),
+		);
+
+		// Lost twice: still exactly one retake; the result and character_next say what is missing.
+		const lost = await run(slug, [
+			"1. no — five fingers\n2. no — no scar",
+			"1. no — five fingers again\n2. yes",
+		]);
+		assert.equal(lost.sent.filter((x) => !x.vision).length, 2);
+		assert.equal(lost.r.check.retaken, true);
+		assert.deepEqual(lost.r.check.missing, [
+			"A left hand with only the thumb and little finger, the gap healed over (Left hand)",
+		]);
+		const step = nextSteps(slug).next[0];
+		assert.equal(step.tool, "character_concept");
+		assert.match(step.why, /only the thumb and little finger/);
+		assert.match(
+			readFileSync(promptFile(slug, "concept-check.json"), "utf8"),
+			/"retaken": true/,
+		);
+
+		// Nothing defining lost: no retake. A vision failure never fails the sheet, and leaves no stale report.
+		const fine = await run(slug, ["1. yes\n2. no — no scar"]);
+		assert.equal(fine.sent.filter((x) => !x.vision).length, 1);
+		assert.equal(fine.r.check.retaken, false);
+		assert.equal(fine.r.check.missing.length, 1);
+		const blind = await run(slug, [""]);
+		assert.match(blind.r.check.reason, /wasn't checked/);
+		assert.equal(existsSync(promptFile(slug, "concept-check.json")), false);
+		assert.equal(nextSteps(slug).next[0].tool, "character_scene");
+	});
+});
+
 test("avatar: made with the concept, remade free, by hand for imported pictures", async () => {
 	const { decodePng } = await import(path.join(root, "dist/png.js"));
 	const { makeAvatar } = await import(path.join(root, "dist/avatar.js"));

@@ -92,6 +92,10 @@ export async function savePrompt(
 export const promptName = (fileName: string) =>
 	path.join(path.dirname(fileName), `${path.parse(fileName).name}.txt`);
 
+/** What a concept sheet was checked against its card: prompts/<sheet>-check.json (see checkConcept). */
+export const checkName = (fileName: string) =>
+	`${path.parse(fileName).name}-check.json`;
+
 /** Writes a generated file into assets/ and, if given, the prompt behind it as prompts/<name>.txt. */
 export async function saveAsset(
 	slug: string,
@@ -356,8 +360,9 @@ export async function saveConcept(
 	prompt: string,
 	fileName = "concept.png",
 ): Promise<string> {
-	// A new sheet replaces the picture its old avatar was cut from.
+	// A new sheet replaces the picture its old avatar was cut from, and the check made on the old one.
 	await rm(assetFile(slug, avatarName(fileName)), { force: true });
+	await rm(promptFile(slug, checkName(fileName)), { force: true });
 	return saveAsset(slug, fileName, bytes, prompt);
 }
 

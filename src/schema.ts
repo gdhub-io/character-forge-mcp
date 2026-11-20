@@ -55,7 +55,7 @@ const MetaSchema = z.object({
 		.optional()
 		.describe("Tournament result, filled after judging."),
 	logline: text(
-		"One sentence: who they are, what they want, what stands in the way.",
+		"One or two plain sentences: who they are, their concrete goal and the obstacle. If a choice defines the conflict, say what each option requires and why they cannot do both. Omit background details that do not explain the conflict; never omit its causal link.",
 	),
 	tagline: text("A short memorable hook, 3-8 words."),
 });
@@ -201,7 +201,9 @@ const DnaSchema = z
 			.describe(
 				"Natural colours of the body, before life changed them (dye, sun, scars).",
 			),
-		face: text("Face or head features they were born with, one line."),
+		face: text(
+			"Face or head features they were born with, by shape: face shape, jaw, nose, brows, how the eyes are set. One line.",
+		),
 		frame: FrameSchema,
 		build_tendency: percent(
 			"Innate build: 0 lean and wiry → 100 heavy and solid.",
@@ -240,13 +242,17 @@ const CoreSchema = z.object({
 const GoalsSchema = z.object({
 	want: text("Conscious external goal (can change during the story)."),
 	need: text("Inner need that never changes; carries the theme."),
-	motivation: text("Why they act on want/need."),
+	motivation: text(
+		"What makes this goal matter to them and why they act now. State the concrete reason, not just a thematic connection.",
+	),
 	arc_goal: text(
 		"The inner arc, ideally phrased like one of the popular arc goals.",
 	),
-	goal_climax: text("How the goal peaks at the story climax."),
+	goal_climax: text(
+		"The concrete decision at the climax: what they can do, what each option gains or costs, and what prevents them from doing both.",
+	),
 	conflicting_goals: text(
-		"How want and need are (or become) mutually exclusive, forcing a choice.",
+		"Explain the situation that makes pursuing the want prevent the action required by the need. State the incompatible actions and their consequences; naming two opposed values or people is not enough.",
 	),
 	scene_goal_example: text("An example of a concrete goal in one scene."),
 });
@@ -366,7 +372,9 @@ const DescriptionSchema = z.object({
 	physical: z
 		.object({
 			height_build: text("Height, weight, body type now."),
-			face: text("Face, eyes, skin now."),
+			face: text(
+				"Face now, shape first: face shape, jaw, nose, brows, how the eyes are set, mouth; then eyes and skin. The shape makes them recognisable: skin and mood alone come out as the image model's default face.",
+			),
 			hair: text("Hair (or crest, mane, none) now."),
 			first_impression: text("Overall impression at first glance."),
 		})
@@ -533,7 +541,7 @@ const BackstorySchema = z.object({
 
 const TraitsSchema = z.object({
 	personality: text(
-		"What they are like in life now, as a person: mood, energy, how they are with others (alone or in company, leader or follower, rebel or conformist), their social life and what they love. The DNA temperament after the wound and the life events; a stranger should know them from this paragraph.",
+		"An authorial description of what they are like in life now, including feelings they may not recognize: mood, energy, how they are with others (alone or in company, leader or follower, rebel or conformist), their social life and what they love. The DNA temperament after the wound and the life events; a stranger should know them from this paragraph.",
 	),
 	habits: list("Behavioral habits.", 2),
 	best_trait: text("ONE thing they do better than anyone in the world."),
@@ -591,7 +599,7 @@ const BodySchema = z
 		),
 	})
 	.describe(
-		"Posture and asymmetries on top of the frame (core.dna.frame, as life events changed it). Not idealized: symmetry is rare.",
+		"Posture and asymmetries on top of the frame (core.dna.frame, as life events changed it). Level and straight (all 0) unless the story bends the body: a tilt or a stoop only where an injury, a trade, age or a habit in the story makes it. One strong deviation reads better than several weak ones.",
 	);
 
 const LookSchema = z
@@ -669,10 +677,16 @@ const LookSchema = z
 			.array(
 				z.object({
 					mark: text(
-						"Scar, tattoo, prosthetic, wear... Acquired only: innate differences live in core.dna.",
+						"Scar, tattoo, prosthetic, wear... Acquired only: innate differences live in core.dna. Write a hard mark the way a picture shows it: 'a left hand with only the thumb and little finger, the gap healed over', not 'three missing fingers'.",
 					),
 					location: text("Exactly where (left/right matters)."),
 					origin: text("Which event in their life caused it."),
+					defining: z
+						.boolean()
+						.optional()
+						.describe(
+							"True for a mark that changes the body's shape and that image models tend to repair: a missing limb or fingers, an eye patch, a prosthetic. It leads every picture prompt, and the concept is checked for it. Left out, such marks are found by their wording.",
+						),
 				}),
 			)
 			.min(1)
@@ -888,8 +902,9 @@ export function badChange(
 
 /**
  * What a playing character keeps in mind (a scene, a meeting, later life in time). ALWAYS: who they are, in every
- * prompt, so these fields are written from inside: nothing the character doesn't know (fears: the conscious ones).
- * AUTHOR: what they don't know — the truth, the future, how the story or the audience sees them; knowing it would
+ * prompt. These are authorial descriptions, not necessarily conscious self-knowledge; only explicit thoughts,
+ * self-account and dialogue use character voice. Unrecognized motives guide behavior, not conscious thoughts.
+ * AUTHOR: withheld story knowledge — the truth, the future, how the story or the audience sees them; knowing it would
  * make them wise too early or play the ending. VISUAL: for images and video. Everything else is RECALLED when the
  * moment calls for it.
  */
@@ -953,7 +968,7 @@ const dnaInMind = (c: CharacterCard) =>
 		.join("; ");
 
 /**
- * The character's view of themselves, for playing them (a scene, a meeting): the ALWAYS fields lead, the rest of the
+ * Context for playing the character (a scene, a meeting): the ALWAYS fields lead, the rest of the
  * card follows as what they can recall, minus the author's fields and the look (they don't see themselves from
  * outside). A fear they don't admit drives them, but they can't think it, so only the conscious ones stay.
  */
@@ -986,7 +1001,7 @@ export function playerView(card: CharacterCard): string {
 		const parent = asObject(at(self, keys.slice(0, -1)));
 		if (parent) delete parent[keys[keys.length - 1]];
 	}
-	return `ALWAYS IN YOU:\n${always.join("\n")}\n\nWHAT YOU CAN RECALL WHEN THE MOMENT CALLS FOR IT:\n${JSON.stringify(self)}`;
+	return `The card is written by an author. Descriptions of unrecognized feelings, motives or defenses guide behavior; they are not facts you can consciously think or say. Use self_story and lie for your own account. Do not turn authorial insight into self-awareness.\n\nALWAYS IN YOU:\n${always.join("\n")}\n\nWHAT YOU CAN RECALL WHEN THE MOMENT CALLS FOR IT:\n${JSON.stringify(self)}`;
 }
 
 export function slugify(name: string): string {

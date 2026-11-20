@@ -49,7 +49,7 @@ Spawn the `character-designer` agent with the winner's card.json path. Merge its
 Call `character_concept` for the WINNER only. If the user gave their own image, give the designer the image path too (it must describe exactly what the image shows) and don't generate: `character_pick` has already made the image the concept.
 
 ## 8b. Edit — winner only
-Spawn the `character-editor` agent with the winner's card.json path. It returns the card rewritten for a reader who knows nothing of the world (plain narration in a voice tuned to the character, no facts changed). Validate with `character_check`, re-save with overwrite.
+Spawn the `character-editor` agent with the winner's card.json path. It returns the card rewritten for a reader who knows nothing of the world (clear authorial narration, character voice only in explicit thoughts and dialogue, no facts changed). Resolve every `NEEDS AUTHOR` gap in the story, validate the affected links with `character_check`, and return the revised card to the editor. Re-save with overwrite when no gaps remain.
 
 ## 8c. Languages — only if the user asked for more than English
 Run the `translate-character` skill for each extra language (the card is free; the voice is paid and needs a yes). When the voice is made later, pass `translations: [{ lang: "ru", text }]` to `character_voice` so every language is recorded in one call, each performed fresh from the description.

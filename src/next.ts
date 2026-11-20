@@ -1,7 +1,14 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import type { ConceptCheck } from "./concept.js";
 import { config } from "./config.js";
 import { defaultLoop, idleVideoUsd, MOTION_FILE, videoPlan } from "./scene.js";
-import { assetFile, isDraft, promptFile, translationFile } from "./store.js";
+import {
+	assetFile,
+	checkName,
+	isDraft,
+	promptFile,
+	translationFile,
+} from "./store.js";
 import {
 	OTHER_VOICE_LANGUAGES,
 	PROFILE,
@@ -24,6 +31,18 @@ export interface NextStep {
 /** A voice monologue runs about this long; voices are priced per 1000 characters. */
 const TYPICAL_SCRIPT_CHARS = 300;
 const VIDEO_SECONDS = 10;
+
+/** What the concept's check (prompts/concept-check.json) found missing; none when it wasn't checked. */
+function conceptMissing(id: string): string[] {
+	try {
+		const check = JSON.parse(
+			readFileSync(promptFile(id, checkName("concept.png")), "utf8"),
+		) as ConceptCheck;
+		return check.missing ?? [];
+	} catch {
+		return [];
+	}
+}
 
 export function nextSteps(id: string): { done: string[]; next: NextStep[] } {
 	if (isDraft(id)) {
@@ -54,16 +73,28 @@ export function nextSteps(id: string): { done: string[]; next: NextStep[] } {
 			step: "Concept (A-pose sheet)",
 			tool: "character_concept",
 			why: "Every visual step starts from it.",
-			usd: p.concept.image,
+			usd: p.concept.image + p.vision.call, // and its check against the card
 		});
-	else if ((done.push("concept"), !has("scene.png")))
+	else {
+		done.push("concept");
+		const missing = conceptMissing(id);
+		// A sheet that lost a mark the card insists on passes the loss to the scene and the video (#61).
+		if (missing.length)
+			offer({
+				step: "Concept again: it doesn't show what the card says",
+				tool: "character_concept",
+				why: `The check found these missing: ${missing.join("; ")}. Retake (extra saying what to change) or fix it by hand; the location is drawn from this sheet.`,
+				usd: p.concept.image + p.vision.call, // and its check against the card
+			});
+	}
+	if (has("concept.png") && !has("scene.png"))
 		offer({
 			step: "Location (the character in their own place)",
 			tool: "character_scene",
 			why: "Needed for the video and the music.",
 			usd: p.scene.image,
 		});
-	else {
+	else if (has("concept.png")) {
 		done.push("location");
 		if (!has("idle.mp4")) {
 			const model = models.video.default;

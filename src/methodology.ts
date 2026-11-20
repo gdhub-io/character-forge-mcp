@@ -560,8 +560,9 @@ CHARACTER METHOD. A strong character is ONE causal system, not a list of traits.
    of its kind. Rule: born with it → DNA; got it from life (scars, posture, weight, dye, habits) → the rest.
    WOUND: the formative hurt, landing on that temperament — one of the life events, with what it changed.
    SELF-STORY: the same wound as they tell it to themselves, from inside: what they know and believe, never the
-   author's hindsight. What a character keeps in mind is written from inside; the truth, the future and the
-   audience's view belong to the author. LIE: the false belief the wound taught them.
+   author's hindsight. Write the rest of the card in a clear authorial voice, except explicit thoughts,
+   dialogue and the LIE in their own words. Authorial descriptions may include motives and feelings they do
+   not recognize; these guide behavior in play, not conscious self-knowledge. LIE: the false belief the wound taught them.
    FEAR: what the lie makes them dread. DEFENSE: how they protect the lie = their WORST trait.
    GIFT: what the same wound forged = their BEST trait. Best and worst are two faces of one wound:
    that is the CENTRAL PARADOX that makes them vivid — the wound × the temperament it hit: the same hurt turns
@@ -569,6 +570,11 @@ CHARACTER METHOD. A strong character is ONE causal system, not a list of traits.
    WANT feeds the lie; NEED is the truth; the climax forces a choice between them.
    Surprising elements (job, world, look, archetype) must grow out of the core: unexpected, yet inevitable.
    Every trait has a cause: the DNA, the wound, or both.
+
+The card is the source for later scenes and media. Establish its meaning before polishing its language.
+State who acts, what they do, why, and what follows. For a choice, explain the action and consequences of
+each option and why choosing one prevents the other. An evocative contrast is not a causal explanation.
+Short descriptions may omit background, never the link needed to understand the main conflict.
 
 Then fill the 9 sections; the card schema mirrors them.
 
