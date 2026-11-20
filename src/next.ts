@@ -70,7 +70,11 @@ export function nextSteps(id: string): { done: string[]; next: NextStep[] } {
 				step: `Idle video (${VIDEO_SECONDS} s loop)`,
 				tool: "character_video",
 				why: "The voice comes after it.",
-				usd: videoUsd(models.video.default, VIDEO_SECONDS),
+				usd: videoUsd(
+					models.video.default,
+					VIDEO_SECONDS,
+					models.video.default === "veo", // Veo makes sound unless told not to
+				),
 			});
 		} else if ((done.push("video"), !has(PROFILE))) {
 			offer({

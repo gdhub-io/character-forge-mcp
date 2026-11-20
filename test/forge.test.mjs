@@ -364,6 +364,71 @@ async function captureFalSubmit(fn) {
 	return sent;
 }
 
+test("idle video: only what the first frame shows moves, the same face, notes win", async () => {
+	const { defaultLoopPrompt, defaultScenePrompt, withNotes } = await import(
+		path.join(root, "dist/scene.js")
+	);
+	const card = validateCard(example).card;
+	for (const [loop, model] of [
+		["frame", "kling"],
+		["crossfade", "kling"],
+		["frame", "veo"],
+	]) {
+		const p = defaultLoopPrompt(card, model === "veo", loop, model);
+		// A list of things that move reads as things to add (Marenka grew smoke and burning ropes).
+		assert.doesNotMatch(p, /smoke, flames|cloth or rope/);
+		assert.match(p, /only what the first frame already shows moves/);
+		assert.match(p, /Nothing new appears: no smoke, steam, fog/);
+		assert.match(p, /the same face, age, body and outfit/);
+		assert.match(p, /Feelings may show[^.]*true to the first frame.s mood/);
+	}
+	// A correction comes first and is repeated last; the default never asks for what it forbids.
+	const p = withNotes(defaultLoopPrompt(card), "No smoke, no ropes.");
+	assert.ok(p.startsWith("Binding corrections"));
+	assert.match(p, /The corrections at the top win/);
+	for (const m of p.matchAll(/[^.:;]*\b(smoke|ropes?)\b/gi))
+		assert.match(m[0], /\bno\b/i, `"${m[0].trim()}" asks for ${m[1]}`);
+	assert.equal(withNotes("base", "  "), "base");
+	// What each family is sent: Kling 3.0 and Veo also get the negative prompt; lengths stay in each model's range.
+	const { generateIdleVideo, VIDEO_NEGATIVE } = await import(
+		path.join(root, "dist/scene.js")
+	);
+	await withLibrary(async () => {
+		const { saveCard, saveAsset } = await import(
+			path.join(root, "dist/store.js")
+		);
+		const { slug } = await saveCard(example);
+		await saveAsset(slug, "scene.png", Buffer.from("x"));
+		const sent = (model) =>
+			captureFalSubmit(() =>
+				generateIdleVideo(slug, { model, seconds: 20, notes: "No smoke." }),
+			);
+		const k3 = await sent("kling3");
+		assert.equal(k3.duration, "15");
+		assert.equal(k3.generate_audio, false);
+		assert.equal(k3.negative_prompt, VIDEO_NEGATIVE);
+		assert.equal(k3.start_image_url, k3.end_image_url);
+		assert.ok(k3.prompt.startsWith("Binding corrections"));
+		const o1 = await sent("kling");
+		assert.equal(o1.duration, "10");
+		assert.equal(o1.negative_prompt, undefined);
+		const veo = await sent("veo");
+		assert.equal(veo.duration, "8s");
+		assert.equal(veo.negative_prompt, VIDEO_NEGATIVE);
+		// A scene may already show smoke or fire: only new things are negatives.
+		assert.doesNotMatch(VIDEO_NEGATIVE, /smoke|fire|fog/);
+		// Too long for Kling: refused before anything is uploaded or paid for.
+		await assert.rejects(
+			generateIdleVideo(slug, { model: "kling3", notes: "x".repeat(2000) }),
+			/Kling takes at most 2500/,
+		);
+	});
+	// The scene leaves a visible ceiling and floor, and keeps the left side calm.
+	const s = defaultScenePrompt(card);
+	assert.match(s, /ceiling or sky visible[^;]*floor or ground visible/);
+	assert.match(s, /no large or glowing objects/);
+});
+
 test("art style: the library's house style, extra in every mode, dry run = the real prompt", async () => {
 	const {
 		generateConcept,
