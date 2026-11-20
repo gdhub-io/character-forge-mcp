@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.8](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.7...v0.3.8) (2026-11-20)
+
+
+### Features
+
+* concepts keep the card's defining marks, checked and retaken once; cleaner sheets, faces of their own, clearer card text ([#62](https://github.com/gdhub-io/character-forge-mcp/issues/62)) ([80a0d8c](https://github.com/gdhub-io/character-forge-mcp/commit/80a0d8c4f933ff6faf3c68c73fb294e3cafe9901))
+
 ## [0.3.7](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.6...v0.3.7) (2026-11-20)
 
 
