@@ -716,6 +716,13 @@ test("idle video: Veo one piece by default, Kling two; motion read once from the
 
 const hasFfmpeg = spawnSync("ffmpeg", ["-version"]).status === 0;
 
+// The CI job that installs ffmpeg must run the video tests, not skip them.
+test("ffmpeg is there when CI installed it", {
+	skip: !process.env.CI_FFMPEG && "not asked",
+}, () => {
+	assert.ok(hasFfmpeg, "CI_FFMPEG is set but ffmpeg isn't on PATH");
+});
+
 test("idle video: the two pieces join without their duplicated frames", {
 	skip: !hasFfmpeg && "no ffmpeg",
 }, async () => {
