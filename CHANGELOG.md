@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.6](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.5...v0.3.6) (2026-11-20)
+
+
+### Bug Fixes
+
+* leave air above the head and below the feet in every location ([#51](https://github.com/gdhub-io/character-forge-mcp/issues/51)) ([ed5c279](https://github.com/gdhub-io/character-forge-mcp/commit/ed5c27941edb64a9cf99b4843a134677061c4a03))
+* the idle video shows only what is in the scene, keeps the face, and lets corrections win ([#54](https://github.com/gdhub-io/character-forge-mcp/issues/54)) ([9cd0cb4](https://github.com/gdhub-io/character-forge-mcp/commit/9cd0cb4991d3f1611d9c4474d1234ca342186fff))
+
 ## [0.3.5](https://github.com/gdhub-io/character-forge-mcp/compare/v0.3.4...v0.3.5) (2026-11-19)
 
 
